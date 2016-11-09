@@ -1,0 +1,368 @@
+﻿@model CDMIS.ViewModels.ExaminationProfileViewModel
+<style type="text/css">
+    #delete-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+</style>
+<input type="text" id="UId" style="display:none" value="@Model.UserId"/>
+@*参数信息*@
+<div id="ExamDetailInfoDiv">
+    <div class="modalHeader">
+        <span>参数信息</span></div>
+    <div class="modalContent">
+        @*读取参数信息*@
+        <div>
+            <table cellpadding="3" style="margin-left: 50px;">
+                <thead>
+                    <tr>
+                        <th>
+                            参数项目
+                        </th>
+                        <th>
+                            参数值
+                        </th>
+                        <th>
+                            单位
+                        </th>
+                        <th>
+                            结果
+                        </th>
+                        <th colspan="3">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="ExamDetailTableBody">
+                    @if (Model.ExamInfo.Detail.Count > 0)
+                    {
+                        foreach (var item in Model.ExamInfo.Detail)
+                        {
+                        <tr>
+                            <td width="5%" style="border: 0; display: none">@item.Code
+                            </td>
+                            <td width="5%" style="border: 0;">@item.ItemName
+                            </td>
+                            <td width="5%" style="border: 0;">@item.Value
+                            </td>
+                            <td width="5%" style="border: 0; display: none">@item.UnitCode
+                            </td>
+                            <td width="5%" style="border: 0;">@item.Unit
+                            </td>
+                            <td width="5%" style="border: 0; display: none">@item.IsAbnormalCode
+                            </td>
+                            <td width="5%" style="border: 0;">@item.IsAbnormal
+                            </td>
+                            @if (item.IsAllowed == true)
+                            {
+                                <td width="5%" style="border: 0;">
+                                    <input type="button" value="编辑" class="btn btn-primary editExamDetailInfoBtn" />
+                                </td>
+                                <td width="5%" style="border: 0;">
+                                    <input type="button" value="删除" class="btn btn-primary deleteExamDetailInfoBtn" />
+                                </td>
+                            }
+                            else
+                            {
+                                <td width="5%" style="border: 0;">
+                                    <input type="button" value="编辑" class="btn btn-primary editExamDetailInfoBtn" disabled="disabled" />
+                                </td>
+                                <td width="5%" style="border: 0;">
+                                    <input type="button" value="删除" class="btn btn-primary deleteExamDetailInfoBtn" disabled="disabled" />
+                                </td>                             
+                            }
+                        </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="NotExistDtl">
+                            <td style="font-size: 15px;" colspan="9">
+                                暂无数据，请添加！
+                            </td>
+                        </tr>
+            
+                    }
+                </tbody>
+            </table>
+        </div>
+        @*添加参数信息*@
+        <div style="margin-top: 50px;">
+            <input type="text" style="display:none" value="@Model.ExamInfo.SortNo" id="SortNo"/>
+            <div class="modalContent" style="margin-top: 15px; text-align: center;">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">
+                            参数项目
+                        </label>
+                        <div class="col-sm-4">
+                            @Html.DropDownListFor(model => model.ExamInfo.detail.Code, Model.ExamSubItemList, new { id = "ExamDtlItemNameDropDownList", @class = "form-control" })
+                        </div>
+                        <label class="col-sm-2 control-label">
+                            结果
+                        </label>
+                        <div class="col-sm-4">
+                            @Html.DropDownListFor(model => model.ExamInfo.detail.IsAbnormal, Model.IsAbnormal(), new { id = "ExamDtlIsAbnormalDropDownList", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">
+                            参数值
+                        </label>
+                        <div class="col-sm-4">
+                            @Html.TextBoxFor(model => Model.ExamInfo.detail.Value, new { id = "ExamDtlItemValue", @class = "form-control", @onkeyup = "IsLegal(this.id);" })
+                        </div>
+                        <label class="col-sm-2 control-label">
+                            单位
+                        </label>
+                        <div class="col-sm-4">
+                            @Html.DropDownListFor(model => model.ExamInfo.detail.UnitCode, Model.LabResultUnit(), new { id = "ExamDtlItemUnitDropDownList", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group ExamParaTip" style="display: none">
+                        <div class="col-sm-6">
+                            @*@Html.TextBoxFor(model => Model.ExamInfo.detail.Value, new { id = "ExamDtlItemValue", @class = "form-control" })*@
+                            <p class="ExamParaWarning" style="font-size: 16px; color: #FF0000; font-weight: bold;
+                                text-align: center">
+                            </p>
+                        </div>
+                    </div>
+                    <input type="submit" class="btn btn-primary addExamDetailBtn" value="添加" />
+                </div>
+            </div>
+        </div>
+        @*编辑检查参数信息*@
+        <div id="editExamDetailDataDiv" style="display: none;">
+            <div class="modalHeader">
+                <span>编辑参数信息</span></div>
+            <div class="modalContent">
+                <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="ItemName" class="col-sm-2 control-label">
+                        参数项目</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(model => model.ExamInfo.detail.Code, Model.ExamSubItemList, new { id = "ItemName", @class = "form-control", disabled = "disabled" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="Value" class="col-sm-2 control-label">
+                        参数值</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="Value" onkeyup="IsLegal(this.id);" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="Unit" class="col-sm-2 control-label">
+                        单位</label>
+                    <div class="col-sm-10">
+                        @*<input type="text" class="form-control" id="Unit" />*@
+                        @Html.DropDownListFor(model => model.ExamInfo.detail.Unit, Model.LabResultUnit(), new { id = "Unit", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="IsAbnormalDtl" class="col-sm-2 control-label">
+                        结果</label>
+                    <div class="col-sm-10">
+                        @*<input type="text" class="form-control" id="IsAbnormalDtl" />*@
+                        @Html.DropDownListFor(model => model.ExamInfo.detail.IsAbnormal, Model.IsAbnormal(), new { id = "IsAbnormalDtl", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group ExamParaEditTip" style="display: none">
+                    <div class="col-sm-6">
+                        @*@Html.TextBoxFor(model => Model.ExamInfo.detail.Value, new { id = "ExamDtlItemValue", @class = "form-control" })*@
+                        <p class="ExamParaWarning" style="font-size: 16px; color: #FF0000; font-weight: bold;
+                            text-align: center">
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-12">
+                        <input type="button" class="btn btn-primary saveExamDetailBtn" value="保存" />
+                        <input type="button" class="btn btn-default simplemodal-close" id="cancelDetail"
+                            value="取消" />
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+        @*删除参数信息*@
+        <div id="DeleteDetailDataDiv" style="display: none;">
+            <div class="modalHeader">
+                <span>删除</span></div>
+            <div class="modalContent">
+                <form class="form-horizontal" role="form">
+                <p>
+                    确定删除？</p>
+                <table>
+                    <tr>
+                        <td>
+                            <input type="button" class="btn btn-primary sureExamDetailBtn" value="确定" />
+                        </td>
+                        <td>
+                            <input type="button" class="btn btn-default simplemodal-close" id="cancelDeleteDtl"
+                                value="取消" />
+                        </td>
+                    </tr>
+                </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var UserId = document.getElementById("UId").value;
+        var VisitId = "@Model.VisitId";
+        var SortNo = document.getElementById("SortNo").value;
+        var trSeq = 0; $("#ExamDetailTableBody tr").each(function () {
+            var SubCode = $(this).find("td").eq(0).html().trim();
+            $("#ExamDtlItemNameDropDownList option[value='" + SubCode + "']").remove(); //删除Select中Value=SubCode的Option
+            //alert(SubCode); 
+        })
+
+
+
+        $(document).on("click", ".editExamDetailInfoBtn", function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var Value = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(2)").text().trim();
+            var Unit = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+            var IsAbnormal = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(5)").text().trim();
+
+            document.getElementById("ItemName").value = Code;
+            document.getElementById("Value").value = Value; document.getElementById("Unit").value = Unit;
+            document.getElementById("IsAbnormalDtl").value = IsAbnormal;
+            $('#editExamDetailDataDiv').modal({
+                closeHTML: "<a href='#' title='Close'class='modal-close'>x</a>", overlayClose: true //点击蒙层关闭窗口 
+            });
+        });
+        $(".saveExamDetailBtn").click(function () {
+            var Code = document.getElementById("ItemName").value;
+            var ItemName = document.getElementById("ItemName").options[document.getElementById("ItemName").selectedIndex].text;
+            var Value = document.getElementById("Value").value;
+            var UnitCode = document.getElementById("Unit").value;
+            var Unit = document.getElementById("Unit").options[document.getElementById("Unit").selectedIndex].text;
+            var IsAbnormalCode = document.getElementById("IsAbnormalDtl").value;
+            var IsAbnormal = document.getElementById("IsAbnormalDtl").options[document.getElementById("IsAbnormalDtl").selectedIndex].text;
+            $.ajax({
+                url: "/DoctorHome/ExaminationInfoDetailEdit",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VisitId: VisitId, SortNo: SortNo, Code: Code, Value: Value, UnitCode: UnitCode, IsAbnormalCode: IsAbnormalCode }, //输入参数 
+                success: function (res) {
+                    if (res == true) {
+                        // $.modal.close(); 
+                        $("#cancelDetail").click();
+                        //location = "/DoctorHome/ClinicalProfile"; 
+                        //$("#ShowClinicalProfileInfo").html();
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(0)").text(Code);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(1)").text(ItemName);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(2)").text(Value);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(3)").text(UnitCode);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(4)").text(Unit);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(5)").text(IsAbnormalCode);
+                        $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(6)").text(IsAbnormal);
+                    }
+                    else {
+                        alert("数据修改失败，请重新输入！");
+                    }
+                }
+            })
+        })
+
+        $(".addExamDetailBtn").click(function () {
+            var tbody = document.getElementById("ExamDetailTableBody");
+            if (document.getElementById("NotExistDtl")) {//存在 
+                var tr = document.getElementById("NotExistDtl");
+                tbody.removeChild(tr);
+            }
+            var SubCode = document.getElementById("ExamDtlItemNameDropDownList").value;
+            var Name = document.getElementById("ExamDtlItemNameDropDownList").options[document.getElementById("ExamDtlItemNameDropDownList").selectedIndex].text;
+            var Value = document.getElementById("ExamDtlItemValue").value; var UnitCode = document.getElementById("ExamDtlItemUnitDropDownList").value;
+            var Unit = document.getElementById("ExamDtlItemUnitDropDownList").options[document.getElementById("ExamDtlItemUnitDropDownList").selectedIndex].text;
+            var IsAbnormalCode = document.getElementById("ExamDtlIsAbnormalDropDownList").value;
+            var IsAbnormal = document.getElementById("ExamDtlIsAbnormalDropDownList").options[document.getElementById("ExamDtlIsAbnormalDropDownList").selectedIndex].text;
+            $.ajax({
+                url: "/DoctorHome/ExaminationInfoDetailAdd",
+                type: "GET",
+                dataType: "json",
+                async: false, data: { UserId: UserId, VisitId: VisitId, SortNo: SortNo, SubCode: SubCode, Value: Value, UnitCode: UnitCode, IsAbnormalCode: IsAbnormalCode }, //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        //self.location.reload(); 
+                        var tr = tbody.insertRow();
+                        var td0 = document.createElement("td"); td0.setAttribute("style", "display:none");
+                        td0.innerHTML = SubCode; tr.appendChild(td0); tr.insertCell().innerHTML = Name;
+                        tr.insertCell().innerHTML = Value; var td3 = document.createElement("td");
+                        td3.setAttribute("style", "display:none"); td3.innerHTML = UnitCode; tr.appendChild(td3);
+                        tr.insertCell().innerHTML = Unit;
+                        var td5 = document.createElement("td"); td5.setAttribute("style", "display:none");
+                        td5.innerHTML = IsAbnormalCode; tr.appendChild(td5);
+                        tr.insertCell().innerHTML = IsAbnormal;
+                        tr.insertCell().innerHTML = "<input type='button' value='编辑' class='btn btn-primary editExamDetailInfoBtn' />";
+                        tr.insertCell().innerHTML = "<input type='button' value='删除' class='btn btn-primary deleteExamDetailInfoBtn' />";
+                        document.getElementById("ExamDtlItemNameDropDownList").value = "";
+                        document.getElementById("ExamDtlItemValue").value = "";
+                        document.getElementById("ExamDtlItemUnitDropDownList").value = "";
+                        document.getElementById("ExamDtlIsAbnormalDropDownList").value = "";
+                        $("#ExamDtlItemNameDropDownList option[value='" + SubCode + "']").remove();
+                    }
+                    else { alert("数据插入失败，请重新输入！"); }
+                }
+            })
+        })
+        $(document).on("click", ".deleteExamDetailInfoBtn", function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            $('#DeleteDetailDataDiv').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                containerId: 'delete-container',
+                overlayClose: true //点击蒙层关闭窗口
+            });
+        });
+        $(".sureExamDetailBtn").click(function () {
+            //var trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var Name = $("#ExamDetailTableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            $.ajax({
+                url: "/DoctorHome/ExaminationInfoDetailDelete", type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VisitId: VisitId, SortNo: SortNo, Code: Code }, //输入参数 
+                success: function (res) {
+                    if (res == true) {
+                        $("#cancelDeleteDtl").click();
+                        var tbody = document.getElementById("ExamDetailTableBody");
+                        tbody.deleteRow(trSeq);
+                        $("#ExamDtlItemNameDropDownList").append("<option value='" + Code + "'>" + Name + "</option>");
+                    }
+                    else { alert("数据删除失败，请重试！"); }
+                }
+            })
+        })
+
+
+    })
+
+    //验证输入参数值合法性
+    function IsLegal(o) {
+        if (document.getElementById(o).value != "") {
+            var re = /^\d+$|^\d+\.\d+$/;
+            if (!re.test(document.getElementById(o).value)) {
+                $(".ExamParaWarning").html("输入格式有误！");
+                if (o == "Value") {
+                    $(".ExamParaEditTip").show();
+                }
+                else {
+                    $(".ExamParaTip").show();
+                }
+            }
+            else {
+                $(".ExamParaTip").hide();
+                $(".ExamParaEditTip").hide();
+            }
+        }
+    }
+</script>

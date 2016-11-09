@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:s0="http://tempuri.org" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://tempuri.org" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org">
+      <s:element name="GetBasicInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" name="UserId" type="s:string" />
+            <s:element minOccurs="0" name="PatientId" type="s:string" />
+            <s:element minOccurs="0" name="HospitalCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetBasicInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element name="GetBasicInfoResult" type="s0:resSetPatient" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="resSetPatient">
+        <s:complexContent mixed="false">
+          <s:extension base="s0:Ens_Response">
+            <s:sequence>
+              <s:element minOccurs="0" name="Status" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Ens_Response">
+        <s:complexContent mixed="false">
+          <s:extension base="s0:Ens_Messagebody" />
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Ens_Messagebody" />
+      <s:element name="GetPatient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" name="UserId" type="s:string" />
+            <s:element minOccurs="0" name="PatientId" type="s:string" />
+            <s:element minOccurs="0" name="StartDateTime" type="s:dateTime" />
+            <s:element minOccurs="0" name="HospitalCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPatientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element name="GetPatientResult" type="s0:resSetInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="resSetInfo">
+        <s:complexContent mixed="false">
+          <s:extension base="s0:Ens_Response">
+            <s:sequence>
+              <s:element minOccurs="0" name="Status">
+                <s:simpleType>
+                  <s:restriction base="s:string">
+                    <s:maxLength value="1024" />
+                  </s:restriction>
+                </s:simpleType>
+              </s:element>
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetBasicInfoSoapIn">
+    <wsdl:part name="parameters" element="s0:GetBasicInfo" />
+  </wsdl:message>
+  <wsdl:message name="GetBasicInfoSoapOut">
+    <wsdl:part name="parameters" element="s0:GetBasicInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetPatientSoapIn">
+    <wsdl:part name="parameters" element="s0:GetPatient" />
+  </wsdl:message>
+  <wsdl:message name="GetPatientSoapOut">
+    <wsdl:part name="parameters" element="s0:GetPatientResponse" />
+  </wsdl:message>
+  <wsdl:portType name="Bs.WebServiceSoap">
+    <wsdl:operation name="GetBasicInfo">
+      <wsdl:input message="s0:GetBasicInfoSoapIn" />
+      <wsdl:output message="s0:GetBasicInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPatient">
+      <wsdl:input message="s0:GetPatientSoapIn" />
+      <wsdl:output message="s0:GetPatientSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="Bs.WebServiceSoap" type="s0:Bs.WebServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetBasicInfo">
+      <soap:operation soapAction="http://tempuri.org/Bs.WebService.GetBasicInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPatient">
+      <soap:operation soapAction="http://tempuri.org/Bs.WebService.GetPatient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Bs.WebService">
+    <wsdl:port name="Bs.WebServiceSoap" binding="s0:Bs.WebServiceSoap">
+      <soap:address location="http://10.0.0.120:57772/csp/hz_mb/Bs.WebService.cls" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

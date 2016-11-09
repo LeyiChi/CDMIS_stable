@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configurationSnapshot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:schemas-microsoft-com:xml-wcfconfigurationsnapshot">
+  <behaviors />
+  <bindings>
+    <binding digest="System.ServiceModel.Configuration.BasicHttpBindingElement, System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089:&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data name=&quot;ServicesSoap&quot; /&gt;" bindingType="basicHttpBinding" name="ServicesSoap" />
+    <binding digest="System.ServiceModel.Configuration.CustomBindingElement, System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089:&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data name=&quot;ServicesSoap12&quot;&gt;&lt;httpTransport /&gt;&lt;textMessageEncoding messageVersion=&quot;Soap12&quot; /&gt;&lt;/Data&gt;" bindingType="customBinding" name="ServicesSoap12" />
+  </bindings>
+  <endpoints>
+    <endpoint normalizedDigest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://121.43.107.106:8088/Services.asmx&quot; binding=&quot;basicHttpBinding&quot; bindingConfiguration=&quot;ServicesSoap&quot; contract=&quot;ServiceReference.ServicesSoap&quot; name=&quot;ServicesSoap&quot; /&gt;" digest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://121.43.107.106:8088/Services.asmx&quot; binding=&quot;basicHttpBinding&quot; bindingConfiguration=&quot;ServicesSoap&quot; contract=&quot;ServiceReference.ServicesSoap&quot; name=&quot;ServicesSoap&quot; /&gt;" contractName="ServiceReference.ServicesSoap" name="ServicesSoap" />
+    <endpoint normalizedDigest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://121.43.107.106:8088/Services.asmx&quot; binding=&quot;customBinding&quot; bindingConfiguration=&quot;ServicesSoap12&quot; contract=&quot;ServiceReference.ServicesSoap&quot; name=&quot;ServicesSoap12&quot; /&gt;" digest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;http://121.43.107.106:8088/Services.asmx&quot; binding=&quot;customBinding&quot; bindingConfiguration=&quot;ServicesSoap12&quot; contract=&quot;ServiceReference.ServicesSoap&quot; name=&quot;ServicesSoap12&quot; /&gt;" contractName="ServiceReference.ServicesSoap" name="ServicesSoap12" />
+  </endpoints>
+</configurationSnapshot>

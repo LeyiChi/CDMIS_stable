@@ -1,0 +1,200 @@
+D:\实验室\慢病管理\CDMIS\CDMIS\bin\CDMIS.dll
+D:\实验室\慢病管理\CDMIS\CDMIS\bin\CDMIS.pdb
+D:\实验室\慢病管理\CDMIS\CDMIS\bin\EntityFramework.dll
+D:\实验室\慢病管理\CDMIS\CDMIS\bin\EntityFramework.xml
+D:\实验室\慢病管理\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+D:\实验室\慢病管理\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+D:\实验室\慢病管理\CDMIS\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\CDMIS.dll
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\CDMIS.pdb
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\EntityFramework.dll
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\EntityFramework.xml
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+D:\实验室\慢病管理\任务\界面任务20141210\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\CDMIS.dll
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\CDMIS.pdb
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\EntityFramework.dll
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\EntityFramework.xml
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\obj\Debug\CDMIS.dll
+F:\实验室\慢病管理\PC端\20150608_CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+J:\20150608_CDMIS\CDMIS\bin\CDMIS.dll
+J:\20150608_CDMIS\CDMIS\bin\CDMIS.pdb
+J:\20150608_CDMIS\CDMIS\bin\EntityFramework.dll
+J:\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+J:\20150608_CDMIS\CDMIS\bin\EntityFramework.xml
+J:\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+J:\20150608_CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+J:\20150608_CDMIS\CDMIS\obj\Debug\CDMIS.dll
+J:\20150608_CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+J:\20150608_CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\CDMIS.dll
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\CDMIS.pdb
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\EntityFramework.dll
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\EntityFramework.xml
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\obj\Debug\CDMIS.dll
+F:\实验室\慢病管理\PC端\20150615_CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+D:\Project\20150615_CDMIS\CDMIS\bin\CDMIS.dll
+D:\Project\20150615_CDMIS\CDMIS\bin\CDMIS.pdb
+D:\Project\20150615_CDMIS\CDMIS\bin\EntityFramework.dll
+D:\Project\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+D:\Project\20150615_CDMIS\CDMIS\bin\EntityFramework.xml
+D:\Project\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+D:\Project\20150615_CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+D:\Project\20150615_CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+D:\Project\20150615_CDMIS\CDMIS\obj\Debug\CDMIS.dll
+D:\Project\20150615_CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\CDMIS.dll
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\CDMIS.pdb
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\EntityFramework.dll
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\Newtonsoft.Json.dll
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\EntityFramework.xml
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\Newtonsoft.Json.pdb
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\bin\Newtonsoft.Json.xml
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\obj\Debug\CDMIS.dll
+C:\Users\MAC\Desktop\最后的工程\CDMIS_201506181416\CDMIS\obj\Debug\CDMIS.pdb
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\CDMIS.dll
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\CDMIS.pdb
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\EntityFramework.dll
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\EntityFramework.xml
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+C:\Users\MAC\Desktop\20150625CDMIS\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+C:\github\CDMIS\CDMIS\bin\CDMIS.dll
+C:\github\CDMIS\CDMIS\bin\CDMIS.pdb
+C:\github\CDMIS\CDMIS\bin\EntityFramework.dll
+C:\github\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+C:\github\CDMIS\CDMIS\bin\EntityFramework.xml
+C:\github\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+C:\github\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+C:\github\CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+C:\github\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+C:\github\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\CDMIS.dll
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\CDMIS.pdb
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\EntityFramework.dll
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\EntityFramework.xml
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+C:\Users\Administrator\Desktop\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\CDMIS.dll
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\CDMIS.pdb
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\EntityFramework.dll
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\EntityFramework.xml
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\obj\Debug\ResolveAssemblyReference.cache
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+F:\bme319\chronic disease management\github\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+C:\慢病管理\github\CDMIS\CDMIS\bin\CDMIS.dll
+C:\慢病管理\github\CDMIS\CDMIS\bin\CDMIS.pdb
+C:\慢病管理\github\CDMIS\CDMIS\bin\EntityFramework.dll
+C:\慢病管理\github\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+C:\慢病管理\github\CDMIS\CDMIS\bin\EntityFramework.xml
+C:\慢病管理\github\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+C:\慢病管理\github\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+C:\慢病管理\github\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+C:\慢病管理\github\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\CDMIS.dll
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\CDMIS.pdb
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\EntityFramework.dll
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\log4net.dll
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\EntityFramework.xml
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\log4net.xml
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+F:\Work\chronic disease management\github\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\Work\chronic disease management\github\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+F:\Work\chronic disease management\github\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+E:\Program\task\github\CDMIS\CDMIS\bin\CDMIS.dll
+E:\Program\task\github\CDMIS\CDMIS\bin\CDMIS.pdb
+E:\Program\task\github\CDMIS\CDMIS\bin\EntityFramework.dll
+E:\Program\task\github\CDMIS\CDMIS\bin\log4net.dll
+E:\Program\task\github\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+E:\Program\task\github\CDMIS\CDMIS\bin\EntityFramework.xml
+E:\Program\task\github\CDMIS\CDMIS\bin\log4net.xml
+E:\Program\task\github\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+E:\Program\task\github\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+E:\Program\task\github\CDMIS\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+E:\Program\task\github\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+E:\Program\task\github\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+C:\Users\LY\Desktop\CDMIS\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+C:\Users\LY\Desktop\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\CDMIS.dll
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\CDMIS.pdb
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\EntityFramework.dll
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\log4net.dll
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\EntityFramework.xml
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\log4net.xml
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+C:\Users\LY\Desktop\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+C:\Users\LY\Desktop\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\CDMIS.dll.config
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\CDMIS.dll
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\CDMIS.pdb
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\EntityFramework.dll
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\log4net.dll
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\Newtonsoft.Json.dll
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\EntityFramework.xml
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\log4net.xml
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\Newtonsoft.Json.pdb
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\bin\Newtonsoft.Json.xml
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\obj\Debug\CDMIS.dll
+F:\Work\chronic disease management\github\CDMIS20151216\CDMIS\CDMIS\obj\Debug\CDMIS.pdb
+E:\Program\task\github\CDMIS\CDMIS\bin\CDMIS.dll.config
+E:\Program\task\github\CDMIS\CDMIS\bin\System.Net.Http.dll
+E:\Program\task\github\CDMIS\CDMIS\bin\System.Net.Http.xml
+E:\Program\task\github\CDMIS\CDMIS\bin\zh-Hans\System.Net.Http.resources.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.dll.config
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.pdb
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\EntityFramework.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\log4net.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\System.Net.Http.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\EntityFramework.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\log4net.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.pdb
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\System.Net.Http.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\zh-Hans\System.Net.Http.resources.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Debug\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Debug\CDMIS.pdb
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\CDMIS.dll.config
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\CDMIS.pdb
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\EntityFramework.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\log4net.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\Newtonsoft.Json.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\System.Net.Http.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\EntityFramework.xml
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\log4net.xml
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\Newtonsoft.Json.pdb
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\Newtonsoft.Json.xml
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\System.Net.Http.xml
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\bin\zh-Hans\System.Net.Http.resources.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\obj\Debug\CDMIS.csprojResolveAssemblyReference.cache
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\obj\Debug\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS_stable\CDMIS\obj\Debug\CDMIS.pdb

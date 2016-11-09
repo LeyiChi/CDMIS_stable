@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CDMIS.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="CDMIS_WebReferenceJC_WebServicePs" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://192.168.0.129:57772/csp/hz_mb/Bs.WebService.cls</Value>
+    </Setting>
+    <Setting Name="CDMIS_WebReferenceJC_Bs_WebService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://10.0.0.120:57772/csp/hz_mb/Bs.WebService.cls</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "转到登录";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 180px;
+        width: 660px;
+    }
+    #simplemodal-overlay {background-color:#000000}
+</style>
+@Html.Hidden("c0", @ViewData["controller"])
+@Html.Hidden("ar0", @ViewData["actionResult"])
+<div id="dialog" style="display: none;">
+    <div class="modalHeader">
+        <span>说明</span></div>
+    <div class="modalContent">
+        <h3 class="text-left" style="font-weight:bold">亲爱的用户：</h3>
+        <h3 class="text-center" id="notice" style="font-weight:bold">您没有访问此页的权限！3秒后将跳转到登录界面。</h3>
+    </div>
+</div>
+<div style="height:700px">
+</div>
+<script type="text/javascript">
+    var back = -1;
+    var si;
+    var t = 3; //设定跳转的时间 
+    
+    function refer() {
+        var c0 = document.getElementById("c0").value;
+        var ar0 = document.getElementById("ar0").value;
+        if (back == 0) {
+            location = "/Account/LogOn?control=" + c0 + "&page=" + ar0; //#设定跳转的链接地址
+        }
+        if (back == 1) {
+            history.back(-1);
+        }
+        if (t == 0) {
+            clearInterval(si);
+            $.modal.close();
+            location = "/Account/LogOn?control=" + c0 + "&page=" + ar0; //#设定跳转的链接地址
+            //   history.back(-1);
+        }
+        else{
+            $('#notice').text("您没有访问此页的权限！" + t + "秒后将跳转到登录界面。");
+            t--; // 计数器递减 
+        }
+        
+    }
+
+    $(function () {
+        $('#dialog').modal({
+            overlayClose: false
+        });
+        si = setInterval("refer()", 1000); //启动1秒定时 
+    });
+</script>

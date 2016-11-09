@@ -1,0 +1,354 @@
+﻿@model  CDMIS.ViewModels.MessageListViewModel
+@{
+    ViewBag.Title = "信箱-写信";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 160px;
+        width: 250px;
+    }
+</style>
+<style>
+    .plus
+    {
+        width: 10px;
+        height: 10px;
+        background-image: url(/Content/Image/Mail_Open.jpg);
+    }
+    .minus
+    {
+        width: 10px;
+        height: 10px;
+        background-image: url(/Content/Image/Mail_Hide.jpg);
+    }
+    .mailform
+    {
+        border-color: #DDDDFF;
+        background-color: White;
+        border-style: inset;
+        border-width: 1px;
+    }
+    .ToLeft
+    {
+        position: relative;
+        left: 0px;
+        top: 0px;
+    }
+</style>
+<div id="MailBoxShare">
+    @{Html.RenderAction("MailBoxShare", "MailBox");}
+</div>
+<div id="Main" style="border: 5px solid #DDDDFF;" align="center">
+    <table width="1020px" align="center">
+        <tr>
+            <td width="80px" align="left" height="30px" class="otherfont">
+                收件人
+            </td>
+            <td width="780px" height="30px">@Html.TextBoxFor(model => model.Receiver, new { id = "Receiver", name = "Receiver", @class = "mailform", readOnly = "true", style = "width:780px;" })
+            </td>
+            <td rowspan="14" width="190px">
+                <div id="Contact" style="border: 5px solid #DDDDFF; height: 620px; width: 190px;
+                    overflow-x:hidden;overflow-y:scroll;">
+                    <div style="height: 550px; width: 400px;">
+                        <table>
+                            @for (int i = 0; i <Model.ModuleInfoList.Count; i++)
+                            {
+                                if (Model.ContactsList[i] != null)
+                                {
+                                    if (Model.ContactsList[i].Count > 0)
+                                    {
+                                <tr class="trht">
+                                    <th align="left" onclick="ShowOrHide(this)">
+                                        <button class="plus" type="button">
+                                        </button>
+                                        @Model.ModuleInfoList[i].ModuleName
+                                    </th>
+                                </tr>
+                                    }
+                                <tr>
+                                    <td style="display: none;">
+                                        <ul>
+                                            @foreach (CDMIS.Models.ContractsInfo item in Model.ContactsList[i])
+                                            {                                          
+                                                <li style="list-style-type: none; line-height: 25px;">
+                                                    <button type="button" onclick="show(this)" value="@item.ContractName＜@item.ContractId＞" class="myButton2"  title="ID: @item.ContractId"  style="position: relative; left: 8px;">@item.ContractName</button>
+                                                    <button type="button" onclick="deleteCon(this)" value="@item.ContractName＜@item.ContractId＞" class="myButton1" style="position: relative; left: 8px;background-color: transparent;" disabled="disabled">
+                                                        删除</button>
+                                                </li>                                           
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="80px" align="left" height="30px" class="otherfont">
+                主&nbsp;&nbsp;&nbsp;题
+            </td>
+            <td width="780px" height="30px">@Html.TextBoxFor(model => model.Title, new { id = "Title", @class = "mailform", onkeyup = "chkmaxsms(this,512)", style = "width:780px;" })
+            </td>
+        </tr>
+        <tr>
+            <td width="80px" align="left" height="30px" class="otherfont">
+                附&nbsp;&nbsp;&nbsp;件
+            </td>
+            <td align="left" height="30px">
+                <input type="file" name="file" />
+            </td>
+        </tr>
+        <tr>
+            <td width="80px" align="left" class="otherfont">
+                正&nbsp;&nbsp;&nbsp;文
+            </td>
+            <td width="780px">@Html.TextAreaFor(model => model.Content, new { id = "Content", @class = "mailform", onkeyup = "chkmaxsms(this,1024)", style = " width: 780px;height: 490px;" })
+            </td>
+        </tr>
+        <tr>
+            <td align="center" colspan="2" class="otherfont">
+                <button type="submit" id="Send" class="myButton1" value="1">
+                    发送</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button type="submit" id="Draft" class="myButton1" value="2">
+                    保存到草稿箱</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="MyModel" style="display: none;">
+    <div class="modalHeader">
+        <span>提示
+            <button type="button" style="position: relative; left: 170px; background-color: transparent;
+                border: none;" id="CloseBtn">
+                关闭</button></span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            <input id="AttentionContent" value="" /></h4>
+        <div class="col-md-offset-3" style="position: relative; top: 20px; left: 28px;">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmBtn" />
+        </div>
+    </div>
+</div>
+<div id="MyModel2" style="display: none;">
+    <div class="modalHeader">
+        <span>提示
+            <button type="button" style="position: relative; left: 170px; background-color: transparent;
+                border: none;" id="CloseBtn2">
+                关闭</button></span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            主题为空，确定要发送？</h4>
+        <div class="col-md-offset-3" style="position: relative; top: 20px;">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmBtn2" />
+            <input type="button" value="取消" class="btn btn-primary" id="cancelBtn2" />
+        </div>
+    </div>
+</div>
+ 
+ @*通讯录展开与收起*@
+<script type="text/javascript">
+    function ShowOrHide(obj) {
+        $(obj).parent().next().children().slideToggle("fast");
+        $(obj).children("button").toggleClass("minus");
+    }
+</script>
+
+@*联系人添加与删除*@
+<script type="text/javascript">
+    //添加联系人
+    function show(obj) {
+        var Txt = obj.value;
+        var cont = document.getElementById('Receiver');
+        var existTxt = new Array();
+        existTxt = cont.value.split(";　");
+        var flag = 1;
+        var len = existTxt.length;
+        for (var i = 0; i < len; i++) {
+            if (existTxt[i] == Txt) {
+                flag = 0;
+                break;
+            }
+        }
+        if (flag == 1) {
+            cont.value = cont.value + Txt + ";" + "　";
+            $(obj).parent().children('.myButton1').attr("disabled", false);
+            $(obj).parent().children('.myButton1').attr("class", "myButtondelete");
+        }
+    }
+
+    //删除联系人
+    function deleteCon(obj) {
+        $(obj).attr("class", "myButton1");
+        $(obj).attr("disabled", "disabled");
+
+        var Txt = obj.value;
+        var cont = document.getElementById('Receiver');
+        var existTxt = new Array();
+        existTxt = cont.value.split(";　");
+        var index = -1;
+        var len = existTxt.length;
+        for (var i = 0; i < len; i++) {
+            if (existTxt[i] == Txt) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            cont.value = "";
+            for (var j = 0; j < index; j++) {
+                cont.value = cont.value + existTxt[j] + ";　";
+            }
+            for (var k = index + 1; k < len - 1; k++) {
+                cont.value = cont.value + existTxt[k] + ";　";
+            }
+
+        }
+    }
+</script>
+
+@*发信与保存*@
+<script type="text/javascript">
+    //发送
+    $("#Send").click(function () {
+        var flag1 = 0;
+        var flag2 = 0;
+
+        if (($("#Receiver").val() == null) || ($("#Receiver").val() == "")) {
+            alertModal("收件人不能为空！");
+        }
+        else {
+            flag1 = 1;
+        }
+        if (flag1 == 1) {
+            if (($("#Content").val() == null) || ($("#Content").val() == "")) {
+                alertModal("正文不能为空！");
+            }
+            else {
+                flag2 = 1;
+            }
+        }
+
+        if ((flag1 == 1) && (flag2 == 1)) {
+            if (($("#Title").val() == null) || ($("#Title").val() == "")) {
+                $('#MyModel2').modal({
+                    overlayClose: true
+                });
+                $('#CloseBtn2').click(function () {
+                    $.modal.close();
+                });
+                $('#cancelBtn2').click(function () {
+                    $.modal.close();
+                });
+                $('#confirmBtn2').click(function () {
+                    $.modal.close();
+                    Myjson("发送失败，请重试！", "/MailBox/HaveSent", 1);
+                });
+            }
+            else {
+                Myjson("发送失败，请重试！", "/MailBox/HaveSent", 1);
+            }
+        }
+    });
+
+    //保存
+    $("#Draft").click(function () {
+        if (($("#Receiver").val() == null) || ($("#Receiver").val() == "")) {
+            alertModal("收件人不能为空！");
+        }
+        else {
+            Myjson("保存失败，请重试！", "/MailBox/Draft", 2);
+        }
+    });
+
+    //Json
+    function Myjson(Txt, URL, Selection) {
+        $.ajax({
+            url: "/MailBox/WtrieJson",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {
+                PiTitle: $("#Title").val(),
+                PiReceiver: $("#Receiver").val(),
+                PiContent: $("#Content").val(),
+                PiSelection: Selection
+            },
+            success: function (res) {
+                if (!res) {
+                    alertModal(Txt);
+                }
+                else {
+                    //消息推送
+                    if (Selection == 1)
+                    {
+                        var ReicAryy = new Array();
+                        ReicAryy = $("#Receiver").val().split(";");
+                        var Cont = $("#Content").val();
+                        var Til = $("#Title").val();
+                        if ((Til == "") || (Til == null)) {
+                            Til = "无主题";
+                        }
+                        if (Cont.length > 30) {
+                            Cont = Cont.substring(0, 30);
+                        }
+                        for (var i = 0; i < ReicAryy.length - 1; i++) {
+                            var IndexofA = ReicAryy[i].indexOf("＜");
+                            var IndexofB = ReicAryy[i].indexOf("＞");
+                            var ReceiverTemp = ReicAryy[i].substring(IndexofA + 1, IndexofB);
+                            SendMail(ReceiverTemp + "||" + Til +"||" + Cont + "||" + GetLatestMeNo(ReceiverTemp)); //收件人Id 主题 内容截取 消息编号                       
+                        }
+
+                    }
+                    location.href = URL;
+                }
+            }
+        });
+    }
+</script>
+
+@*弹框提示*@
+<script type="text/javascript">
+    function alertModal(Txt) {
+        $("#AttentionContent").attr("value", Txt);
+        $('#MyModel').modal({
+            overlayClose: true
+        });
+        $('#CloseBtn').click(function () {
+            $.modal.close();
+        });
+        $('#confirmBtn').click(function () {
+            $.modal.close();
+        });
+    }
+</script>
+
+@*改变按钮颜色与限制信息长度*@
+<script type="text/javascript">
+    //改变按钮颜色
+    $(document).ready(function () {
+        $("#bn2").toggleClass("myButtonChange");
+    });
+
+    //限制信息长度
+    function chkmaxsms(vobj1, vmax) {
+        var str = vobj1.value;
+        var strlen = str.length;
+        if (strlen > vmax) {
+            if (vmax == 1024) {
+                alertModal('正文请勿多于1024字');
+            }
+            else {
+                alertModal('主题请勿多于512字');
+            }
+            eval(vobj1.value = str.substr(0, vmax));
+        }
+    }
+
+</script>

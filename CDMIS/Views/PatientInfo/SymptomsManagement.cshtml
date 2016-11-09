@@ -1,0 +1,291 @@
+﻿@model CDMIS.ViewModels.SymptomsViewModel
+@{
+    ViewBag.Title = "症状管理（医生）";
+    Layout = "~/Views/Shared/_PatientInfoLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 150px;
+        width: 300px;
+    }
+    
+    #alert-container
+    {
+        height: 120px;
+        width: 300px;
+    }
+</style>
+<div onload="ShowOptions()">
+    <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+        <h2 class="text-center">
+            已有症状列表</h2>
+        <table id="DataTable" class="display">
+            <thead>
+                <tr>
+                    <th>
+                        症状类型
+                    </th>
+                    <th>
+                        症状名称
+                    </th>
+                    <th>
+                        症状描述
+                    </th>
+                    <th>
+                        添加时间
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.SymptomsList)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SymptomsTypeName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SymptomsName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.RecordDate)
+                            @Html.DisplayFor(modelItem => item.RecordTime)
+                        </td>
+                        <td>
+                            @if (@item.IsAllowed == true)
+                            {
+                                <button type = "button" value= "@Model.UserId#@item.UserId#@item.VisitId#@item.SymptomsNo#@item.ReInUserId" class="btn btn-danger" id="DeleteSyp" style="font-size: 16px;" onclick="DeleteSymptoms(this.value)">
+                                    删除</button>
+                            }
+                             else
+                            {
+                                <button type = "button" class="btn btn-primary" style="font-size: 16px;" disabled="disabled">
+                                    删除</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@using (Html.BeginForm("SymptomsManagement", "PatientInfo", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+@*@using (Ajax.BeginForm(
+     "SymptomsManagement", "PatientInfo", 
+     new AjaxOptions
+     {
+         UpdateTargetId = "tableContainer",
+         HttpMethod = "Post",
+         OnSuccess = "",
+     },
+     new { @class = "form-horizontal", role="form"}))
+{*@
+    <div style="margin-top: 2.0em; width: 100%; border: 2px dotted #3567d1; padding: 0 2.0em 2.0em 2.0em;">
+        <h2>
+            添加新的症状</h2>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>症状类型：</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.SymptomsTypeSelected, Model.SymptomsTypeList(), new { id = "SymptomsTypeListDropDownList", @class = "form-control", style = "font-size:18px", onchange = "SymptomsTypeChanged();" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>症状名称：</label>
+            <div class="col-sm-9">
+                <select id="SymptomsNameListDropDownList" name="SymptomsNameSelected" class="form-control"
+                    style="font-size: 18px">
+                    <option value="0">---请选择症状类型---</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                症状描述：</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.Description, new { id = "SymptomsDescription", @class = "form-control" })
+            </div>
+        </div>
+        <div>
+            @Html.HiddenFor(model => model.PId)
+            @Html.HiddenFor(model => model.SymptomsNameSelected, new { id = "SymptomsName" })
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>记录时间：</label>
+            <div class="col-sm-9">
+                <div>
+                    <div id="Once">
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                @Html.TextBoxFor(model => model.RecordTime, new { id = "RecordTime", @class = "form-control", @onclick = "WdatePicker({maxDate:'%y-%M-%d %H:%m:%s',dateFmt:'yyyy-MM-dd HH:mm:ss'})" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" class="btn btn-primary" id="addSpM" value="添加" style="font-size: 16px;" />
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            是否删除此数据？</h4>
+        <div class="col-md-offset-3">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmDeleteBtn" />
+            <input type="button" value="取消" class="btn btn-default" id="cancelDeleteBtn" />
+        </div>
+    </div>
+</div>
+ 
+    
+    <div id="addDataDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>信息不全！</span></div>
+        <div class="modalContent">
+            <center>
+            <p id="addDataP"></p>
+            <input type="button" class="btn btn-default simplemodal-close" value="确定" />
+        </center>
+        </div>
+    </div>
+    
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(3) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": true,  //是否分页。
+            "iDisplayLength": 10,
+            //            "sScrollX": "100%",
+            //            "sScrollY": "250px",
+            "order": [3, 'desc'],   //排序
+            "bFilter": false
+
+        });
+    });
+
+    //点击删除按钮，弹出对话框
+    function DeleteSymptoms(value) {
+        var UserId = value.split("#")[0];
+        var PId = value.split("#")[1];
+        var VId = value.split("#")[2];
+        var SyNo = value.split("#")[3];
+        var piUser = value.split("#")[4];
+
+        //弹框提示
+        $('#deleteModal').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true
+        });
+        $('#confirmDeleteBtn').click(function () {
+            //连接数据库删除数据
+            $.ajax({
+                url: "/PatientInfo/DeleteSymptomsInfo",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PId: PId, VId: VId, SyNo: SyNo },  //输入参数
+                success: function (res) {
+                    if (res == 1) {
+                        location.reload();
+                    }
+                    else {
+                        alert("删除失败！");
+                    }
+                }
+            });
+        })
+
+        $('#cancelDeleteBtn').click(function () {
+            $.modal.close();
+            $('#cancelDeleteBtn').unbind("click");
+        })
+    }
+
+    function SymptomsTypeChanged() {
+        var SymptomsTypeSelected = document.getElementById("SymptomsTypeListDropDownList").value;
+        $.ajax({
+            url: "/PatientInfo/GetListbySymptomsType",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { SymptomsTypeSelected: SymptomsTypeSelected },  //输入参数
+            success: function (res) {
+                $("#SymptomsNameListDropDownList").empty();
+                var InitialElement = $("<option>---请选择症状类型---</option>").text("");
+                InitialElement.attr('value', "0");
+                $("#SymptomsNameListDropDownList").append(InitialElement);
+                for (var item in res) {
+                    var SymptomsNameList = res[item];
+                    var Name = SymptomsNameList.split("|")[0];
+                    var Code = SymptomsNameList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#SymptomsNameListDropDownList").append(NewElement);
+                }
+            }
+        });
+    }
+
+    $("#addSpM").bind("click", function (event) {
+        var SymptomsTypeSelected = document.getElementById("SymptomsTypeListDropDownList").value;
+        var SymptomsNameSelected = document.getElementById("SymptomsNameListDropDownList").value;
+        var DateTime = document.getElementById("RecordTime").value;
+        if ((SymptomsTypeSelected == "0") || (SymptomsNameSelected == "0") || (DateTime == "")) {
+            event.preventDefault();
+            Text = "";
+            if (SymptomsTypeSelected == "0") {
+                Text += "症状类型、";
+            }
+            if (SymptomsNameSelected == "0") {
+                Text += "症状名称、";
+            }
+            if (DateTime == "") {
+                Text += "记录时间、";
+            }
+            Text = Text.substr(0, Text.length - 1);
+            Text += "不能为空！";
+            $('#addDataP').html(Text);
+            $('#addDataDiv').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                containerId: 'alert-container',
+                overlayClose: true     //点击蒙层关闭窗口
+            });
+            //            alert("症状类型、症状名称、记录时间均不能为空！");
+        }
+        else {
+            var obj = document.getElementById("SymptomsName");
+            obj.value = SymptomsNameSelected;
+        }
+    });
+
+
+</script>

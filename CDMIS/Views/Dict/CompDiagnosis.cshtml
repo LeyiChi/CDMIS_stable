@@ -1,0 +1,132 @@
+﻿
+@model IEnumerable<CDMIS.Models.MpDiagnosisCmp>
+
+@{
+    ViewBag.Title = "CompDiagnosis";
+}
+
+<link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/jquery-1.11.1.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<style type="text/css">
+    #simplemodal-container {height:390px; width:400px;}
+    #delete-container {height:320px; width:400px;}
+</style>
+<ul id="tabs" style="margin: 5px 0 20px 0;">
+    <li>
+        @Html.ActionLink("未匹配诊断字典表", "UnCompDiagnosis", new { })</li>
+    <li>
+        @Html.ActionLink("已匹配诊断字典表", "CompDiagnosis", new { }, new { id = "current" })</li>
+    <li>
+        @Html.ActionLink("诊断字典表", "Diagnosis", new { })</li>
+</ul>
+
+<div id="tableContainer1" class="tableContainer" style="margin-top: 5px" >
+    <table width="100%" id="DataTable" class="display">
+        <thead>
+            <tr>
+                <th align="left" style="display:none">
+                    医院代码
+                </th>
+                <th align="left">
+                    医院名称
+                </th>
+                <th align="left" style="display:none">
+                    HZ代码
+                </th>
+                <th align="left">
+                    医院诊断名称
+                </th>
+                <th align="left" style="display:none">
+                    类别
+                </th>
+                <th align="left">
+                    类别名称
+                </th>
+                <th align="left" style="display:none">
+                    编码
+                </th>
+                <th align="left">
+                    字典诊断名称
+                </th>        
+                <th align="left">
+                    备注
+                </th>
+
+            </tr>
+        </thead>
+        <tbody id="TableBody">
+             @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="display:none">
+                        @Html.DisplayFor(modelItem => item.HospitalCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.HospitalName)
+                    </td>
+                    <td  style="display:none">
+                        @Html.DisplayFor(modelItem => item.HZCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.HZName)
+                    </td>
+                    <td  style="display:none">
+                        @Html.DisplayFor(modelItem => item.Type)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TypeName)
+                    </td>
+                    <td style="display:none">
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Redundance)
+                    </td>
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+
+<script type="text/javascript">
+    var typeflag = 0;
+    var codeflag = 0;
+    var nameflag = 0;
+    var startdateflag = 0;
+    var enddateflag = 0; //编辑弹框输入合法性标志位 0 不合法 1 合法
+    var trSeq = -1; //选定的行标
+    var editType = 0; //编辑类型，0：无  1：编辑  2：新增
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "420px",
+            "iDisplayLength": 11,
+            "bLengthChange": false,
+            "bFilter": true
+        });
+        
+        $("#DataTable").attr("width", "auto");
+    })
+    
+</script>
+
+

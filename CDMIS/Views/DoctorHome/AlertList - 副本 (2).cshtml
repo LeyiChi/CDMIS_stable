@@ -1,0 +1,248 @@
+﻿@model CDMIS.ViewModels.AlertListViewModel
+@{
+    ViewBag.Title = "警报信息";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/chinese-string.js"></script>
+<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 400px;
+        width: 600px;
+    }
+</style>
+@using (Html.BeginForm("AlertList", "DoctorHome", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+
+    <div style="width: 100%;" align="center">
+        <div class="form-group">
+            <label for="" class="col-sm-1 control-label">
+                ID
+            </label>
+            <div class="col-sm-2">
+                @Html.TextBoxFor(m => m.PatientId, new { id = "patientId", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PatientId)
+            </div>
+            <label for="" class="col-sm-1 control-label">
+                姓名
+            </label>
+            <div class="col-sm-2">
+                @Html.TextBoxFor(m => m.PatientName, new { id = "patientName", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.PatientName)
+            </div>
+            <label for="" class="col-sm-2 control-label">
+                警报</label>
+            <div class="col-sm-2">
+                @Html.DropDownListFor(model => model.AlertStatusSelected, Model.AlertStatusList(), new { id = "AlertDropDownList", @class = "form-control" })
+            </div>
+            <div class="col-sm-offset-1 ">
+                <button type="submit" class="btn btn-primary">
+                    查看</button>
+            </div>
+        </div>
+        <div id="tableContainer1" class="tableContainer" style="margin-top: 5px;">
+            <table width="100%" id="DataTable" class="display">
+                <thead>
+                    <tr>
+                        <th width="30px">
+                            操作
+                        </th>
+                        <th width="80px">
+                            患者ID
+                        </th>
+                        <th width="40px">
+                            姓名
+                        </th>
+                        <th width="100px">
+                            警报项目
+                        </th>
+                        <th width="10px">
+                            警报类型
+                        </th>
+                        <th width="60px">
+                            处置状态
+                        </th>
+                        <th width="130px">
+                            警报时间
+                        </th>
+                        <th width="60px">
+                            处置状态
+                        </th>
+                        <th width="1px">
+                            序号
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="AlertListTbody">
+                    @if (Model.AlertRecordList.Count > 0)
+                    {
+                        foreach (var item in Model.AlertRecordList)
+                        {
+                        <tr class="normalRow" align="center">
+                            <td class="" width="30px">
+                                <a>
+                                    <input id="MessageLink" class="" style="border: 0; background-image: url(../../Content/Image/mail.png);
+                                        background-repeat: no-repeat; background-color: transparent; cursor: pointer;
+                                        width: 24px; height: 24px; margin-right: 5px" title="发信" /></a>
+                            </td>
+                            <td width="80px">@item.UserId
+                            </td>
+                            <td width="40px">@item.UserName
+                            </td>
+                            <td width="100px">@item.AlertItemName
+                            </td>
+                            <td width="100px">@item.AlertTypeName
+                            </td>
+                            @if (@item.ProcessFlag == 1)
+                            {
+                                <td width="30px">
+                                    <button id="Process" class="btn btn-default ">
+                                        未处理</button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td width="30px">
+                                    已处理
+                                </td>
+                            }
+                            <td width="130px">@item.AlertDateTime
+                            </td>
+                            <td width="30px">@item.ProcessFlag
+                            </td>
+                            <td width="30px">@item.SortNo
+                            </td>
+                        </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="sendMessageDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>发送消息</span></div>
+        <div class="modalContent">
+            <iframe id="MessagePop" src="" width="100%" height="350px" style="background: #FFF;"
+                scrolling="no" frameborder="no"></iframe>
+            <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+        </div>
+    </div>
+    
+@*    <div id="sendMessageDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>发送消息</span></div>
+        <div class="modalContent">
+            <iframe id="MessagePop" src=""></iframe>
+        </div>
+    </div>
+*@    
+    @Html.HiddenFor(model => model.PatientId)
+    @Html.HiddenFor(model => model.PatientName)
+    @Html.HiddenFor(model => model.AlertStatusSelected)
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(2) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "400px",
+            "bLengthChange": false,
+            "iDisplayLength": 8,
+            "order": [[7, 'asc'], [6, 'asc']],   //两列排序
+            "bFilter": false,
+            "columnDefs": [     //隐藏列
+            {
+            "targets": [7],
+            "visible": false,
+            "searchable": false
+        }, {
+            "targets": [8],
+            "visible": false,
+            "searchable": false
+        }]
+
+        //        }],
+        //        //Event
+        //        fnRowCallback: function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+        //            //                // Cell click
+        //            //                $('td', nRow).on('click', function () {
+        //            //                    console.log('Col Clicked.', this, aData, iDisplayIndex, iDisplayIndexFull);
+        //            //                    //alert(aData[1]);    //Get PaitentId
+        //            //                    if (aData[5] == "未处理") {
+        //            //                        $(this).text("已处理");
+        //            //                        console.log('处置状态： ', $(this).text());
+        //            //                    }
+        //            //              });
+        //        }
+    });
+
+    //单击表格中按钮、图标的事件 td on click
+    $(document).on('click', '#DataTable td', function (e) {
+        //var cell_clicked = table.cell(this).data();
+        var colIndex = table.cell(this).index().column;
+        var trIndex = table.cell(this).index().row;
+        var td = $(this).parent();
+        //console.log('The index is ', colIndex);
+        //console.log(cell_clicked);
+        //console.log(td);
+        switch (colIndex) {
+            case 0:     // 操作列
+                {
+                    // Parameters for MessageBoxPop：(string SendBy,string Receiver)
+                    //var trIndex = $(this).parent().parent().parent().parent().find("tr").index($(this).parent().parent().parent());
+                    var patientId = trim($("#AlertListTbody tr:eq(" + trIndex + ") td:eq(1)").text());
+                    $("#MessagePop").attr('src', "/MailBox/FASTWrite?Receiver=" + patientId + "&SendBy=" + "@Model.DoctorId");
+                    $("#MessagePop").attr('target', "_parent");
+                    $('#sendMessageDiv').modal({
+                        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                        overlayClose: true     //点击蒙层关闭窗口
+                    });
+                    break;
+                }
+            case 5:     //处置状态列
+                {
+                    var row_clicked = $(td).closest('tr');
+                    //console.log(row_clicked);
+                    var processFlag = table.row(row_clicked).data()[7];
+                    console.log(processFlag);
+                    if (processFlag == 1) {
+                        var patientId = table.row(row_clicked).data()[1];
+                        var sortNo = table.row(row_clicked).data()[8];
+                        //console.log('pid and  sortNo： ', patientId, sortNo);
+                        $.ajax({
+                            type: "POST",
+                            url: "/DoctorHome/AlertList",
+                            data: "pid=" + patientId + "&&sortNo=" + sortNo,
+                            success: function () {
+                                //console.log("return page");
+                                var form = document.getElementById("Form1");
+                                form.submit();
+                            }
+                        });
+                    }
+                    break;
+                }
+            default:
+        }
+    });
+});
+
+
+function trim(str) {  //删除左右两端的空格
+    return str.replace(/(^\s*)|(\s*$)/g, "");
+}
+
+
+
+</script>

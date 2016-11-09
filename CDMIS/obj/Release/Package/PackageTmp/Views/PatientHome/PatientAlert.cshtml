@@ -1,0 +1,123 @@
+﻿@model CDMIS.ViewModels.PatientAlertViewModel
+@{
+    ViewBag.Title = "患者警报";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 400px;
+        width: S0px;
+    }
+</style>
+@using (Html.BeginForm("PatientAlert", "PatientHome", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    <div onload="ShowOptions()">
+        <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+            <h2 class="text-center">
+                已有警报列表</h2>
+            <input type="button" class="btn btn-info" id="SendMessageBtn" value="发信" style="float: right;
+                font-size: 16px;" />
+            @* <a href="/MailBox/HaveSent"><input type="button" value = "发送"/></a>*@
+            <table id="DataTable" class="display">
+                <thead>
+                    <tr>
+                        <th>
+                            警报项目
+                        </th>
+                        <th>
+                            警报类型
+                        </th>
+                        <th>
+                            处理状态
+                        </th>
+                        <th>
+                            警报时间
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.AlertList)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertItemName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertTypeName)
+                            </td>
+                            @if (@item.ProcessFlag == 1)
+                            {
+                                <td>
+                                    未处理
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    已处理
+                                </td>
+                            }
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertDateTime)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+@*传回数据*@
+    <div>
+        @Html.HiddenFor(model => model.UserId)
+    </div>
+
+
+}
+<div id="sendMessageDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>发送消息</span></div>
+    <div class="modalContent">
+        <iframe id="MessagePop" src="" width="100%" height="350px" style="background: #FFF;"
+            scrolling="no" frameborder="no"></iframe>
+        <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(5) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": true,  //是否分页。
+            "iDisplayLength": 10,
+//            "sScrollX": "100%",
+//            "sScrollY": "300px",
+            "order": [[2, 'desc'], [3, 'desc']],
+            "bFilter": false
+            //            "aoColumnDefs": [{ "sWidth": "30px", "aTargets": [0] },
+            //            { "sWidth": "200px", "aTargets": [1]}]
+
+        });
+    });
+
+    $("#SendMessageBtn").click(function () {
+        $("#MessagePop").attr('src', "/MailBox/FastWriteFromPat?SendBy=" + "@Model.UserId");
+        $('#sendMessageDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    })
+</script>

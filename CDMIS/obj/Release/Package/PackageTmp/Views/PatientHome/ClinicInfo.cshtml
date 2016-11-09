@@ -1,0 +1,196 @@
+﻿@model CDMIS.ServiceReference.Clinic
+@{
+    ViewBag.Title = "患者临床信息";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+
+<link href="../../Content/timeLine.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 670px;
+        width: 900px;
+    }
+</style>
+
+@Html.HiddenFor(model => model.UserId)
+@Html.HiddenFor(model => model.AdmissionDateMark)
+@Html.HiddenFor(model => model.ClinicDateMark)
+
+
+
+@*时间轴动态*@
+<div id="norecord" style="display: none; margin-top: 20px;margin-bottom:40px;" align="center">
+    <p style="font-size: 20px; color: Red;">还没有任何临床信息</p>
+</div>
+  <h4>
+        根据就诊卡同步</h4>
+<div class="demo" id="demo">
+    <div class="history">
+        <div class="history-date">
+                       <ul id="historyUl">
+
+                @for (int i = 0; i < Model.History.Length; i++)
+                {       
+                    <li>
+                        <h3>@Model.History[i].Time</h3>          @*时间轴左侧--时间（具体）目前暂时（就诊与其他分开） 应该是 住院入院分开 门诊一天合并*@
+                       
+                        <div class="cbp_tmlabel" id="@Model.History[i].Color">
+                        
+                            <span class="tag-@Model.History[i].Color">@Model.History[i].Tag</span> 
+        
+                        @for (int m = 0; m < Model.History[i].ItemGroup.Length; m++)   
+                        {
+                            if ((Model.History[i].ItemGroup[m].Type == "入院") || (Model.History[i].ItemGroup[m].Type == "出院") || (Model.History[i].ItemGroup[m].Type == "门诊") || (Model.History[i].ItemGroup[m].Type == "急诊") || (Model.History[i].ItemGroup[m].Type == "当前住院中") || (Model.History[i].ItemGroup[m].Type == "转科"))
+                                 { 
+                                    <p class="Item" id="">@Model.History[i].ItemGroup[m].Time<span style="margin-left:20px;">@Model.History[i].ItemGroup[m].Event</span></p>  
+
+                                 }
+
+                                 else
+                                 { 
+                                    <p><a href="javascript:void(0)" class="Itemhref" id="@Model.History[i].ItemGroup[m].KeyCode" onclick="OpenClinicInfoDetail(this.id);">@Model.History[i].ItemGroup[m].Time&nbsp;&nbsp;@Model.History[i].ItemGroup[m].Event</a></p>
+                                }
+                        }
+                        </div>
+
+                    </li>       
+                }
+            </ul>
+
+        </div>
+    </div>
+
+    <div id="history_loading" style="display: none; margin-top:0px" align="center">
+            <img alt="Load" src="../../Content/Image/history_loading.gif" style="width:50px;height:50px;" />
+            <p>加载中，请稍后</p>
+    </div>
+
+    <div class="white" style="height: 10px; margin-top: 10px;">
+    </div>
+    <div id="historyButton">
+       <input type="button" style="width:800px;height:40px;" class="btn btn-primary" onclick="GetMoreClinic();" value="加载更多" />
+    </div>
+    <div class="white" style="height: 80px;">
+    </div>
+</div>
+
+<div id="clinicDetailDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>临床详细信息</span></div>
+        <div class="modalContent">
+            <iframe id="iframe_ClinicDetail" src="" width="100%" height="600px" style="background: #FFF;"
+                scrolling="no" frameborder="no"></iframe>
+            <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+        </div>
+    </div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+
+        
+        if (@Model.History.Length>0) 
+        {
+            var target = document.getElementById("demo");
+            target.style.display = "block";
+            var target = document.getElementById("norecord");
+            target.style.display = "none";
+         }
+        else
+        {
+            var target = document.getElementById("demo");
+            target.style.display = "none";
+            var target = document.getElementById("norecord");
+            target.style.display = "block";
+         }
+    });
+</script>
+
+<script type="text/javascript">
+
+    //    (function () {
+    //        //滚轮滑至底端刷新
+    //        var docNode = $(document);
+    //        docNode.scroll(function () {
+
+    //            if (docNode.height() - $(window).height() - docNode.scrollTop() < 10) {
+    //                alert("1");
+    //                //获取更多数据 
+    //                GetMoreClinic();
+    //            }
+    //        });
+    //    })()
+
+    function GetMoreClinic() {
+
+        var target = document.getElementById("history_loading");
+        target.style.display = "block";
+        $("#historyButton").hide();
+
+        var userid = document.getElementById("UserId").value;
+        var admissionDateMark = document.getElementById("AdmissionDateMark").value;
+        var clinicDateMark = document.getElementById("ClinicDateMark").value;
+
+        $.ajax({
+            url: "/PatientHome/GetMoreClinic",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PatientId: userid, AdmissionDate: admissionDateMark, ClinicDate: clinicDateMark, Num: 10 },
+            success: function (res) {
+
+                var target = document.getElementById("history_loading");
+                target.style.display = "none";
+
+                document.getElementById("AdmissionDateMark").value = res.AdmissionDateMark;  //数据格式 弄成string不会错
+                document.getElementById("ClinicDateMark").value = res.ClinicDateMark;
+
+                if (res.History.length > 0) {
+                    var str = '';
+                    for (var i = 0; i < res.History.length; i++) {
+                        str += '<li><h3>' + res.History[i].Time + '</h3> <div class="cbp_tmlabel" id="' + res.History[i].Color + '">';
+                        str += '<span class="tag-' + res.History[i].Color + '">' + res.History[i].Tag + '</span>  ';
+                        //str += '<h2 style="font-family: 微软雅黑;"></h2>';
+                        for (var j = 0; j < res.History[i].ItemGroup.length; j++) {
+                            if ((res.History[i].ItemGroup[j].Type == "入院") || (res.History[i].ItemGroup[j].Type == "出院") || (res.History[i].ItemGroup[j].Type == "门诊") || (res.History[i].ItemGroup[j].Type == "急诊") || (res.History[i].ItemGroup[j].Type == "当前住院中") || (res.History[i].ItemGroup[j].Type == "转科")) {
+                                str += ' <p class="Item" id="">' + res.History[i].ItemGroup[j].Time + '<span style="margin-left:20px;">' + res.History[i].ItemGroup[j].Event + '</span></p>';
+                            }
+                            else {
+                                str += '<p><a href="javascript:void(0)" class="Itemhref" id="' + res.History[i].ItemGroup[j].KeyCode + '" onclick="OpenClinicInfoDetail(this.id);">' + res.History[i].ItemGroup[j].Time + '&nbsp;&nbsp;' + res.History[i].ItemGroup[j].Event + '</a></p>';
+                            }
+                        }
+                        str += '</li>';
+                    }
+                    $("#historyUl").append(str);
+                    $("#historyButton").show();
+                }
+                else {
+                    $("#historyButton").hide();
+                    //alert("没有更多了");
+                }
+
+            }
+        });
+
+    }
+
+    function OpenClinicInfoDetail(keycode) {
+        //alert(a);   // "type|VId|date"
+        //var keycode = this.id;
+        var userid = document.getElementById("UserId").value;
+
+        $("#iframe_ClinicDetail").attr('src', "/PatientHome/ClinicInfoDetail?PatientId=" + userid + "&keycode=" + keycode);
+        // $("#ClinicInfoDetail").attr('target', "_parent"); 当iframe中的子网页的事件要更换iframe所属的父页面网页时
+
+        $('#clinicDetailDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+</script>

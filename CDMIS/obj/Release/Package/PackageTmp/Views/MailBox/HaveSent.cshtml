@@ -1,0 +1,86 @@
+﻿@model CDMIS.ViewModels.MessageListViewModel
+@{
+    ViewBag.Title = "信箱-已发送";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<div id="MailBoxShare">
+    @{Html.RenderAction("MailBoxShare", "MailBox");}
+</div>
+<div id="Content" style="border: 5px solid #DDDDFF;">
+    <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+        <table id="DataTable" class="display">
+            <thead>
+                <tr>
+                    <th>
+                        收件人
+                    </th>
+                    <th>
+                        主题
+                    </th>
+                    <th>
+                        时间
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.MessageList.Count > 0)
+                {
+                    foreach (CDMIS.Models.MessageInfo item in Model.MessageList)
+                    {   
+                    <tr onclick="TranPa(this)">
+                        <td>
+                            @if (item.OutDateFlag == 1)
+                            {
+                                <input type="hidden" value="(@item.MessageNo)"/>@item.ReceiverName<span style="color:#FF0000;">（身份已过期）</span>
+                            }
+                            else
+                            {                      
+                                <input type="hidden" value="(@item.MessageNo)"/>@item.ReceiverName                   
+                            }
+                        </td>
+                        <td>
+                            @item.Title
+                        </td>
+                        <td>
+                            @item.SendDateTime
+                        </td>
+                    </tr>           
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //改变按钮颜色
+    $(document).ready(function () {
+        $("#bn3").toggleClass("myButtonChange");
+    });
+
+    //传递参数
+    function TranPa(obj) {
+        var Txt = obj.cells[0].innerHTML;
+        var TxtList = new Array();
+        TxtList = Txt.split("(");
+        var Temp = TxtList[1].split(")")[0];
+        window.location.href = "/MailBox/SendDetail/" + Temp;
+    }
+
+    //表格样式
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "518px",
+            "bLengthChange": false,
+            "iDisplayLength": 14,
+            "bFilter": false,
+            "bSort": false
+        });
+    });
+</script>

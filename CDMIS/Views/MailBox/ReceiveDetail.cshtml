@@ -1,0 +1,62 @@
+﻿@model CDMIS.Models.MessageInfo
+@{
+    ViewBag.Title = "信箱-收信";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("Write", "MailBox", FormMethod.Get, new { id = "Form1", enctype = "multipart/form-data" }))
+{
+    <div id="MailBoxShare">
+        @{Html.RenderAction("MailBoxShare", "MailBox");}
+    </div>
+    <div id="Content" style="border: 5px solid #DDDDFF;">
+        <table>
+            <tr class = "trht">
+                <td width="60px" align="left" class="otherfont">
+                    主&nbsp;&nbsp;&nbsp;题：
+                </td>
+                <td align="left">@Model.Title
+                </td>
+            </tr>
+            <tr class = "trht">
+                <td width="60px" align="left" class="otherfont">
+                    发件人：
+                </td>
+                <td align="left" id="SendByName">@Model.SendByName＜@Model.SendBy＞
+                </td>
+            </tr>
+            <tr class = "trht">
+                <td width="60px" align="left" class="otherfont">
+                    时&nbsp;&nbsp;&nbsp;间：
+                </td>
+                <td align="left">@Model.SendDateTime
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <div style="border: 3px solid #DDDDFF;">
+                        <textarea style="width: 1009px; height: 480px;" readonly="readonly">@Model.Content</textarea></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center" class="otherfont">
+                    <input type="submit" value="回复" onclick="subPara()" class="myButton1" />
+                </td>
+            </tr>
+        </table>
+    </div>
+      
+    <span>@Html.HiddenFor(model => model.SendByName, new { id = "ReSendByName",})</span>
+    
+}
+<script type="text/javascript">
+
+    //改变按钮颜色
+    $(document).ready(function () {
+        $("#bn1").toggleClass("myButtonChange");
+    });
+
+    //回复时，传递收信人信息
+    function subPara() {
+        $('#ReSendByName').val("@Model.SendByName＜@Model.SendBy＞");
+    }
+</script>

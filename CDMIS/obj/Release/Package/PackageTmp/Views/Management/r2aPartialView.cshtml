@@ -1,0 +1,56 @@
+﻿@model CDMIS.ViewModels.Role2AuthorityViewModel
+           
+<table width="80%" id="RoleAuthorityListDT" class="display">
+    <thead class="fixedHeader">
+        <tr>
+            <th width="160px">
+                对象编码
+            </th>
+            <th width="160px">
+                对象
+            </th>
+            <th width="160px">
+                操作编码
+            </th>
+            <th width="160px">
+                操作
+            </th>
+        </tr>
+    </thead>
+    <tbody class="scrollContent">
+        @if (Model.RoleAuthorityRowCount > 0)
+        {
+            foreach (var item in Model.RoleAuthorityList)
+            {
+                <tr class="normalRow">
+                    <td width="110px">@item.AuthorityCode
+                    </td>
+                    <td width="110px">@item.AuthorityName
+                    </td>
+                    <td width="110px">@item.SubAuthorityCode
+                    </td>
+                    <td width="110px">@item.SubAuthorityName
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var table = $('#RoleAuthorityListDT').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "250px",
+            "order": [3, 'desc'],   //排序
+            "bFilter": false
+
+        });
+    });
+</script>

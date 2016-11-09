@@ -1,0 +1,848 @@
+﻿@model CDMIS.ViewModels.ClinicalInfoProfileViewModel
+@{
+    ViewBag.Title = "患者建档-就诊信息";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/flexibleDisplay.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script src="../../Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+<script src="../../Scripts/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+<style type="text/css">
+    #Redirect
+    {
+        overflow: hidden;
+        width: 100%;
+        margin: 0 0 1.0em 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #Redirect li
+    {
+        float: left;
+        margin: 0 5 0 5;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+        display: inline-block;
+    }
+    #Redirect a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 0px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #777\9;
+        opacity: .8;
+        filter: alpha(opacity=30);
+    }
+    #Redirect a:hover, #Redirect a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    @*.tdhover
+    {
+        background-color: #cccc00;
+    }*@
+    #simplemodal-container
+    {
+        height: 440px;
+        width: 480px;
+    }
+    #delete-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+    #alert-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+    
+    #simple-overlay
+    {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.9;
+        background-color: #eee;
+        z-index: 1001;
+    }
+    #loading
+    {
+        position: absolute;
+        top: 48%;
+        text-align:center;
+        width: 100%;
+        margin: auto;
+        z-index: 1003;
+    }
+</style>
+<div id="simple-overlay" style="display: none; width: 100%; height: 100%; text-align: center;">
+    <div id="loading">
+        <img alt="Load" src="../../Content/Image/history_loading.gif" style="width: 50px;
+            height: 50px;" />
+        <h3>
+            正在同步，请稍后……</h3>
+    </div>
+</div>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.UserId, Role = "Patient" }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo", new { PointedPatient = @Model.UserId });}
+@*就诊卡信息*@
+<div>
+    <h4>
+        根据就诊卡同步</h4>
+    <div class="modalContent" style="margin-top: 15px; text-align: center;">
+        <div class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">
+                    就诊医院
+                </label>
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.HospitalSelected, Model.HospitalList(), new { id = "HospitalListDropDownListFor", @class = "form-control", onclick = "HospitalChange()" })
+                </div>
+                <label class="col-sm-2 control-label">
+                    就诊ID
+                </label>
+                <div class="col-sm-4">
+                    @Html.TextBox("PIDJC", "", new { id = "PIDJC", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                @*<label class="col-sm-2 control-label">
+                    就诊ID
+                </label>
+                <div class="col-sm-4">
+                    @Html.TextBox("PIDJC", "", new { id = "PIDJC", @class = "form-control" })
+                </div>*@
+                <label class="col-sm-2 control-label">
+                    起始日期
+                </label>
+                <div class="col-sm-4">
+                    @Html.TextBox("StartDateTime", "", new { id = "StartDateTime", @onclick = "WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})", @class = "form-control" })
+                </div>
+                @*<div class="col-sm-4">
+                    <input style="font-size: 16px; font-weight: bold; text-align: center" value="起始日期未填时，将同步所有临床信息"
+                        class="form-control" disabled="disabled" />
+                </div>*@
+                <label class="col-sm-4 control-label">
+                    起始日期未填，将同步所有临床信息
+                </label>
+                <div class="col-sm-2">
+                    <input type="button" class="btn btn-primary" id="synchronization" value="同步" />
+                </div>
+            </div>
+            <div class="form-group" style="display: none;" id="synchronizationTip">
+                <div class="col-sm-12">
+                    <p id="synchronizationWarning" style="font-size: 16px; color: #FF0000; font-weight: bold;
+                        text-align: center">
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@using (Html.BeginForm("ClinicalInfo", "DoctorHome", FormMethod.Post, new { id = "Form1", enctype = "multipart/form-data" }))
+{
+@*读取就诊信息*@
+    <div style="background-color: White; width: 100%; margin-top: 20px">
+        <h4>
+            就诊信息</h4>
+        <input type="text" id="UId" style="display:none" value="@Model.UserId"/>
+        <table id="InfoList" class="display">
+            <thead>
+                <tr>
+                    <th style="display: none;">
+                        就诊Id
+                    </th>
+                    <th style="display: none;">
+                        就诊医院ID
+                    </th>
+                    <th>
+                        就诊医院
+                    </th>
+                    <th style="display: none;">
+                        就诊科室ID
+                    </th>
+                    <th>
+                        就诊科室
+                    </th>
+                    <th>
+                        就诊时间
+                    </th>
+                    <th>
+                        就诊医生
+                    </th>
+                    <th style="display: none;">
+                        序号
+                    </th>
+                    @*<th colspan="2">*@
+                    <th>
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="TableBody">
+                @if (Model.InPatientList.Count > 0 || Model.OutPatientList.Count > 0)
+                {
+                    for (int i = 0; i < Model.InPatientList.Count(); i++)
+                    {
+                    <tr>
+                        <td style="border: 0; display: none" id="1">
+                            @Model.InPatientList[i].VisitId _ @Model.InPatientList[i].SortNo
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.InPatientList[i].HospitalCode
+                        </td>
+                        <td style="border: 0;">
+                            @Model.InPatientList[i].HospitalName
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.InPatientList[i].DepartmentCode
+                        </td>
+                        <td style="border: 0;">
+                            @Model.InPatientList[i].DepartmentName
+                        </td>
+                        <td style="border: 0;">
+                            @Model.InPatientList[i].AdmissionDate|
+                            @if (Model.InPatientList[i].DischargeDate == Convert.ToDateTime("9999/01/01 0:00:00"))
+                            {
+                            }
+                            else
+                            {                               
+                                @Model.InPatientList[i].DischargeDate
+                            }
+                        </td>
+                        <td style="border: 0;">
+                            @Model.InPatientList[i].Doctor
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.InPatientList[i].SortNo
+                        </td>
+                        @if (Model.InPatientList[i].IsAllowed == true)
+                        {
+                            <td style="border: 0;">
+                                <input type="button" value="编辑" class="btn btn-primary editClinicalInfoBtn" />
+                                <input type="button" value="删除" class="btn btn-primary deleteClinicalInfoBtn" />
+                            </td>
+                        }
+                        else
+                        {
+@* <td style="border: 0;">
+                                <input type="button" value="编辑" class="btn btn-primary editClinicalInfoBtn" disabled="disabled" />
+                                <input type="button" value="删除" class="btn btn-primary deleteClinicalInfoBtn" disabled="disabled" />
+                            </td> *@     
+                            <td>
+                                无编辑权限
+                            </td>                  
+                        }
+                    </tr>
+                    }
+                    for (int i = 0; i < Model.OutPatientList.Count(); i++)
+                    {
+                    <tr>
+                        <td style="border: 0; display: none" id="1">
+                            @Model.OutPatientList[i].VisitId
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.OutPatientList[i].HospitalCode
+                        </td>
+                        <td style="border: 0;">
+                            @Model.OutPatientList[i].HospitalName
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.OutPatientList[i].DepartmentCode
+                        </td>
+                        <td style="border: 0;">
+                            @Model.OutPatientList[i].DepartmentName
+                        </td>
+                        <td style="border: 0;">
+                            @Model.OutPatientList[i].ClinicDate
+                        </td>
+                        <td style="border: 0;">
+                            @Model.OutPatientList[i].Doctor
+                        </td>
+                        <td style="border: 0; display: none">
+                            @Model.OutPatientList[i].SortNo
+                        </td>
+                        @if (Model.OutPatientList[i].IsAllowed == true)
+                        {
+                            <td style="border: 0;">
+                                <input type="button" value="编辑" class="btn btn-primary editClinicalInfoBtn" />
+                                <input type="button" value="删除" class="btn btn-primary deleteClinicalInfoBtn" />
+                            </td>
+                        }
+                        else
+                        {
+@*<td style="border: 0;" class="disabledInputHover">
+                                <input type="button" value="编辑" class="btn btn-primary editClinicalInfoBtn" disabled="disabled" />
+                                <input type="button" value="删除" class="btn btn-primary deleteClinicalInfoBtn" disabled="disabled" />
+                            </td> *@    
+                            <td>
+                                非本人填写,无权限编辑
+                            </td>                            
+                        }
+                    </tr>
+                    }
+                }
+@* else
+                {
+                    <tr id="NotExist">
+                        <td style="font-size: 15px;" colspan="9">
+                            暂无数据，请添加！
+                        </td>
+                    </tr>
+            
+                }*@
+            </tbody>
+        </table>
+    </div>
+@*添加信息*@
+    @Html.HiddenFor(model => model.UserId);
+    <div>
+        <h4 id="moduleInfoToggle">
+            添加就诊信息</h4>
+        <div class="modalContent" style="margin-top: 15px;">
+            <div class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        *就诊类型</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownList("VisitType", Model.VisitTypeList(), new { id = "VisitTypeListDropDownListFor", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-2 control-label VisitId" style="display: none">
+                        *就诊</label>
+                    <div class="col-sm-4 VisitId" style="display: none">
+                        @Html.DropDownListFor(model => model.ClinicalInfo.VisitIdSelected, Model.ClinicalInfoList, new { id = "ClinicalInfoListDropDownListFor", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">
+                        *就诊医院</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model => model.ClinicalInfo.HospitalCode, Model.HospitalList(), new { id = "HospitalListDropDownListFor", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        *就诊科室</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model => model.ClinicalInfo.DepartmentCode, Model.DeptList(), new { id = "DeptListDropDownListFor", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group ">
+                    <label class="col-sm-2 control-label">
+                        就诊医生
+                    </label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.ClinicalInfo.Doctor, new { id = "DoctorInput", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ClinicalInfo.Doctor)
+                    </div>
+                    <label class="col-sm-2 control-label" id="JiuZhenDate">
+                        *就诊日期
+                    </label>
+                    <label class="col-sm-2 control-label" style="display: none" id="RuYuanDate">
+                        *入院日期
+                    </label>
+                    <label class="col-sm-2 control-label" style="display: none" id="ZhuanKeDate">
+                        *转科日期
+                    </label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.ClinicalInfo.AdmissionDate, new { id = "AdmissionDateInput", @onclick = "WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ClinicalInfo.AdmissionDate)
+                    </div>
+                </div>
+                <div class="form-group ">
+                    <label class="col-sm-2 control-label DischargeDateInput">
+                        出院日期</label>
+                    <div class="col-sm-4 DischargeDateInput">
+                        @Html.TextBox("DischargeDate", "", new { id = "DischargeDateInput", @onclick = "WdatePicker({minDate:'#F{$dp.$D(AdmissionDateInput)}',dateFmt:'yyyy-MM-dd HH:mm:ss'})", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-5 col-sm-7">
+                        <input type="button" class="btn btn-primary addClinicalInfoBtn" value="添加" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@*编辑信息*@
+<div id="editDataDiv" style="display: none; overflow: none">
+    <div class="modalHeader">
+        <span>编辑</span></div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="VisitId" class="col-sm-3 control-label">
+                就诊Id</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="VisitId" readonly="readonly" />
+            </div>
+        </div>
+        <div class="form-group" id="editSortNo" style="display: none">
+            <label for="SortNo" class="col-sm-3 control-label">
+                就诊序号</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="SortNo" readonly="readonly" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="HospitalName" class="col-sm-3 control-label">
+                *就诊医院</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.HospitalSelected, Model.HospitalList(), new { id = "HospitalName", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="DepartmentName" class="col-sm-3 control-label">
+                *就诊科室</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.DepartmentNameSelected, Model.DeptList(), new { id = "DepartmentName", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="Doctor" class="col-sm-3 control-label">
+                就诊医生</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.ClinicalInfo.Doctor, new { id = "Doctor", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="AdmissionDate" class="col-sm-3 control-label">
+                *就诊时间</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.ClinicalInfo.AdmissionDate, new { id = "AdmissionDate", @onclick = "WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group" id="editDischargeDate" style="display: none">
+            <label for="DischargeDate" class="col-sm-3 control-label">
+                出院时间</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.ClinicalInfo.DischargeDate, new { id = "DischargeDate", @onclick = "WdatePicker({minDate:'#F{$dp.$D(AdmissionDateInput)}',dateFmt:'yyyy-MM-dd HH:mm:ss'})", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group" style="display: none;" id="Tip">
+            <label class="col-sm-3 control-label" style="font-size: 16px; color: #FF0000; font-weight: bold">
+                提示：</label>
+            <div class="col-sm-9">
+                <span class="form-control" style="font-size: 16px; color: #FF0000; font-weight: bold">
+                    就诊时间不能为空！</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-4 col-sm-12">
+                <input type="button" class="btn btn-primary saveClinicalInfoBtn" value="保存" />
+                <input type="button" class="btn btn-default simplemodal-close" id="cancel" value="取消" />
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+@*删除信息*@
+<div id="DeleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>删除</span></div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        <p>
+            确定删除？</p>
+        <table>
+            <tr>
+                <td>
+                    <input type="button" class="btn btn-primary sureClinicalInfoBtn" value="确定" />
+                </td>
+                <td>
+                    <input type="button" class="btn btn-default simplemodal-close" id="cancelDelete"
+                        value="取消" />
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</div>
+@*alert弹出框*@
+<div id="alertDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>提示框</span></div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        @*<input type="text" disabled="disabled" id="Warning"/>*@
+        <p id="Warning">
+        </p>
+        <table>
+            <tr>
+                <td>
+                    <input type="button" class="btn btn-primary Sure" value="确定" />
+                </td>
+                <td>
+                    <input type="button" class="btn btn-default simplemodal-close" id="Close" style="display: none"
+                        value="取消" />
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</div>
+<div style="float: right">
+    <ul id="Redirect">
+        <li>@Html.ActionLink("上一步", "BasicProfile", new { PatientId = @Model.UserId, Role = "Patient" })</li>
+        <li>@Html.ActionLink("下一步", "ClinicalProfile", new { UserId = @Model.UserId })</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(1) a").attr("id", "currentnav");
+
+        $("#DeptListDropDownListFor").chosen({
+            no_results_text: "没有找到相应的选项",
+            placeholder_text: "请选择……"
+        });
+        document.getElementById('HospitalListDropDownListFor').value = "";
+        document.getElementById('VisitTypeListDropDownListFor').value = "";
+
+        document.getElementById('DeptListDropDownListFor').value = "";
+
+        var table = $('#InfoList').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "300px",
+            "bFilter": false,
+            "aaSorting": [[5, "desc"]],
+            "columnDefs": [{ "bSortable": false, "aTargets": [8]}] //禁止某些列的排序功能
+        });
+
+        var UserId = document.getElementById("UId").value;
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+        }
+
+        $(".addClinicalInfoBtn").click(function () {
+            var VID = $("#ClinicalInfoListDropDownListFor").val();
+            var VType = $("#VisitTypeListDropDownListFor").val();
+
+            if (VType == "4" && VID == "") {
+                $("#Warning").html("请选择就诊Id");
+                //alert(Text);
+                $('#alertDiv').modal({
+                    closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                    containerId: 'alert-container',
+                    overlayClose: true     //点击蒙层关闭窗口
+                });
+            }
+            else {
+                $("#Form1").submit();
+            }
+
+        })
+
+        $(document).on("click", ".editClinicalInfoBtn", function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var VisitId = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var HospitalCode = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            var DepartmentCode = $("#TableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+
+            var Admission_Discharge_Date = $("#TableBody tr:eq(" + trSeq + ") td:eq(5)").text().trim();
+            strs = Admission_Discharge_Date.split("|");
+            AdmissionDate = strs[0];
+            DischargeDate = strs[1];
+
+            if (typeof (DischargeDate) != "undefined") {
+                DischargeDate = strs[1].trim();
+            }
+
+            var Doctor = $("#TableBody tr:eq(" + trSeq + ") td:eq(6)").text().trim();
+            var SortNo = $("#TableBody tr:eq(" + trSeq + ") td:eq(7)").text().trim();
+
+
+            EditData(VisitId, HospitalCode, DepartmentCode, AdmissionDate, DischargeDate, Doctor, SortNo);
+        });
+
+        //编辑数据界面
+        function EditData(VisitId, HospitalCode, DepartmentCode, AdmissionDate, DischargeDate, Doctor, SortNo) {
+            document.getElementById("VisitId").value = VisitId;
+            document.getElementById("SortNo").value = SortNo;
+            document.getElementById("HospitalName").value = HospitalCode;
+            document.getElementById("DepartmentName").value = DepartmentCode;
+            document.getElementById("AdmissionDate").value = AdmissionDate;
+            document.getElementById("DischargeDate").value = DischargeDate;
+            document.getElementById("Doctor").value = Doctor;
+            document.getElementById("editDischargeDate").style.display = "none";
+            if (VisitId.substr(0, 2) == "In") {
+                document.getElementById("editDischargeDate").style.display = "block";
+            }
+            $('#editDataDiv').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                overlayClose: true     //点击蒙层关闭窗口
+            });
+            $("#DepartmentName").chosen({
+                no_results_text: "没有找到相应的选项",
+                placeholder_text: "请选择……"
+            });
+        }
+
+        $(".saveClinicalInfoBtn").click(function () {
+            var VisitId = document.getElementById("VisitId").value;
+            var SortNo = document.getElementById("SortNo").value;
+            var HospitalCode = document.getElementById("HospitalName").value;
+            var HospitalName = document.getElementById("HospitalName").options[document.getElementById("HospitalName").selectedIndex].text;
+            var DepartmentCode = document.getElementById("DepartmentName").value;
+            var DepartmentName = document.getElementById("DepartmentName").options[document.getElementById("DepartmentName").selectedIndex].text;
+            var AdmissionDate = document.getElementById("AdmissionDate").value;
+
+            if (AdmissionDate == "") {
+                $("#Tip").show();
+            }
+            else {
+                if (VisitId.substr(0, 2) == "In") {
+                    iVisitId = VisitId.split(" ")[0]; //字符分割      
+                    var DischargeDate = document.getElementById("DischargeDate").value;
+                    if (DischargeDate == "") {
+                        DischargeDate = "9999/01/01 0:00:00";
+                    }
+                }
+                else {
+                    iVisitId = VisitId;
+                    var DischargeDate = "9999/01/01 0:00:00";
+                }
+
+                var Doctor = document.getElementById("Doctor").value;
+
+                $.ajax({
+                    url: "/DoctorHome/ClinicalInfoEdit",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { UserId: UserId, VisitId: iVisitId, SortNo: SortNo, HospitalCode: HospitalCode, DepartmentCode: DepartmentCode, AdmissionDate: AdmissionDate, DischargeDate: DischargeDate, Doctor: Doctor },  //输入参数
+                    success: function (res) {
+                        if (res == true) {
+                            $("#cancel").click();
+                            window.location.href = "/DoctorHome/ClinicalInfo?UserId=" + UserId;
+                        }
+                        else {
+                            alert("数据编辑失败，请重新输入！");
+                        }
+                    }
+                })
+            }
+        })
+
+        $(document).on("click", ".deleteClinicalInfoBtn", function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            $('#DeleteDataDiv').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                containerId: 'delete-container',
+                overlayClose: true     //点击蒙层关闭窗口
+            });
+        });
+
+        $(".sureClinicalInfoBtn").click(function () {
+            var VisitId = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            $.ajax({
+                url: "/DoctorHome/ClinicalInfoDelete",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VisitId: VisitId },  //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        $("#cancelDelete").click();
+                        window.location.href = "/DoctorHome/ClinicalInfo?UserId=" + UserId;
+
+                    }
+                    else {
+                        alert("数据删除失败，请重试！");
+                    }
+                }
+
+            })
+        })
+    });
+
+    String.prototype.trim = function () {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
+    $(".Sure").click(function () {
+        $("#Close").click();
+    })
+
+    $("#synchronization").click(function () {
+        var screenheight = document.body.scrollHeight;
+        $("#simple-overlay").css("height", screenheight);
+
+        var CDMISPatientId = "@Model.UserId";
+        var HCode = $("#HospitalListDropDownListFor").val();
+        var PatientId = $("#PIDJC").val();
+        var StartDateTime = $("#StartDateTime").val();
+
+        //alert(CDMISPatientId);
+        //alert(PatientId);
+        //alert(StartDateTime);
+
+        //alert(StartDateTime);
+        if (StartDateTime == "") {
+            //alert("请输入起始日期!");
+            StartDateTime = "1900-01-01";
+            //alert(StartDateTime);
+        }
+
+        if (PatientId == "" || HCode == "") {
+            var Text = "提示：";
+            if (HCode == "") { Text = Text + "就诊医院 "; }
+            if (PatientId == "") { Text = Text + "就诊号 "; }
+
+            Text = Text + "不能为空！";
+            $("#synchronizationWarning").html(Text);
+            //alert(Text);
+            $('#synchronizationTip').show();
+        }
+        else {
+            $("#simple-overlay").show();
+            setTimeout(function () {
+                $.ajax({
+                    url: "/DoctorHome/GetIntegrationData",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { UserId: CDMISPatientId, PatientId: PatientId, StartDateTime: StartDateTime, HospitalCode: "HJZYY" },  //输入参数
+                    success: function (res) {
+                        if (res != "") {
+                            //alert(res);
+                            $("#simple-overlay").hide();
+                            location.reload();
+                        }
+                        else {
+                            alert("数据库连接失败，请重试！");
+                        }
+                    }
+                });
+            }, 2000);
+        }
+    });
+
+    $(".DischargeDateInput").hide();
+    $(function () {
+        $("#VisitTypeListDropDownListFor").change(function () {
+            var value = $(this).val();
+            switch (value) {
+                case "1":
+                    $("#JiuZhenDate").show();
+                    $("#RuYuanDate").hide();
+                    $("#ZhuanKeDate").hide();
+                    $(".DischargeDateInput").hide();
+                    $(".VisitId").hide();
+                    break;
+                case "2":
+                    $("#JiuZhenDate").show();
+                    $("#RuYuanDate").hide();
+                    $("#ZhuanKeDate").hide();
+                    $(".DischargeDateInput").hide();
+                    $(".VisitId").hide();
+                    break;
+                case "3":
+                    $(".DischargeDateInput").show();
+                    $("#JiuZhenDate").hide();
+                    $("#RuYuanDate").show();
+                    $("#ZhuanKeDate").hide();
+                    $(".VisitId").hide();
+                    break;
+                case "4":
+                    $(".DischargeDateInput").show();
+                    $(".VisitId").show();
+                    $("#ZhuanKeDate").show();
+                    $("#RuYuanDate").hide();
+                    $("#JiuZhenDate").hide();
+                    break;
+            }
+        });
+    });
+
+    $(function () {
+        $("#VisitTypeName").change(function () {
+            var value = $(this).val();
+
+            if (value == "3") {
+                $("#editDischargeDate").show();
+            }
+            else {
+                $("#editDischargeDate").hide();
+                document.getElementById("DischargeDate").value = "";
+            }
+        })
+    })
+
+    $(document).ready(function () {
+        //鼠标移动到行变色,单独建立css类hover
+        //tr:gt(0):表示获取大于 tr index 为0 的所有tr，即不包括表头
+        $("#TableBody tr").hover(
+        function () {
+            $(this).addClass("tdhover")
+        },
+        function () {
+            $(this).removeClass("tdhover")
+        })
+    });
+
+    function HospitalChange() {
+        var CDMISPatientId = "@Model.UserId";
+        var HCode = $("#HospitalListDropDownListFor").val();
+
+        if (HCode != "") {
+            $.ajax({
+                url: "/DoctorHome/getLatestHUserIdByHCode",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: CDMISPatientId, HCode: HCode },  //输入参数
+                success: function (res) {
+                    if (res != "") {
+                        //alert(res);
+                        $("#PIDJC").val(res);
+                    }
+                    else {
+                        alert("数据库连接失败，请重试！");
+                    }
+                }
+
+            });
+        }
+        else {
+            $("#PIDJC").val("");
+        }
+    }
+</script>

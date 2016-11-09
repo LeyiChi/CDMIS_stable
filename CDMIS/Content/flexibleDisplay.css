@@ -1,0 +1,74 @@
+/*¿ÉÕÛµþdiv*/
+.dropdown{
+  text-decoration: none;
+  position: relative;
+  display: block;
+  color: black;
+  /*background: #2980b9;*/
+  background:-moz-linear-gradient(top left,#2980b9,#77b7e1);/*»ðºü*/ 
+  background:-webkit-gradient(linear, 0% 0%, 100% 100%,from(#2980b9), to(#77b7e1));/*¹È¸è*/  
+  -moz-box-shadow: 0 1px 0 #409ad5 inset, 0 -1px 0 #20638f inset;
+  -webkit-box-shadow: 0 1px 0 #409ad5 inset, 0 -1px 0 #20638f inset;
+  box-shadow: 0 1px 0 #409ad5 inset, 0 -1px 0 #20638f inset;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+  padding: 0.5em;
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.dropdown:hover {
+  background: #2c89c6;
+}
+.dropdown .icon-arrow {
+  position: absolute;
+  display: block;
+  font-size: 0.7em;
+  color: #fff;
+  top: 14px;
+  right: 10px;
+}
+.dropdown .icon-arrow.open-arrow {
+  -moz-transform: rotate(-180deg);
+  -ms-transform: rotate(-180deg);
+  -o-transform: rotate(-180deg);
+  -webkit-transform: rotate(-180deg);
+  transform: rotate(-180deg);
+  -moz-transition: -moz-transform 0.6s;
+  -o-transition: -o-transform 0.6s;
+  -webkit-transition: -webkit-transform 0.6s;
+  transition: transform 0.6s;
+}
+
+.dropdown .icon-arrow.close-arrow {
+  -moz-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  -webkit-transform: rotate(0deg);
+  transform: rotate(0deg);
+  -moz-transition: -moz-transform 0.6s;
+  -o-transition: -o-transform 0.6s;
+  -webkit-transition: -webkit-transform 0.6s;
+  transition: transform 0.6s;
+}
+
+.dropdown .icon-arrow:before {
+  content: '\25BC';
+}
+
+.dropdown-div{
+  overflow: hidden;
+  padding-top: 2.0em;
+  padding-right: 2.0em;
+  padding-bottom: 1.0em;
+  /*margin-bottom: 1.0em;*/
+  border: 1px solid #2980b9;
+}
+
+.dropdown .show {
+  display:block;
+}
+
+.dropdown .hide {
+  display: none;
+}

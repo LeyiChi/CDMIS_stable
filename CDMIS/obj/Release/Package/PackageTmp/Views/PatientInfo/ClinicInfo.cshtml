@@ -1,0 +1,453 @@
+﻿@model CDMIS.ServiceReference.Clinic
+@{
+    ViewBag.Title = "患者临床信息";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+
+<link href="../../Content/timeLine.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+      
+    #simple-overlay
+    {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.9;
+        background-color: #eee;
+        z-index: 1001;
+    }
+    
+    #simplemodal-container
+    {
+        height: 670px;
+        width: 900px;
+    }
+</style>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.UserId, Role = "Patient" }, new { target = "_self" })
+        </li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })
+        </li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })
+        </li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })
+        </li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })
+        </li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.UserId }, new { target = "_self" })
+        </li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo", new { PointedPatient = @Model.UserId });}
+@Html.HiddenFor(model => model.UserId)
+@Html.HiddenFor(model => model.AdmissionDateMark)
+@Html.HiddenFor(model => model.ClinicDateMark)
+
+@*时间轴动态*@
+
+<div>
+    <h4>临床信息按类型筛选</h4>
+    <div class="modalContent" style="margin-top: 5px; text-align: center;">
+        <div class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">
+                    选择类型
+                </label>
+                <div class="col-sm-4">
+                    <select id="type_chose" class="form-control" onclick = "TypeChange()">
+                        <option value="all">所有</option>
+                        <option value="Itemhref_Diagnosis">诊断</option>
+                        <option value="Itemhref_Examination">检查</option>
+                        <option value="Itemhref_LabTest">化验</option>
+                        <option value="Itemhref_Drug">用药</option>
+                    </select>
+                </div>
+                </div>
+                </div>
+                </div>
+</div>
+
+<div id="norecord" style="display: none; margin-top: 20px;margin-bottom:40px;" align="center">
+    <p style="font-size: 20px; color: Red;">还没有任何临床信息</p>
+</div>
+
+<div class="demo" id="demo">
+    <div class="history">
+        <div class="history-date">
+                       <ul id="historyUl">
+
+                @for (int i = 0; i < Model.History.Length; i++)
+                {       
+                    <li>
+                        <h3>@Model.History[i].Time</h3>          @*时间轴左侧--时间（具体）目前暂时（就诊与其他分开） 应该是 住院入院分开 门诊一天合并*@
+                       
+                        <div class="cbp_tmlabel" id="@Model.History[i].Color">
+                        
+                            <span class="tag-@Model.History[i].Color">@Model.History[i].Tag</span> 
+        
+                        @for (int m = 0; m < Model.History[i].ItemGroup.Length; m++)   
+                        {
+                            if ((Model.History[i].ItemGroup[m].Type == "入院") || (Model.History[i].ItemGroup[m].Type == "出院") || (Model.History[i].ItemGroup[m].Type == "门诊") || (Model.History[i].ItemGroup[m].Type == "急诊") || (Model.History[i].ItemGroup[m].Type == "当前住院中") || (Model.History[i].ItemGroup[m].Type == "转科"))
+                                 { 
+                                    <p class="Item" id="">@Model.History[i].ItemGroup[m].Time<span style="margin-left:20px;">@Model.History[i].ItemGroup[m].Event</span></p>  
+
+                                 }
+
+                                 else
+                                 { 
+                                     if (Model.History[i].ItemGroup[m].Type  == "诊断")
+                                     {
+                                         <p class = "Itemhref_Diagnosis"><a href="javascript:void(0)" class="Itemhref" id="@Model.History[i].ItemGroup[m].KeyCode" onclick="OpenClinicInfoDetail(this.id);">@Model.History[i].ItemGroup[m].Time&nbsp;&nbsp;@Model.History[i].ItemGroup[m].Event</a></p>
+                                     }
+                                     else if (Model.History[i].ItemGroup[m].Type == "检查")
+                                     {
+                                         <p class = "Itemhref_Examination"><a href="javascript:void(0)" class="Itemhref" id="@Model.History[i].ItemGroup[m].KeyCode" onclick="OpenClinicInfoDetail(this.id);">@Model.History[i].ItemGroup[m].Time&nbsp;&nbsp;@Model.History[i].ItemGroup[m].Event</a></p>
+                                     }
+                                     else if (Model.History[i].ItemGroup[m].Type == "化验")
+                                     {
+                                          <p class = "Itemhref_LabTest"><a href="javascript:void(0)" class="Itemhref" id="@Model.History[i].ItemGroup[m].KeyCode" onclick="OpenClinicInfoDetail(this.id);">@Model.History[i].ItemGroup[m].Time&nbsp;&nbsp;@Model.History[i].ItemGroup[m].Event</a></p>
+                                     }
+                                     else if (Model.History[i].ItemGroup[m].Type == "用药")
+                                     {
+                                          <p class = "Itemhref_Drug"><a href="javascript:void(0)" class="Itemhref" id="@Model.History[i].ItemGroup[m].KeyCode" onclick="OpenClinicInfoDetail(this.id);">@Model.History[i].ItemGroup[m].Time&nbsp;&nbsp;@Model.History[i].ItemGroup[m].Event</a></p>
+                                     }
+
+                                 }
+                        }
+                        </div>
+
+                    </li>       
+                }
+            </ul>
+
+        </div>
+    </div>
+
+    <div id="history_loading" style="display: none; margin-top:0px" align="center">
+            <img alt="Load" src="../../Content/Image/history_loading.gif" style="width:50px;height:50px;" />
+            <p>加载中，请稍后</p>
+    </div>
+
+    <div class="white" style="height: 10px; margin-top: 10px;">
+    </div>
+
+    @if (Model.mark_contitue == "1")
+    {
+    <div id="historyButton">
+       <input type="button" style="width:800px;height:40px;" class="btn btn-primary" onclick="GetMoreClinic();" value="加载更多" />
+    </div>
+    }
+    <div class="white" style="height:50px;">
+    </div>
+</div>
+
+<div id="clinicDetailDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>临床详细信息</span></div>
+        <div class="modalContent">
+            <iframe id="iframe_ClinicDetail" src="" width="100%" height="600px" style="background: #FFF;"
+                scrolling="no" frameborder="no"></iframe>
+            <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+        </div>
+    </div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(2) a").attr("id", "current");
+
+        GetHospitalList();
+        
+        if (@Model.History.Length>0) 
+        {
+            var target = document.getElementById("demo");
+            target.style.display = "block";
+            var target = document.getElementById("norecord");
+            target.style.display = "none";
+         }
+        else
+        {
+            var target = document.getElementById("demo");
+            target.style.display = "none";
+            var target = document.getElementById("norecord");
+            target.style.display = "block";
+         }
+    });
+</script>
+
+<script type="text/javascript">
+
+    //    (function () {
+    //        //滚轮滑至底端刷新
+    //        var docNode = $(document);
+    //        docNode.scroll(function () {
+
+    //            if (docNode.height() - $(window).height() - docNode.scrollTop() < 10) {
+    //                alert("1");
+    //                //获取更多数据 
+    //                GetMoreClinic();
+    //            }
+    //        });
+    //    })()
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(5) a").attr("id", "currentnav");
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+        }
+    })
+
+    function GetMoreClinic() {
+
+        var target = document.getElementById("history_loading");
+        target.style.display = "block";
+        $("#historyButton").hide();
+
+        var userid = document.getElementById("UserId").value;
+        var admissionDateMark = document.getElementById("AdmissionDateMark").value;
+        var clinicDateMark = document.getElementById("ClinicDateMark").value;
+
+        $.ajax({
+            url: "/PatientInfo/GetMoreClinic",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PatientId: userid, AdmissionDate: admissionDateMark, ClinicDate: clinicDateMark, Num: 10 },
+            success: function (res) {
+
+                var target = document.getElementById("history_loading");
+                target.style.display = "none";
+
+                document.getElementById("AdmissionDateMark").value = res.AdmissionDateMark;  //数据格式 弄成string不会错
+                document.getElementById("ClinicDateMark").value = res.ClinicDateMark;
+
+                if (res.History.length > 0) {
+                    var str = '';
+                    for (var i = 0; i < res.History.length; i++) {
+                        str += '<li><h3>' + res.History[i].Time + '</h3> <div class="cbp_tmlabel" id="' + res.History[i].Color + '">';
+                        str += '<span class="tag-' + res.History[i].Color + '">' + res.History[i].Tag + '</span>  ';
+                        //str += '<h2 style="font-family: 微软雅黑;"></h2>';
+                        for (var j = 0; j < res.History[i].ItemGroup.length; j++) {
+                            if ((res.History[i].ItemGroup[j].Type == "入院") || (res.History[i].ItemGroup[j].Type == "出院") || (res.History[i].ItemGroup[j].Type == "门诊") || (res.History[i].ItemGroup[j].Type == "急诊") || (res.History[i].ItemGroup[j].Type == "当前住院中") || (res.History[i].ItemGroup[j].Type == "转科")) {
+                                str += ' <p class="Item" id="">' + res.History[i].ItemGroup[j].Time + '<span style="margin-left:20px;">' + res.History[i].ItemGroup[j].Event + '</span></p>';
+                            }
+                            else {
+                                //str += '<p><a href="javascript:void(0)" class="Itemhref" id="' + res.History[i].ItemGroup[j].KeyCode + '" onclick="OpenClinicInfoDetail(this.id);">' + res.History[i].ItemGroup[j].Time + '&nbsp;&nbsp;' + res.History[i].ItemGroup[j].Event + '</a></p>';
+                                //不同类型的标注
+                                var type_class = "";
+                                if (res.History[i].ItemGroup[j].Type == "诊断") {
+                                    type_class = "Itemhref_Diagnosis";
+                                }
+                                else if (res.History[i].ItemGroup[j].Type == "检查") {
+                                    type_class = "Itemhref_Examination";
+                                }
+                                else if (res.History[i].ItemGroup[j].Type == "化验") {
+                                    type_class = "Itemhref_LabTest";
+                                }
+                                else if (res.History[i].ItemGroup[j].Type == "用药") {
+                                    type_class = "Itemhref_Drug";
+                                }
+                                str += '<p class="' + type_class + '" ><a href="javascript:void(0)" id="' + res.History[i].ItemGroup[j].KeyCode + '" onclick="OpenClinicInfoDetail(this.id);">' + res.History[i].ItemGroup[j].Time + '&nbsp;&nbsp;' + res.History[i].ItemGroup[j].Event + '</a></p>';
+                            }
+                        }
+                        str += '</li>';
+                    }
+                    $("#historyUl").append(str);
+
+                    if (res.mark_contitue == "1") {
+                        //$("#historyButton").show();
+                        document.getElementById("historyButton").style.display = "block";
+                    }
+                    else {
+                        //$("#historyButton").hide();
+                        document.getElementById("historyButton").style.display = "none";
+                    }
+                    //只显示选择的类型
+                    TypeChange();
+
+                }
+                else {
+                    $("#historyButton").hide();
+                    //alert("没有更多了");
+                }
+
+            }
+        });
+
+    }
+
+    function OpenClinicInfoDetail(keycode) {
+        //alert(a);   // "type|VId|date"
+        //var keycode = this.id;
+        var userid = document.getElementById("UserId").value;
+
+        $("#iframe_ClinicDetail").attr('src', "/PatientInfo/ClinicInfoDetail?PatientId=" + userid + "&keycode=" + keycode);
+        // $("#ClinicInfoDetail").attr('target', "_parent"); 当iframe中的子网页的事件要更换iframe所属的父页面网页时
+
+        $('#clinicDetailDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    function GetHospitalList() {
+
+        $.ajax({
+            url: "/PatientInfo/GetHospitalList",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {},  //输入参数
+            success: function (res) {
+                $("#HospitalListDropDownListFor").empty();
+                var InitialElement = $("<option></option>").text("请选择");
+                InitialElement.attr('value', "");
+                $("#HospitalListDropDownListFor").append(InitialElement);
+                for (var item in res) {
+                    var HospitalList = res[item];
+                    var Name = HospitalList.split("|")[0];
+                    var Code = HospitalList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#HospitalListDropDownListFor").append(NewElement);
+                }
+            }
+        });
+    }
+
+    function HospitalChange() {
+        var CDMISPatientId = "@Model.UserId";
+        var HCode = $("#HospitalListDropDownListFor").val();
+
+        if (HCode != "") {
+            $.ajax({
+                url: "/DoctorHome/getLatestHUserIdByHCode",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: CDMISPatientId, HCode: HCode },  //输入参数
+                success: function (res) {
+                    if (res != "") {
+                        //alert(res);
+                        $("#PIDJC").val(res);
+                    }
+                    else {
+                        alert("数据库连接失败，请重试！");
+                    }
+                }
+
+            });
+        }
+        else {
+            $("#PIDJC").val("");
+        }
+    }
+
+    $("#synchronization").click(function () {
+        var screenheight = document.body.scrollHeight;
+        $("#simple-overlay").css("height", screenheight);
+
+        var CDMISPatientId = "@Model.UserId";
+        var HCode = $("#HospitalListDropDownListFor").val();
+        var PatientId = $("#PIDJC").val();
+        var StartDateTime = $("#StartDateTime").val();
+
+        //alert(CDMISPatientId);
+        //alert(PatientId);
+        //alert(StartDateTime);
+
+        //alert(StartDateTime);
+        if (StartDateTime == "") {
+            //alert("请输入起始日期!");
+            StartDateTime = "1900-01-01";
+            //alert(StartDateTime);
+        }
+
+        if (PatientId == "" || HCode == "") {
+            var Text = "提示：";
+            if (HCode == "") { Text = Text + "就诊医院 "; }
+            if (PatientId == "") { Text = Text + "就诊号 "; }
+
+            Text = Text + "不能为空！";
+            $("#synchronizationWarning").html(Text);
+            //alert(Text);
+            $('#synchronizationTip').show();
+        }
+        else {
+            $("#simple-overlay").show();
+            setTimeout(function () {
+                $.ajax({
+                    url: "/DoctorHome/GetIntegrationData",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { UserId: CDMISPatientId, PatientId: PatientId, StartDateTime: StartDateTime, HospitalCode: "HJZYY" },  //输入参数
+                    success: function (res) {
+                        if (res != "") {
+                            //alert(res);
+                            $("#simple-overlay").hide();
+                            location.reload();
+                        }
+                        else {
+                            alert("数据库连接失败，请重试！");
+                        }
+                    }
+                });
+            }, 2000);
+        }
+    });
+
+
+    function TypeChange() {
+        $('#historyUl').find('li').each(function () {
+            $(this).css({ display: 'block' });
+        });
+
+        var type_selected = $("#type_chose").val();
+        if (type_selected == "all") {
+            $('.Itemhref_Diagnosis ').css({ display: 'block' });
+            $('.Itemhref_Examination ').css({ display: 'block' });
+            $('.Itemhref_LabTest ').css({ display: 'block' });
+            $('.Itemhref_Drug ').css({ display: 'block' });
+        }
+        else {
+            $('.Itemhref_Diagnosis').css({ display: 'none' });
+            $('.Itemhref_Examination').css({ display: 'none' });
+            $('.Itemhref_LabTest').css({ display: 'none' });
+            $('.Itemhref_Drug').css({ display: 'none' });
+            $('.' + type_selected).css({ display: 'block' });
+        }
+
+        //空框被隐藏
+
+        $('#historyUl').find('li').each(function () {
+            var mark = 0;
+            $(this).find('p').each(function () {
+                if ($(this).css("display") == "block") {
+                    mark = 1;
+                }
+            });
+            if (mark == 0) {
+                $(this).css({ display: 'none' });
+            }
+        });
+
+    }
+
+</script>

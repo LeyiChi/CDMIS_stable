@@ -1,0 +1,308 @@
+﻿@model CDMIS.ViewModels.PatientListViewModel
+@{
+    ViewBag.Title = "患者列表(健康专员)";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/chinese-string.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container {
+        height: 400px;
+        width: 600px;
+    }
+
+    #delete-container {
+        height: 160px;
+        width: 250px;
+    }
+</style>
+@using (Html.BeginForm("HealthCoachPatientList", "DoctorHome", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    <div class="form-group">
+        <label for="" class="col-sm-1 control-label" style="width:60px;">
+            ID
+        </label>
+        <div class="col-sm-2" style="width:170px;">
+            <input class="form-control" id="PatientId" onkeydown="if (event.keyCode == 13) { $('#patientListSearch').click() }" type="text" />
+        </div>
+        <label for="" class="col-sm-1 control-label" style="width:60px;">
+            姓名
+        </label>
+        <div class="col-sm-2" style="width:150px;">
+            <input class="form-control" id="PatientName" onkeydown="if (event.keyCode == 13) { $('#patientListSearch').click() }" type="text" />
+        </div>
+        <label for="" class="col-sm-1 control-label" style="width:60px;">
+            模块
+        </label>
+        <div class="col-sm-2" style="width:170px;">
+            <select class="form-control" id="ModuleDropDownList">
+                <option value="">全部</option>
+                <option value="HM1">高血压模块</option>
+                <option value="HM2">糖尿病模块</option>
+                <option value="HM3">心力衰竭模块</option>
+            </select>
+        </div>
+        <label for="" class=" col-sm-1 control-label" style="width:60px;">
+            性别
+        </label>
+        <div class="col-sm-2" style="width:150px;">
+            <select class="form-control" id="GenderDropDownList">
+                <option value="">请选择</option>
+                <option value="男性">男性</option>
+                <option value="女性">女性</option>
+                <option value="其他">其他</option>
+                <option value="未知">未知</option>
+            </select>
+        </div>
+        <div class="col-sm-1 ">
+            <input id="patientListSearch" type="button" class="btn btn-primary" value="查 看" onclick="GetPatientsList('@Model.DoctorId')" />
+        </div>
+        <div>
+            @Html.ActionLink("刷 新", "HealthCoachPatientList", new {}, new { @class = "btn btn-primary" })
+        </div>
+    </div>
+    
+    <div style="width: 100%;" align="center">
+        <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; margin-bottom: 10px;">
+            <table width="100%" id="DataTable" class="display ">
+                <thead>
+                    <tr>
+                        <th width="290px">
+                            操作
+                        </th>
+                        <th width="120px">
+                            患者ID
+                        </th>
+                        <th width="80px">
+                            姓名
+                        </th>
+                        <th width="40px">
+                            性别
+                        </th>
+                        <th width="40px">
+                            年龄
+                        </th>
+                        <th width="120px">
+                            模块
+                        </th>
+                        <th width="120px">
+                            依从率
+                        </th>
+                        <th width="100px">
+                            剩余天数
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="PatientListTbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="sendMessageDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>发送消息</span></div>
+        <div class="modalContent">
+            <iframe id="MessagePop" src="" width="100%" height="350px" style="background: #FFF;"
+                scrolling="no" frameborder="no"></iframe>
+            <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var WebAPI = "http://121.43.107.106:9000/";
+    var table = $('#DataTable').DataTable({
+        "oLanguage": {//语言国际化
+            "sUrl": "/Content/jquery.dataTable.cn.txt"
+        },
+        "bPaginate": true,  //是否分页。
+        "sScrollY": "400px",
+        "bFilter": false,
+        "bLengthChange": false,
+        "iDisplayLength": 10,
+        "order": [1, 'desc'],
+        //隐藏列
+        "columnDefs": [{
+            "bSortable": false, "aTargets": [0]
+        }] //禁止某些列的排序功能
+    });
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(0) a").attr("id", "current");
+        GetPatientsList("@Model.DoctorId");
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+    })
+
+    //获取专员病人列表
+    function GetPatientsList (DoctorId)
+    {
+        table.clear();
+        $("th[aria-label*='患者ID']").click();
+        $(".sorting_asc").click();
+        var BasicInfo = null
+        if ($("#ModuleDropDownList").val() == "HM1" || $("#ModuleDropDownList").val() == "") {
+            var url = WebAPI + "Api/v1/Users/GetPatientsPlan?DoctorId=" + DoctorId + "&Module=HM1&VitalType={VitalType}&VitalCode={VitalCode}"
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (res) {
+                    if (res != null) {
+                        for (i = 0; i < res.length; i++) {
+                            url = WebAPI + "Api/v1/Users/" + res[i].PatientId + "/BasicInfo"
+                            $.ajax({
+                                type: "GET",
+                                url: url,
+                                async: false,
+                                success: function (ret) {
+                                    BasicInfo = ret
+                                }
+                            })
+                            if (res[i].PatientId.indexOf($("#PatientId").val()) != -1 && res[i].PatientName.indexOf($("#PatientName").val()) != -1 && BasicInfo.GenderText.indexOf($("#GenderDropDownList").val()) != -1) {
+                                table.row.add({
+                                    "0": '<a href=""><input id="BasicProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/profile.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="个人信息" /></a><a href=""><input id="ClinicalInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/plan.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="就诊信息" /></a><a href=""><input id="ClinicalProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/medication.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息" /></a><a href=""><input id="ModuleProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/module.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康模块" /></a><a href=""><input id="HealthCoachManagement" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/healthcoach.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康专员管理" /></a><a href=""><input id="ClinicTimeLine" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/clinictimeline.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息查看" /></a><a><input id="MessageLink" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/mail.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="发信" /></a><a href=""><input id="AddClinicInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/addclinicinfo.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="添加医嘱" /></a>',
+                                    "1": res[i].PatientId,
+                                    "2": res[i].PatientName,
+                                    "3": BasicInfo.GenderText,
+                                    "4": BasicInfo.Age,
+                                    "5": "高血压模块",
+                                    "6": res[i].ComplianceRate,
+                                    "7": res[i].RemainingDays
+                                }).draw();
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        if ($("#ModuleDropDownList").val() == "HM2" || $("#ModuleDropDownList").val() == "") {
+            var url = WebAPI + "Api/v1/Users/GetPatientsPlan?DoctorId=" + DoctorId + "&Module=HM2&VitalType={VitalType}&VitalCode={VitalCode}"
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (res) {
+                    if (res != null) {
+                        for (i = 0; i < res.length; i++) {
+                            url = WebAPI + "Api/v1/Users/" + res[i].PatientId + "/BasicInfo"
+                            $.ajax({
+                                type: "GET",
+                                url: url,
+                                async: false,
+                                success: function (ret) {
+                                    BasicInfo = ret
+                                }
+                            })
+                            if (res[i].PatientId.indexOf($("#PatientId").val()) != -1 && res[i].PatientName.indexOf($("#PatientName").val()) != -1 && BasicInfo.GenderText.indexOf($("#GenderDropDownList").val()) != -1) {
+                                table.row.add({
+                                    "0": '<a href=""><input id="BasicProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/profile.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="个人信息" /></a><a href=""><input id="ClinicalInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/plan.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="就诊信息" /></a><a href=""><input id="ClinicalProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/medication.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息" /></a><a href=""><input id="ModuleProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/module.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康模块" /></a><a href=""><input id="HealthCoachManagement" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/healthcoach.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康专员管理" /></a><a href=""><input id="ClinicTimeLine" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/clinictimeline.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息查看" /></a><a><input id="MessageLink" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/mail.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="发信" /></a><a href=""><input id="AddClinicInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/addclinicinfo.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="添加医嘱" /></a>',
+                                    "1": res[i].PatientId,
+                                    "2": res[i].PatientName,
+                                    "3": BasicInfo.GenderText,
+                                    "4": BasicInfo.Age,
+                                    "5": "糖尿病模块",
+                                    "6": res[i].ComplianceRate,
+                                    "7": res[i].RemainingDays
+                                }).draw();
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        if ($("#ModuleDropDownList").val() == "HM3" || $("#ModuleDropDownList").val() == "") {
+            var url = WebAPI + "Api/v1/Users/GetPatientsPlan?DoctorId=" + DoctorId + "&Module=HM3&VitalType={VitalType}&VitalCode={VitalCode}"
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (res) {
+                    if (res != null) {
+                        for (i = 0; i < res.length; i++) {
+                            url = WebAPI + "Api/v1/Users/" + res[i].PatientId + "/BasicInfo"
+                            $.ajax({
+                                type: "GET",
+                                url: url,
+                                async: false,
+                                success: function (ret) {
+                                    BasicInfo = ret
+                                }
+                            })
+                            if (res[i].PatientId.indexOf($("#PatientId").val()) != -1 && res[i].PatientName.indexOf($("#PatientName").val()) != -1 && BasicInfo.GenderText.indexOf($("#GenderDropDownList").val()) != -1) {
+                                table.row.add({
+                                    "0": '<a href=""><input id="BasicProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/profile.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="个人信息" /></a><a href=""><input id="ClinicalInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/plan.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="就诊信息" /></a><a href=""><input id="ClinicalProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/medication.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息" /></a><a href=""><input id="ModuleProfile" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/module.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康模块" /></a><a href=""><input id="HealthCoachManagement" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/healthcoach.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="健康专员管理" /></a><a href=""><input id="ClinicTimeLine" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/clinictimeline.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="临床信息查看" /></a><a><input id="MessageLink" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/mail.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="发信" /></a><a href=""><input id="AddClinicInfo" onclick="OperationBtn(this)" style="border: 0; background-image: url(../../Content/Image/addclinicinfo.png); background-repeat: no-repeat; background-color: transparent; cursor: pointer; width: 24px; height: 24px; margin-right: 5px" title="添加医嘱" /></a>',
+                                    "1": res[i].PatientId,
+                                    "2": res[i].PatientName,
+                                    "3": BasicInfo.GenderText,
+                                    "4": BasicInfo.Age,
+                                    "5": "心力衰竭模块",
+                                    "6": res[i].ComplianceRate,
+                                    "7": res[i].RemainingDays
+                                }).draw();
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    function OperationBtn(Button) {
+        //Get RowIndex
+        var trIndex = $(Button).parent().parent().parent().parent().find("tr").index($(Button).parent().parent().parent());
+        var content = trim($("#PatientListTbody tr:eq(" + trIndex + ") td:eq(1)").text());
+        switch ($(Button).attr('id')) {
+            case "BasicProfile":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/BasicProfile" + "?PatientId=" + content + "&Role=" + "Patient");
+                    break;
+                }
+            case "ClinicalInfo":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/ClinicalInfo" + "?UserId=" + content);
+                    break;
+                }
+            case "ClinicalProfile":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/ClinicalProfile" + "?UserId=" + content);
+                    break;
+                }
+            case "ModuleProfile":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/ModuleProfile" + "?PatientId=" + content);
+                    break;
+                }
+            case "HealthCoachManagement":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/HealthCoachManagement" + "?PatientId=" + content);
+                    break;
+                }
+            case "ClinicTimeLine":
+                {
+                    $(Button).parent().attr('href', "/PatientInfo/ClinicInfo" + "?PatientId=" + content);
+                    break;
+                }
+            case "MessageLink":
+                {
+                    $("#MessagePop").attr('src', "/MailBox/FASTWrite?Receiver=" + content + "&SendBy=" + "@Model.DoctorId");
+                    $('#sendMessageDiv').modal({
+                        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                        overlayClose: true     //点击蒙层关闭窗口
+                    });
+                    break;
+                }
+            case "AddClinicInfo":
+                {
+                    $(Button).parent().attr('href', "/DoctorHome/ClinicalProfile" + "?UserId=" + content + "&Newer=new");
+                    break;
+                }
+            default:
+        }
+    }
+
+    function trim(str) {  //删除左右两端的空格
+        return str.replace(/(^\s*)|(\s*$)/g, "");
+    }
+</script>

@@ -1,0 +1,246 @@
+﻿@model CDMIS.ViewModels.PatientAlertViewModel
+@{
+    ViewBag.Title = "患者警报记录（医生）";
+    Layout = "~/Views/Shared/_PatientInfoLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 400px;
+        width: 600px;
+    }
+</style>
+@using (Html.BeginForm("PatientAlert", "PatientInfo", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    <div onload="ShowOptions()">
+        <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+            <h2 class="text-center">
+                已有警报列表</h2>
+            <div class="form-group">
+                <label class="col-sm-1 control-label" style="float: left;">
+                    警报</label>
+                <div class="col-sm-2">
+                    @Html.DropDownListFor(model => model.AlertStatusSelected, Model.AlertStatusList(), new { id = "AlertDropDownList", @class = "form-control" })
+                </div>
+                <div class="col-sm-8 ">
+                    <input id="alertListSearch" type="submit" class="btn btn-primary" value="查 看" name="action:AlertListSearch" />
+                </div>
+                <div class="col-sm-1 ">
+                    <input type="button" class="btn btn-info" id="SendMessageBtn" value="发信" style="float: right;
+                        font-size: 16px;" />
+                </div>
+            </div>
+            @* <a href="/MailBox/HaveSent"><input type="button" value = "发送"/></a>*@
+            <table id="DataTable" class="display">
+                <thead>
+                    <tr>
+                        <th>
+                            警报项目
+                        </th>
+                        <th>
+                            警报类型
+                        </th>
+                        <th>
+                            处理状态
+                        </th>
+                        <th>
+                            警报时间
+                        </th>
+                        <th>
+                            处理状态
+                        </th>
+                        <th>
+                            序号
+                        </th>
+                        <th>
+                            PId
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.AlertList)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertItemName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertTypeName)
+                            </td>
+                            @if (@item.ProcessFlag == 1)
+                            {
+                                <td>
+                                    <input type='button' id="Process" class="btn btn-default " value="未处理" />
+                                        
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    已处理
+                                </td>
+                            }
+                            <td>
+                                @Html.DisplayFor(modelItem => item.AlertDateTime)
+                            </td>
+                            @*<td>
+                                <button value= "@item.UserId#@item.SortNo#@item.ProcessFlag" class="btn btn-primary" id="SetProcessFlag" style="font-size: 16px;" onclick="SetTrnProcessFlag(this.value)">
+                                    处理</button>
+                            </td>*@
+                            <td>
+                                @item.ProcessFlag
+                            </td>
+                            <td>
+                                @item.SortNo
+                            </td>
+                            <td>
+                                @Model.UserId
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+@*传回数据*@
+    <div>
+        @Html.HiddenFor(model => model.UserId)
+    </div>
+
+
+}
+<div id="sendMessageDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>发送消息</span></div>
+    <div class="modalContent">
+        <iframe id="MessagePop" src="" width="100%" height="350px" style="background: #FFF;"
+            scrolling="no" frameborder="no"></iframe>
+        <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(4) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            //            "bAutoWidth": false,
+            "bPaginate": true,  //是否分页。
+            "bLengthChange": false,
+            "iDisplayLength": 10,
+            //            "sScrollX": "100%",
+            //            "sScrollY": "300px",
+            "order": [[2, 'asc'], [3, 'desc']],
+            "bFilter": false,
+
+            "columnDefs": [     //隐藏列
+            {
+            "targets": [4],
+            "visible": false,
+            "searchable": false
+        }, {
+            "targets": [5],
+            "visible": false,
+            "searchable": false
+        }, {
+            "targets": [6],
+            "visible": false,
+            "searchable": false
+        }]
+        //            "aoColumnDefs": [{ "sWidth": "30px", "aTargets": [0] },
+        //            { "sWidth": "200px", "aTargets": [1]}]
+
+    });
+
+
+
+    //    单击表格中按钮、图标的事件 td on click
+    $(document).on('click', '#DataTable td', function (e) {
+
+        var colIndex = table.cell(this).index().column;
+        var trIndex = table.cell(this).index().row;
+        var td = $(this).parent();
+
+        switch (colIndex) {
+            case 2:     //处置状态列
+                {
+                    var row_clicked = $(td).closest('tr');
+
+                    var processFlag = table.row(row_clicked).data()[4];
+
+                    if (processFlag == 1) {
+                        var PId = table.row(row_clicked).data()[6];
+
+                        var SortNo = table.row(row_clicked).data()[5];
+                        //console.log('pid and  sortNo： ', patientId, sortNo);
+                        $.ajax({
+                            url: "/PatientInfo/SetTrnProcessFlag",
+                            type: "GET",
+                            dataType: "json",
+                            async: false,
+                            data: { PId: PId, SortNo: SortNo },  //输入参数
+                            success: function (res) {
+                                if (res == true) {
+                                    //alert("1");
+                                    //console.log("aaa");
+                                    location.href = "/PatientInfo/PatientAlert/";
+                                }
+                                else {
+                                    alert("处置状态数据更改失败！");
+                                }
+                            }
+                        });
+                    }
+                    break;
+                }
+                //  default:
+        }
+    });
+});
+//    function SetTrnProcessFlag(value) {
+//        var PId = value.split("#")[0];
+//        var SortNo = value.split("#")[1];
+//        var ProcessFlag = value.split("#")[2];
+//        if (ProcessFlag != 1) {
+//            alert("已处理警报不可再处理！");
+//        }
+//        else {
+
+//            $.ajax({
+//                url: "/PatientInfo/SetTrnProcessFlag",
+//                type: "GET",
+//                dataType: "json",
+//                async: false,
+//                data: { PId: PId, SortNo: SortNo },  //输入参数
+//                success: function (res) {
+//                    if (res == true) {
+//                        location.reload();
+//                    }
+//                    else {
+//                        alert("处理失败！");
+//                    }
+//                }
+//            });
+//        }
+//    }
+
+$("#SendMessageBtn").click(function () {
+    $("#MessagePop").attr('src', "/MailBox/FASTWrite?Receiver=" + "@Model.UserId" + "&SendBy=" + "@Model.DoctorId");
+    $('#sendMessageDiv').modal({
+        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+        overlayClose: true     //点击蒙层关闭窗口
+    });
+})
+</script>

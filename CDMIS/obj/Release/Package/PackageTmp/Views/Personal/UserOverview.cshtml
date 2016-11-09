@@ -1,0 +1,174 @@
+﻿@model CDMIS.ViewModels.UserOverviewViewModel
+@{
+    ViewBag.Title = "UserOverview";
+}
+<style type="text/css">
+    #reminder-container
+    {
+        height: 150px;
+        width: 300px;
+    }
+</style>
+@if (Request.IsAuthenticated && Model.UserId != "")
+{
+    <p style="margin-bottom: 5px;" id="BackToMain">
+        用户：
+        @if(Model.InvalidFlag == "0")
+        {
+        <a href="#">@Html.ActionLink(Model.UserName, "PersonalHomepage", "Personal")，新消息 @Html.ActionLink(Model.Message, "Receive", "MailBox", new { UserId = @Model.UserId }, null)
+        条</a>
+        }
+        else
+        {
+            <a href="#">@Html.ActionLink(Model.UserName, "PersonalHomepage", "Personal")</a>
+        }
+        @if (Model.Role == "Patient")
+        {
+            <span>，未完成任务:</span>
+            @Html.ActionLink(Model.UndoneCount, "TaskList", "PatientHome", new { UserId = @Model.UserId }, new { id = "UndoneCount"})    
+            <span>个，</span>
+        }
+        @if (Model.InvalidFlag == "0")
+        {
+        <a href="#">[@switch (Model.Role)
+         {
+             case "Administrator": @Html.ActionLink("返回首页", "Index", "Dict"); break;
+             case "Doctor": @Html.ActionLink("返回首页", "PatientList", "DoctorHome"); break;
+             case "HealthCoach": @Html.ActionLink("返回首页", "HealthCoachPatientList", "DoctorHome"); break;
+             default: break;
+         }]</a>
+        }
+        [@Html.ActionLink("注销", "LogOff", "Account")]</p>
+}
+else
+{
+    <p>
+        [ @Html.ActionLink("登录", "LogOn", "Account") ]</p>
+}
+@if (Model.Role == "Patient")
+{
+
+    if (Model.TodoList.Count > 0)
+    {
+        for (int i = 0; i < Model.TodoList.Count; i++)
+        {
+    @Html.Hidden("time" + Model.TodoList[i].Num, Model.TodoList[i].ReminderTime)
+    @Html.Hidden("content" + Model.TodoList[i].Num, Model.TodoList[i].Content)
+        }
+    }
+}
+<div id="remindModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <h4 class="text-center" id="remindContent">
+        </h4>
+        <div class="col-md-offset-5">
+            @*            <input type="button" value="确定" class="btn btn-primary" id="confirmDeleteBtn" />*@
+            <input type="button" value="取消" class="btn btn-default" id="cancelToDoBtn" />
+        </div>
+    </div>
+</div>
+@Html.HiddenFor(model => model.Role)
+<script type="text/javascript">
+    $(function () {
+        if ($("#Role").val() == "Patient") {
+            if ($("#time1").val() != null) {
+                setTimeout('RemindToPatient($("#content1").val())', $("#time1").val());
+            }
+
+            if ($("#time2").val() != null) {
+                setTimeout('RemindToPatient($("#content2").val())', $("#time2").val());
+            }
+
+            if ($("#time3").val() != null) {
+                setTimeout('RemindToPatient($("#content3").val())', $("#time3").val());
+            }
+
+        }
+
+    });
+
+    //点击删除按钮，弹出对话框
+    function RemindToPatient(content) {
+        $("#remindContent").text("您有未完成任务：" + content);
+        //弹框提示
+        $('#remindModal').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'reminder-container',
+            overlayClose: true
+        });
+
+
+        $('#cancelToDoBtn').click(function () {
+            $.modal.close();
+        })
+    };
+
+    //websocket
+    var ws;
+    var wsServerIP = "@Model.ServerIP" + ":4141/chat";
+    var SocketCreated = false;
+    var isUserloggedout = false;
+
+    //消息推送
+    window.onunload = function () //断开连接
+    {
+        SocketCreated = false;
+        isUserloggedout = true;
+        ws.close();
+    }
+
+    window.onload = function () //建立连接
+    {
+        try {
+            if ("WebSocket" in window) {
+                ws = new WebSocket("ws://" + wsServerIP);
+                console.log(1);
+            }
+            else if ("MozWebSocket" in window) {
+                ws = new MozWebSocket("ws://" + wsServerIP);
+            }
+            else {
+                alert("当前浏览器不支持WebSocket");
+            }
+
+            SocketCreated = true;
+            isUserloggedout = false;
+        }
+        catch (ex) {
+            console.log(ex, "ERROR");
+            return;
+        }
+        ws.onopen = WSonOpen;
+        ws.onmessage = WSonMessage;
+        ws.onclose = WSonClose;
+        ws.onerror = WSonError;
+    }
+
+
+    function WSonOpen() {
+        ws.send("login:" + "@Model.UserId");
+        console.log(2);
+    };
+
+    function WSonMessage(event) {
+        //$.sticky(event.data);
+        var Arry = new Array();
+        Arry = event.data.split("||");
+        if (Arry[0] == "@Model.UserId") {
+            $.sticky('<p style="line-height:200%;" id="' + Arry[3] + '"><span align="center">您有一条新的消息,来自</span><span style="font-weight:bold;color:blue;">' + Arry[4] + '</span><span style="color: rgb(151, 151, 155);">' + Arry[5] + '</span>：</br>主题：<span style="color:blue;font-weight:bold;">' + Arry[1] + '</span></br>内容：<span style="color:blue;font-weight:bold;">' + Arry[2] + '</span></p>');
+        }
+    };
+    function WSonClose() {
+    };
+
+    function WSonError() {
+        console.log("远程连接中断。", "ERROR");
+    };
+
+    //发送消息
+    function SendMail(Txt) {
+        ws.send(Txt + "||" + "@Model.UserName" + "||" + "(" + "@Model.UserId" + ")");
+    }
+</script>

@@ -1,0 +1,164 @@
+﻿@model CDMIS.ViewModels. ClinicInfoDetailByTypeViewModel
+@{
+    ViewBag.Title = "检查/化验详细（患者）";
+}
+
+
+<style type="text/css">
+    
+.display
+    {
+        font-size: 15px;
+        color: black;
+    }
+    
+</style>
+
+ @Html.HiddenFor(model => model.NowDetailType)
+
+ @*<div>
+ <input type="checkbox" name="putup" onclick="hidediv()"/>
+ </div>*@
+
+  <div id="DetailTable">
+
+  <div id="ExamDetails" style="display:none;width:90%;margin:0 auto;">
+  <table id="ExamDetailsTable" class="display" cellspacing="0" width="100%">
+                            <thead>
+                            <tr>
+                                <td>
+                                    参数编码名称
+                                </td>
+                                <td>
+                                    参数值
+                                </td>                           
+                                <td>
+                                    单位
+                                </td>
+                                <td>
+                                    是否正常
+                                </td>    
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            @if (Model.ExamDetailsTable.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow item in Model.ExamDetailsTable.Rows)
+                               {
+                                <tr>
+                                   <td>@item["Name"]
+                                    </td>
+                                    <td>@item["Value"]
+                                    </td>
+                                    <td>@item["Unit"]
+                                    </td>
+                                    <td>@item["IsAbnormal"]
+                                    </td>
+                                    
+                              </tr>
+                              }
+                            }
+                        </tbody>
+                          </table>
+ </div>
+
+  <div id="LabTestDetails" style="display:none;width:90%;margin:0 auto;">
+  
+  <h3>详细参数信息</h3>
+
+  <table id="LabTestDetailsTable" class="display" cellspacing="0" width="100%">
+                            <thead>
+                            <tr>
+                                <td>
+                                    参数名称
+                                </td>
+                                <td>
+                                    参数值
+                                </td>                           
+                                <td>
+                                    单位
+                                </td>
+                                <td>
+                                    是否正常
+                                </td>    
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            @if (Model.LabTestDetailsTable.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow item in Model.LabTestDetailsTable.Rows)
+                               {
+                                <tr>
+                                   <td>@item["Name"]
+                                    </td>
+                                    <td>@item["Value"]
+                                    </td>
+                                    <td>@item["Unit"]
+                                    </td>
+                                    <td>@item["IsAbnormal"]
+                                    </td>
+                                    
+                              </tr>
+                              }
+                            }
+                        </tbody>
+                          </table>
+ </div>
+
+ </div>
+   <script type="text/javascript">
+       $(document).ready(function () {
+
+           var detailtype = document.getElementById("NowDetailType").value;
+           //alert(detailtype);
+           if (detailtype == "ExamDetails") {
+               var table11 = $("#" + detailtype + "Table").DataTable({
+                   "oLanguage": {//语言国际化
+                       "sUrl": "/Content/jquery.dataTable.cn.txt"
+                   },
+                   "bFilter": false,    //搜索
+                   scrollY: "150px",
+                   scrollX: true,
+                   scrollCollapse: true,
+                   paging: false
+                   //"aoColumnDefs": [{ "sWidth": "60px", "aTargets": [0] }]  //限定列宽
+               });
+
+               //        new $.fn.dataTable.FixedColumns(table12, {   //固定
+               //            leftColumns: 1,
+               //            rightColumns: 1
+               //        });
+
+           }
+           else {
+               var table12 = $("#" + detailtype + "Table").DataTable({
+                   "oLanguage": {      //语言国际化
+                       "sUrl": "/Content/jquery.dataTable.cn.txt"
+                   },
+                   "bFilter": false,    //搜索
+                   scrollY: "150px",
+                   scrollX: true,
+                   scrollCollapse: true,
+                   paging: false
+                   //"aoColumnDefs": [{ "sWidth": "60px", "aTargets": [0] }]  //限定列宽
+               });
+
+               //        new $.fn.dataTable.FixedColumns(table12, {   //固定
+               //            leftColumns: 1,
+               //            rightColumns: 1
+               //        });
+           }
+
+           var target = document.getElementById(detailtype);
+           target.style.display = "block";
+
+       });
+
+
+       function hidediv() {
+           $("#part").toggle();
+       }
+
+</script>

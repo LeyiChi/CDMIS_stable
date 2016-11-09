@@ -1,0 +1,232 @@
+﻿@model CDMIS.ViewModels.MailboxViewModel
+@{
+    ViewBag.Title = "MailBoxShare";
+}
+<div style="border: 5px solid #DDDDFF;">
+    <table>
+        <tr>
+            <td>
+                <a href="/MailBox/Receive">
+                    <button type="button" class="myButton" id="bn1">
+                      收信（@Model.UnreadNum）</button></a>
+            </td>
+            <td>
+                <a href="/MailBox/Write">
+                    <button type="button" class="myButton" id="bn2">
+                        写信</button>
+                </a>
+            </td>
+            <td>
+                <a href="/MailBox/HaveSent">
+                    <button type="button" class="myButton" id="bn3">
+                        已发送</button></a>
+            </td>
+            <td>
+                <a href="/MailBox/Draft">
+                    <button type="button" class="myButton" id="bn4">
+                        草稿箱（@Model.UnsentNum）</button></a>
+            </td>
+        </tr>
+    </table>
+</div>
+<style type="text/css">
+    .myButton
+    {
+        -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #f6f6f6));
+        background: -moz-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+        background: -webkit-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+        background: -o-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+        background: -ms-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+        background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+        background-color: #ffffff;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border: 1px solid #D4ABEA;
+        display: inline-block;
+        cursor: pointer;
+        color: #4C4A4C;
+        font-family: arial;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 4px 10px;
+        text-decoration: none;
+    }
+    .myButton:hover
+    {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f6f6f6), color-stop(1, #ffffff));
+        background: -moz-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+        background: -webkit-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+        background: -o-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+        background: -ms-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+        background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+        background-color: #f6f6f6;
+    }
+    .myButton:active
+    {
+        position: relative;
+        top: 1px;
+    }
+  
+    .myButtonChange
+    {
+        -moz-box-shadow: inset 0px 1px 0px 0px #efdcfb;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #efdcfb;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfbdfa), color-stop(1, #bc80ea));
+        background: -moz-linear-gradient(top, #dfbdfa 5%, #bc80ea 100%);
+        background: -webkit-linear-gradient(top, #dfbdfa 5%, #bc80ea 100%);
+        background: -o-linear-gradient(top, #dfbdfa 5%, #bc80ea 100%);
+        background: -ms-linear-gradient(top, #dfbdfa 5%, #bc80ea 100%);
+        background: linear-gradient(to bottom, #dfbdfa 5%, #bc80ea 100%);
+        background-color: #dfbdfa;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border: 1px solid #A78E8E;
+        display: inline-block;
+        cursor: pointer;
+        color: #ffffff;
+        font-family: arial;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 4px 10px;
+        text-decoration: none;
+    }
+    .myButtonChange:hover
+    {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #bc80ea), color-stop(1, #dfbdfa));
+        background: -moz-linear-gradient(top, #bc80ea 5%, #dfbdfa 100%);
+        background: -webkit-linear-gradient(top, #bc80ea 5%, #dfbdfa 100%);
+        background: -o-linear-gradient(top, #bc80ea 5%, #dfbdfa 100%);
+        background: -ms-linear-gradient(top, #bc80ea 5%, #dfbdfa 100%);
+        background: linear-gradient(to bottom, #bc80ea 5%, #dfbdfa 100%);
+        background-color: #bc80ea;
+    }
+    .myButtonChange:active
+    {
+        position: relative;
+        top: 1px;
+    }
+    .myButton1
+    {
+        -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9));
+        background: -moz-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -webkit-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -o-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -ms-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+        background-color: #f9f9f9;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border: 1px solid #A78E8E;
+        display: inline-block;
+        cursor: pointer;
+        color: #1A1818;
+        font-family: arial;
+        font-size: 14px;
+        padding: 2px 6px;
+        text-decoration: none;
+    }
+    .myButton1:hover
+    {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9));
+        background: -moz-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -webkit-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -o-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -ms-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: linear-gradient(to bottom, #e9e9e9 5%, #f9f9f9 100%);
+        background-color: #e9e9e9;
+    }
+    .myButton1:active
+    {
+        position: relative;
+        top: 1px;
+    }
+    
+    .myButtondelete {
+	-moz-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #fc8d83), color-stop(1, #e4685d));
+	background:-moz-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+	background:-webkit-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+	background:-o-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+	background:-ms-linear-gradient(top, #fc8d83 5%, #e4685d 100%);
+	background:linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
+	background-color:#fc8d83;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border:1px solid #d83526;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:arial;
+	font-size:14px;
+	padding:2px 6px;
+	text-decoration:none;
+}
+.myButtondelete:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e4685d), color-stop(1, #fc8d83));
+	background:-moz-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+	background:-webkit-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+	background:-o-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+	background:-ms-linear-gradient(top, #e4685d 5%, #fc8d83 100%);
+	background:linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
+	background-color:#e4685d;
+}
+.myButtondelete:active {
+	position:relative;
+	top:1px;
+}
+    
+    
+    
+    .myButton2
+    {
+        -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #e9e9e9));
+        background: -moz-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -webkit-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -o-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: -ms-linear-gradient(top, #f9f9f9 5%, #e9e9e9 100%);
+        background: linear-gradient(to bottom, #f9f9f9 5%, #e9e9e9 100%);
+        background-color: #f9f9f9;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border: 1px solid #A78E8E;
+        display: inline-block;
+        cursor: pointer;
+        color: #1A1818;
+        font-family: arial;
+        font-size: 14px;
+        padding: 2px 6px;
+        text-decoration: none;
+        width:100px;
+    }
+    .myButton2:hover
+    {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e9e9e9), color-stop(1, #f9f9f9));
+        background: -moz-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -webkit-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -o-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: -ms-linear-gradient(top, #e9e9e9 5%, #f9f9f9 100%);
+        background: linear-gradient(to bottom, #e9e9e9 5%, #f9f9f9 100%);
+        background-color: #e9e9e9;
+    }
+    .myButton2:active
+    {
+        position: relative;
+        top: 1px;
+    }
+    .otherfont
+    {
+        font-weight:bold;
+        font-size:16;
+    }
+    .trht
+    {
+        height:30px;
+    }
+</style>

@@ -1,0 +1,323 @@
+﻿@model CDMIS.ViewModels.PersonalHomepageViewModel
+@{
+    ViewBag.Title = "个人主页";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>
+    个人主页</h2>
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="/Scripts/My97DatePicker/WdatePicker.js"></script>
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/chosen.css")" rel="Stylesheet" />
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+@using (Html.BeginForm("PersonalHomepage", "Personal", FormMethod.Post, new { id = "Form5", @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+    <div style="margin-top: 2.0em; width: 21%; float: left; text-align: center;">
+        <div>
+            <img src="@Model.PhotoAddress" id="img0" style="width: 168px; height:168px" alt="头像未上传"/>
+            @Html.HiddenFor(model => model.PhotoAddress)
+        </div>
+        <div class="form-group" style="width: 70%">
+            <input type="file" id="fileUpload" name="fileUpload" style="width: 100%; margin-left: 55px;
+                margin-top: 5px;" disabled="true" />@*//注意一定要指明name属性否则会上传失败*@
+        </div>
+        @*<div class="form-group">
+                <input type="button" id="uploadPhoto" class="btn btn-primary" value="上传头像" onclick="uploadImage();"/>
+            </div>*@
+    </div>
+
+    <div style="width: 78%; margin-bottom: 20px; float: left;">
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                用户ID：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.Patient.UserId, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Patient.UserId)
+            </div>
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                用户姓名：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.Patient.UserName, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Patient.UserName)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                性别：</label>
+            <div class="col-sm-4">
+                @Html.DropDownListFor(model => model.Patient.Gender, Model.GenderList(), new { id = "Gender", name = "Gender", @disabled = "true", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Patient.Gender)
+            </div>
+            <label class="col-offset-2 col-sm-2 control-label" style="text-align: justify">
+                出生日期：</label>
+            <div class="col-sm-3">
+                @Html.TextBoxFor(model => model.Birthday, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Birthday)
+            </div>
+            <div class="col-sm-1">
+                <img id="DatePicker" style="display: none; width: 35px; height: 50px; margin-top: -10px"
+                    onclick="WdatePicker({el:'Birthday'})" src="/Scripts/My97DatePicker/skin/datePicker.gif" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: left">
+                身份证号码：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.IDNO, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.IDNO)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                *手机号码：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.PhoneNumber, new { @readonly = "readonly", onkeyup = "Flag()", @class = "form-control" })
+                @*@Html.ValidationMessageFor(m => m.PhoneNumber)*@
+                 <p id="PhoneEditWarning" style="font-size: 14px; color: #FF0000; font-weight: bold;"></p>
+            </div>
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                家庭住址：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.Address, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Address)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                职业：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.Occupation, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Occupation)
+            </div>
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                国籍：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.Nationality, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Nationality)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                紧急联系人：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.EmergencyContact, new { @readonly = "readonly", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.EmergencyContact)
+            </div>
+            <label class="col-sm-2 control-label" style="text-align: justify">
+                紧急联系电话：</label>
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.EmergencyContactPhoneNumber, new { @readonly = "readonly", onkeyup = "Flag()", @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.EmergencyContactPhoneNumber)
+                <p id="EmergencyPhoneEditWarning" style="font-size: 14px; color: #FF0000; font-weight: bold;"></p>
+            </div>
+        </div>
+        <div id="doctordetail" title="@Model.Role" style="display: none;">
+            <div class="form-group">
+                <label class="col-sm-2 control-label" style="text-align: justify">
+                    工作单位：</label>
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.UnitName, Model.GetHospitalList(), new { @disabled = "disabled", @class = "form-control" })
+                    @*@Html.ValidationMessageFor(m => m.UnitName)*@
+                </div>
+                <label class="col-sm-2 control-label" style="text-align: justify">
+                    科室：</label>
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.Dept, Model.GetDeptList(), new { @disabled = "disabled", @class = "form-control" })
+                    @*@Html.ValidationMessageFor(m => m.Dept)*@
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" style="text-align: justify">
+                    级别：</label>
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.Level, Model.GetLevelList(), new { @disabled = "disabled", @class = "form-control" })
+                    @*@Html.ValidationMessageFor(m => m.Level)*@
+                </div>
+                <label class="col-sm-2 control-label" style="text-align: justify">
+                    职称：</label>
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.JobTitle, Model.GetJobTitleList(), new { @disabled = "disabled", @class = "form-control" })
+                    @*@Html.ValidationMessageFor(m => m.JobTitle)*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-2">
+            <input type="button" name="ChangePassword" class="btn btn-primary btn-lg btn-block"
+                id="ChangePassword" value="修改密码" onclick="window.location.href='/Account/ChangePassword'" />
+        </div>
+        <div class="col-sm-2">
+            <input type="button" name="btEdit" class="btn btn-primary btn-lg btn-block" id="btEdit"
+                value="编辑信息" />
+        </div>
+    </div>
+
+}
+<script type="text/javascript">
+    var perPhoneNo = "@Model.PhoneNumber";
+    function Save() {
+        var form5 = document.getElementById("Form5");
+        form5.submit();
+    }
+
+    function Flag() {
+        var isTelephone = /^([0-9]{3,4}-)?[0-9]{7,8}$/; //固定电话
+        var isPhone = /^1[3|4|5|7|8][0-9]\d{8}$/;
+        var phone = $("#PhoneNumber").val();
+        var emergencyPhone = $("#EmergencyContactPhoneNumber").val();
+        var text = "";
+        var saveFlag = 0;
+        var saveFlag2 = 0;
+        if (phone.length == 11 && isPhone.test(phone)) {
+            if ("@Model.Role" == "Doctor" && phone != perPhoneNo) {
+                $.ajax({
+                    url: "/DoctorHome/checkPhoneNoRepeat",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { PhoneNo: phone },  //输入参数
+                    success: function (res) {
+                        if (res == "1") {
+                            //手机号码不存在
+                            saveFlag = 1;
+                            $("#PhoneEditWarning").hide();
+                        }
+                        else {
+                            //手机号码已存在
+                            text = "该手机号已被使用";
+                            $("#PhoneEditWarning").html(text);
+                            $("#PhoneEditWarning").show();
+                            saveFlag = 0;
+                        }
+                    }
+                })
+            }
+            else {
+                $("#PhoneEditWarning").hide();
+                saveFlag = 1;
+            }
+        }
+        else if (phone.length != 11 && isPhone.test(phone) == false) {
+            text = "请输入11位有效手机号";
+            $("#PhoneEditWarning").html(text);
+            $("#PhoneEditWarning").show();
+            saveFlag = 0;
+        }
+        else {
+            saveFlag = 0;
+        }
+
+        //验证紧急联系电话
+        if (emergencyPhone != "" && (isTelephone.test(emergencyPhone) || isPhone.test(emergencyPhone))) {
+            saveFlag2 = 1;
+            $("#EmergencyPhoneEditWarning").hide();
+        }
+        else if (emergencyPhone == "") {
+            saveFlag2 = 1;
+            $("#EmergencyPhoneEditWarning").hide();
+        }
+        else {
+            saveFlag2 = 0;
+            text = "请输入固定电话或11位手机号";
+            $("#EmergencyPhoneEditWarning").html(text);
+            $("#EmergencyPhoneEditWarning").show();
+        }
+
+        if (saveFlag == 1 && saveFlag2 == 1) {
+            document.getElementById("btEdit").disabled = false;
+            $('#btEdit').removeAttr('onclick').unbind('click').click(function () {
+                Save();
+            });
+        }
+        else {
+            document.getElementById("btEdit").disabled = "disabled";
+        }
+    }
+
+    $(document).ready(function () {
+        if ($("#doctordetail").attr("title") == "Doctor" || $("#doctordetail").attr("title") == "HealthCoach")
+            $("#doctordetail").removeAttr("style");
+        if (document.getElementById("PhoneNumber").value == "") {
+            document.getElementById("PhoneNumber").value = "请输入有效手机号码";
+            document.getElementById("PhoneNumber").style.color = "gray";
+            $('#btEdit').click(function () { PersonalHomePageEdit1(); });
+        }
+        else {
+            $('#btEdit').click(function () { PersonalHomePageEdit2(); });
+        }
+
+        //头像预览
+        $("#fileUpload").change(function (e) {
+            var filesList = e.target.files || e.dataTransfer.files; //读取到的数据集合
+            var fileReader = new FileReader(); //每次都要重新构造才能访问到每个文件
+            var file = filesList[0];
+            if (!(file.name.match("jpg") || file.name.match("png") || file.name.match("bmp") || file.name.match("gif") || file.name.match("JPG") || file.name.match("PNG") || file.name.match("BMP") || file.name.match("GIF"))) {
+                alert("请选择标准的图像文件!");
+                return 0;
+            }
+            if (file.size / 1024 > 1024) { //单位KB
+                alert("请选择1MB以下的图片文件!");
+                return 0;
+            }
+            fileReader.readAsDataURL(file); //从指定url读入文件
+            fileReader.onload = function () {
+                $("#img0").attr("src", this.result);
+            }
+        });
+    });
+
+    function PersonalHomePageEdit1() {
+        //document.getElementById("Patient_UserName").readOnly = false;
+        document.getElementById("Gender").disabled = false;
+        document.getElementById("Birthday").readOnly = false;
+        document.getElementById("IDNO").readOnly = false;
+        document.getElementById("PhoneNumber").readOnly = false;
+        document.getElementById("Address").readOnly = false;
+        document.getElementById("Occupation").readOnly = false;
+        document.getElementById("Nationality").readOnly = false;
+        document.getElementById("EmergencyContact").readOnly = false;
+        document.getElementById("EmergencyContactPhoneNumber").readOnly = false;
+        $("#UnitName").removeAttr("disabled");
+        $("#JobTitle").removeAttr("disabled");
+        $("#Level").removeAttr("disabled");
+        $("#Dept").removeAttr("disabled");
+        document.getElementById("fileUpload").disabled = false;
+        document.getElementById("DatePicker").style.display = "block";
+        document.getElementById("btEdit").value = "保存信息";
+        document.getElementById("btEdit").disabled = "disabled";
+
+        //        $('#btEdit').removeAttr('click').click(function (){ Save();}
+
+
+    }
+
+    function PersonalHomePageEdit2() {
+        //document.getElementById("Patient_UserName").readOnly = false;
+        document.getElementById("Gender").disabled = false;
+        document.getElementById("Birthday").readOnly = false;
+        document.getElementById("IDNO").readOnly = false;
+        document.getElementById("PhoneNumber").readOnly = false;
+        document.getElementById("Address").readOnly = false;
+        document.getElementById("Occupation").readOnly = false;
+        document.getElementById("Nationality").readOnly = false;
+        document.getElementById("EmergencyContact").readOnly = false;
+        document.getElementById("EmergencyContactPhoneNumber").readOnly = false;
+        $("#UnitName").removeAttr("disabled");
+        $("#JobTitle").removeAttr("disabled");
+        $("#Level").removeAttr("disabled");
+        $("#Dept").removeAttr("disabled");
+        $("#Dept").chosen({
+            no_results_text: "没有找到相应的选项",
+            placeholder_text: "请选择",
+        });
+        document.getElementById("fileUpload").disabled = false;
+        document.getElementById("DatePicker").style.display = "block";
+        document.getElementById("btEdit").value = "保存信息";
+        $('#btEdit').removeAttr('click').click(function () { Save(); });
+
+    }
+</script>

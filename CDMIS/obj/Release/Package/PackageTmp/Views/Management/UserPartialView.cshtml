@@ -1,0 +1,89 @@
+﻿@model CDMIS.ViewModels.UserViewModel
+  
+ <table width="100%" id="UserListDT" class="display">
+     <thead class="fixedHeader" >
+          <tr>
+               <th width="160px">
+                    用户ID
+               </th>
+               <th width="160px">
+                    姓名
+               </th>                                     
+               <th width="160px">
+                    密码
+               </th>
+               <th width="160px" style="display: none;">
+                    用户类别编码
+               </th>
+               <th width="160px">
+                    用户类别
+               </th>
+               <th width="160px">
+                    密码有效期
+               </th>
+          </tr>
+     </thead>
+     <tbody class="scrollContent">
+           @if (Model.RowCount > 0)
+           {
+              foreach (var item in Model.UserList)
+              {
+                   <tr class="normalRow">
+                       <td width="160px">@item.UserId
+                       </td>
+                       <td width="90px">@item.UserName
+                       </td>
+                       <td width="110px">@item.Password
+                       </td>
+                       <td width="110px" style="display: none;">@item.Class
+                       </td>
+                       <td width="110px">@item.ClassName
+                       </td>
+                       <td width="110px">@item.EndDate
+                       </td>
+                   </tr>
+              }
+            }
+    </tbody>
+ </table>
+
+ <script type="text/javascript">
+
+     $(document).ready(function () {
+         var table = $('#UserListDT').DataTable({
+             "oLanguage": {//语言国际化
+                 "sUrl": "/Content/jquery.dataTable.cn.txt"
+             },
+             "bAutoWidth": false,
+             "bPaginate": false,  //是否分页。
+             "sScrollX": "100%",
+             "sScrollY": "250px",
+             "order": [3, 'desc'],   //排序
+             "bFilter": false
+
+         });
+
+         $(document).on('dblclick', ".normalRow", function () {
+
+             document.getElementById("txtUserId").value = $(this).find("td:eq(0)").text();
+             document.getElementById("txtUserName").value = $(this).find("td:eq(1)").text();
+             document.getElementById("txtPassword").value = $(this).find("td:eq(2)").text();
+             var classCode = trim($(this).find("td:eq(3)").text());
+             //alert(classCode);
+             $("#userClassList").val(classCode);
+             document.getElementById("EndTime").value = $(this).find("td:eq(5)").text();
+         });
+     });
+     function trim(str) {  //删除左右两端的空格
+         return str.replace(/(^\s*)|(\s*$)/g, "");
+     }
+     function refresh(e) {
+         if (e.toString() == "OK") {
+             alert("保存成功！");
+         }
+         else {
+             alert("保存失败！");
+         }
+         window.location.href = window.location.href;
+     }
+</script>

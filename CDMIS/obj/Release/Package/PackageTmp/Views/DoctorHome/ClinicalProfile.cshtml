@@ -1,0 +1,197 @@
+﻿@model CDMIS.Models.PatientBasicInfo
+@{
+    ViewBag.Title = "患者建档--临床信息";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+    
+}
+
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="../../Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../../Scripts/MicrosoftAjax.js"></script>
+<script type="text/javascript" src="../../Scripts/MicrosoftMvcAjax.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="../../Scripts/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+<style type="text/css">
+   @* td
+    {
+        text-align: center;
+        width: 5%;
+        border: 0;
+    }*@
+   @* tr
+    {
+        height: 30px;
+    }*@
+    @*table th
+    {
+        text-align: center;
+        background-repeat: repeat-x;
+        height: 30px;
+        border: 1px solid #cad9ea;
+        padding: 0 1em 0;
+    }  *@ 
+   
+    #tabs
+    {
+        overflow: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #tabs li
+    {
+        float: left;
+        margin: 0 -15px 0 0;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+    }
+    
+    #tabs li a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 30px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #6C6C6C;
+        opacity: .8;
+        filter: alpha(opacity=30);
+    }
+    
+    #tabs a:hover, #tabs a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #tabs a:focus
+    {
+        outline: 0;
+    }
+    
+    #tabs #current
+    {
+        border-bottom-color: #00A600;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #simplemodal-container
+    {
+        height: 250px;
+        width: 400px;
+    }
+     #alert-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+</style>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.UserId, Role = "Patient" }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo", new { PointedPatient = @Model.UserId });}
+<div class="modalContent" style="margin-top: 15px; text-align: center;">
+    <div class="form-horizontal" role="form">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                就诊</label>
+            <div class="col-sm-8">
+                @Html.DropDownListFor(model => model.VisitId, Model.ClinicalInfoList, new { id = "ClinicalInfoListDropDownListFor" ,@class="form-control"})
+            </div>
+            <div class="col-sm-2">
+                <input type="button" class="btn btn-primary clinicalProfileBtn" value="查看" />
+            </div>
+        </div>
+         @*alert弹出框*@
+        <div id="alertClinicalInfoDiv" style="display: none" class="form-group">
+            <div class="col-sm-12">
+                <p id="Warning" style="font-size: 16px; color: #FF0000; font-weight: bold; text-align: center">
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="menuTabs">     
+</div>
+<div id="Container"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(2) a").attr("id", "currentnav");
+        if ("@Model.LatestClinicalInfo" != "") {
+            $("#ClinicalInfoListDropDownListFor").val("@Model.LatestClinicalInfo");
+            $(".clinicalProfileBtn").click();
+        }
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+        }
+    });
+
+    $(".clinicalProfileBtn").click(function () {
+        var UserId = "@Model.UserId";
+        var VisitId = $("#ClinicalInfoListDropDownListFor").val();
+        if (VisitId == "") {
+            //alert("请选择就诊信息");
+            $("#Warning").html("请选择就诊信息");
+            $("#alertClinicalInfoDiv").show();
+
+            //alert(Text);
+//            $('#alertDiv').modal({
+//                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+//                containerId: 'alert-container',
+//                overlayClose: true     //点击蒙层关闭窗口
+//            });
+        }
+        else {
+            $("#alertClinicalInfoDiv").hide();
+
+            $("#menuTabs").html("<a data-ajax='true' data-ajax-method='Get' data-ajax-mode='replace' data-ajax-update='#Container' href='/DoctorHome/ClinicalProfileLoadByVisitId?UserId=" + UserId + "&amp;VisitId=" + VisitId + "'></a>");
+            $("#menuTabs a").click();
+        }
+    })
+    function tabClick1() {
+        $("#tabs li:eq(0) a").attr("id", "current");
+    }
+    function tabClick2() {
+        $("#tabs li:eq(1) a").attr("id", "current");
+    }
+    function tabClick3() {
+        $("#tabs li:eq(2) a").attr("id", "current");
+    }
+    function tabClick4() {
+        $("#tabs li:eq(3) a").attr("id", "current");
+    }
+    function tabClick5() {
+        $("#tabs li:eq(4) a").attr("id", "current");
+    }
+    $(".Sure").click(function () {
+        $("#Close").click();
+    })
+</script>

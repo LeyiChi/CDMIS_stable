@@ -1,0 +1,588 @@
+﻿@model CDMIS.ViewModels.EverydayTaskViewModel
+@{
+    ViewBag.Title = "EverydayTask";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 150px;
+        width: 300px;
+    }
+</style>
+<div id="tableContainer1" class="tableContainer">
+    <h2 class="text-center">
+        已有任务列表</h2>
+    <div style="text-align: right">
+        <button type="button" class="btn btn-primary" onclick="AddET();">
+            新 增</button>
+    </div>
+    <table id="DataTable" class="display">
+        <thead>
+            <tr>
+                <th style="display: none;">
+                    序号
+                </th>
+                <th>
+                    主题
+                </th>
+                <th style="display: none;">
+                    提醒类型
+                </th>
+                <th>
+                    提醒类型
+                </th>
+                <th style="display: none;">
+                    提醒方式
+                </th>
+                <th>
+                    提醒方式
+                </th>
+                <th>
+                    提醒时间
+                </th>
+                <th>
+                    操作
+                </th>
+                <th style="display: none;">
+                    创建者
+                </th>
+                <th style="display: none;">
+                    起始时间
+                </th>
+            </tr>
+        </thead>
+        <tbody id="ETTbody">
+            @if (Model.TodayTask.Count > 0)
+            {
+                foreach (var item in Model.TodayTask)
+                { 
+                <tr>
+                    <td style="display: none;">@item.ReminderNo
+                    </td>
+                    <td>@item.Content
+                    </td>
+                    <td style="display: none;">@item.ReminderType
+                    </td>
+                    <td>@item.ReminderTypeName
+                    </td>
+                    <td style="display: none;">@item.AlertMode
+                    </td>
+                    <td>@item.AlertModeName
+                    </td>
+                    <td>@item.Description
+                    </td>
+                    <td>
+                        <input type="button" value="编辑" class="btn btn-primary editETBtn" />
+                        @if (item.IsAllowed)
+                        {
+                            <input type="button" value="删除" class="btn btn-danger deleteETBtn" />
+                        }
+                    </td>
+                    <td style="display: none;">
+                        @item.CreatedBy
+                    </td>
+                    <td style="display: none;">@item.StartDateTime
+                    </td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@using (Html.BeginForm("EverydayTask", "PatientHome", FormMethod.Post, new { id = "ETForm", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+@*@using (Ajax.BeginForm(
+     "EverydayTask", "PatientHome",
+     new AjaxOptions
+     {
+         UpdateTargetId = "tableContainer",
+         HttpMethod = "Post",
+         OnSuccess = "",
+     },
+     new { id = "ETForm", @class = "form-horizontal", role = "form" }))
+ {*@
+    @Html.HiddenFor(model => model.EveryDayNumber)
+    @Html.HiddenFor(model => model.WeeklyNumber)
+    @Html.HiddenFor(model => model.MonthlyNumber)
+    @Html.HiddenFor(model => model.AnnualNumber)
+    @Html.HiddenFor(model => model.PatientId)
+    @Html.HiddenFor(model => model.ReminderNo)
+    @Html.HiddenFor(model => model.CreatedBy)
+    <div style="margin-bottom: 1.0em; width: 100%; border: 2px dotted #3567d1; padding: 0 2.0em 2.0em 2.0em;">
+        <h2>
+            添加任务</h2>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-9 validation-summary-errors">
+                <span>@ViewBag.ErrorMSG</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                *主题：</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.Content, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                *提醒类型：</label>
+            <div class="col-sm-5">
+                @Html.DropDownListFor(model => model.ReminderTypeSelected, Model.ReminderTypeList(), new { id = "ReminderTypeList", @class = "form-control", style = "font-size:18px" })
+                @Html.HiddenFor(model => model.ReminderTypeSelected)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                提醒方式：</label>
+            <div class="col-sm-5">
+                @Html.DropDownListFor(model => model.AlertModeSelected, Model.AlertModeList(), new { id = "AlertModeList", @class = "form-control", style = "font-size:18px", onchange = "ShowOptions();" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                起始时间：</label>
+            <div class="col-sm-5">
+                @Html.TextBoxFor(model => model.StartDateTime, new { id = "StartDateTime", @class = "form-control", @onclick = "WdatePicker({minDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" })
+            </div>
+        </div>
+        <div id="SelectTimeDiv">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">
+                    提醒时间：</label>
+                <div class="col-sm-5">
+                </div>
+            </div>
+            <div id="Once">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-5">
+                        @Html.TextBoxFor(model => model.OnceDateTime, new { id = "OnceDateTime", @class = "form-control", @onclick = "WdatePicker({minDate:'%y-%M-%d %H:%m:%s',dateFmt:'yyyy-MM-dd HH:mm:ss'})" })
+                    </div>
+                </div>
+            </div>
+            <div id="EveryDay" style="display: none;">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-5">
+                        @Html.TextBox("EveryDayTime0", "", new { id = "EveryDayTime0", @class = "form-control", @onclick = "WdatePicker({dateFmt:'HH:mm:ss',isShowToday: false})" })
+                    </div>
+                    <input class="btn-add-green" type="button" onclick="AddEveryDayControl();" title="增加" />
+                </div>
+            </div>
+            <div id="Weekly" style="display: none;">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-2">
+                        @Html.DropDownList("WeeklyWeek0", Model.WeeklyList(), new { id = "WeeklyWeek0", @class = "form-control", style = "font-size:18px" })
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.TextBox("WeeklyTime0", "", new { id = "WeeklyTime0", @class = "form-control", @onclick = "WdatePicker({dateFmt:'HH:mm:ss',isShowToday: false})" })
+                    </div>
+                    <input class="btn-add-green" type="button" onclick="AddWeeklyControl();" title="增加" />
+                </div>
+            </div>
+            <div id="Monthly" style="display: none;">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-2">
+                        @Html.DropDownList("MonthlyDay0", Model.MonthlyList(), new { id = "MonthlyDay0", @class = "form-control", style = "font-size:18px" })
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.TextBox("MonthlyTime0", "", new { id = "MonthlyTime0", @class = "form-control", @onclick = "WdatePicker({dateFmt:'HH:mm:ss',isShowToday: false})" })
+                    </div>
+                    <input class="btn-add-green" type="button" onclick="AddMonthlyControl();" title="增加" />
+                </div>
+            </div>
+            <div id="Annual" style="display: none;">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-2">
+                        @Html.DropDownList("AnnualMonth0", Model.AnnualMothList(), new { id = "AnnualMonth0", @class = "form-control", style = "font-size:18px" })
+                    </div>
+                    <div class="col-sm-2">
+                        @Html.DropDownList("AnnualDay0", Model.AnnualDayList(), new { id = "AnnualDay0", @class = "form-control", style = "font-size:18px" })
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.TextBox("AnnualTime0", "", new { id = "AnnualTime0", @class = "form-control", @onclick = "WdatePicker({dateFmt:'HH:mm:ss',isShowToday: false})" })
+                    </div>
+                    <input class="btn-add-green" type="button" onclick="AddAnnualControl();" title="增加" />
+                </div>
+            </div>
+            <div id="Interval" style="display: none;">
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-1">
+                        @Html.TextBoxFor(model => model.FreqYear, new { id = "FreqYear", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-1">
+                        年</label>
+                    <div class="col-sm-1">
+                        @Html.TextBoxFor(model => model.FreqMonth, new { id = "FreqMonth", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-1">
+                        月</label>
+                    <div class="col-sm-1">
+                        @Html.TextBoxFor(model => model.FreqDay, new { id = "FreqDay", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-1">
+                        日</label>
+                    <div class="col-sm-1">
+                        @Html.TextBoxFor(model => model.FreqHour, new { id = "FreqHour", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-1">
+                        小时</label>
+                    <div class="col-sm-1">
+                        @Html.TextBoxFor(model => model.FreqMunite, new { id = "FreqMunite", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-1">
+                        分钟</label>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-9">
+                        @Html.ValidationSummary(true, "请输入非负整数")
+                        @Html.ValidationMessageFor(model => model.FreqYear, "", new { style = "display:none" })
+                        @Html.ValidationMessageFor(model => model.FreqMonth, "", new { style = "display:none" })
+                        @Html.ValidationMessageFor(model => model.FreqDay, "", new { style = "display:none" })
+                        @Html.ValidationMessageFor(model => model.FreqHour, "", new { style = "display:none" })
+                        @Html.ValidationMessageFor(model => model.FreqMunite, "", new { style = "display:none" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-1">
+                <button type="button" class="btn btn-primary" onclick="SubmitET();">
+                    添加</button>
+            </div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-warning" onclick="Cancel();">
+                    取消</button>
+            </div>
+        </div>
+    </div>
+    
+    
+}
+<div id="deleteModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            是否删除此数据？</h4>
+        <div class="col-md-offset-3">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmDeleteBtn" />
+            <input type="button" value="取消" class="btn btn-default" id="cancelDeleteBtn" />
+        </div>
+    </div>
+</div>
+<div id="addDataAlertModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <center>
+            <h4 id="alertP"></h4>
+            <input type="button" class="btn btn-default simplemodal-close" value="确定" />
+        </center>
+    </div>
+</div>
+<script type="text/javascript">
+    var addEveryDayNumber = document.getElementById("EveryDayNumber");
+    var addWeeklyNumber = document.getElementById("WeeklyNumber");
+    var addMonthlyNumber = document.getElementById("MonthlyNumber");
+    var addAnnualNumber = document.getElementById("AnnualNumber");
+    var editSelected;
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(6) a").attr("id", "current");
+
+        if (trim($(".validation-summary-errors").text()).length != 0) {
+            $("#ETForm").show();
+            ShowOptions();
+        }
+        else {
+            $("#ETForm").hide();
+        }
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "250px",
+            "bFilter": false,
+            "aoColumnDefs": [{ "sWidth": "30px", "aTargets": [0] },
+                        { "sWidth": "200px", "aTargets": [1]}],
+            "aaSorting": [[0, "desc"]]
+        });
+    });
+
+    //根据提醒方式显示时间输入控件
+    function ShowOptions() {
+        var alertModeList = document.getElementById("AlertModeList");
+        var alertMode = alertModeList.options[alertModeList.selectedIndex].value;
+
+        switch (alertMode) {
+            case "0": $("#SelectTimeDiv").hide();
+                break;
+            case "1": $("#SelectTimeDiv").show();
+                $("#Once").show();
+                $("#Once").siblings(":gt(0)").hide();
+                break;
+            case "2": $("#SelectTimeDiv").show();
+                $("#EveryDay").show();
+                $("#EveryDay").siblings(":gt(0)").hide();
+                break;
+            case "3": $("#SelectTimeDiv").show();
+                $("#Weekly").show();
+                $("#Weekly").siblings(":gt(0)").hide();
+                break;
+            case "4": $("#SelectTimeDiv").show();
+                $("#Monthly").show();
+                $("#Monthly").siblings(":gt(0)").hide();
+                break;
+            case "5": $("#SelectTimeDiv").show();
+                $("#Annual").show();
+                $("#Annual").siblings(":gt(0)").hide();
+                break;
+            case "6": $("#SelectTimeDiv").show();
+                $("#Interval").show();
+                $("#Interval").siblings(":gt(0)").hide();
+                break;
+            default: break;
+        }
+
+    }
+
+    //点击添加按钮
+    function AddET() {
+        if (editSelected != null) {
+            editSelected.removeClass("selected");
+        }
+        $("#ReminderNo").val("0");
+        $("#Content").val("");
+        $("#ReminderTypeList").val("0");
+        $("#AlertModeList").val("0");
+        $("#CreatedBy").val("");
+        $("#StartDateTime").val(getNowFormatDate());
+        $("#ETForm").show();
+        ShowOptions();
+    }
+
+    //点击编辑按钮
+    $(".editETBtn").click(function () {
+        var trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+        var content = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(1)").text());
+        var alertType = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(2)").text());
+        var alertMode = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(4)").text());
+        var reminderNo = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(0)").text());
+        var createdBy = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(8)").text());
+        var startDay = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(9)").text());
+        if (editSelected != null) {
+            editSelected.removeClass("selected");
+        }
+        editSelected = $(this).parent().parent();
+        editSelected.addClass("selected");
+
+        $("#Content").val(content);
+        $("#ReminderNo").val(reminderNo);
+        $("#ReminderTypeList").val(alertType);
+        $("#AlertModeList").val(alertMode);
+        $("#CreatedBy").val(createdBy);
+        $("#StartDateTime").val(startDay);
+
+        $("#ETForm").show();
+        ShowOptions();
+        //var reminderTypeList = document.getElementById("ReminderTypeList");
+        //reminderTypeList.selectedIndex = alertType;
+    });
+
+    //点击删除按钮，弹出对话框
+    $(".deleteETBtn").click(function () {
+        $("#ETForm").hide();
+        var tr = $(this).parent().parent();
+        var trSeq = tr.parent().find("tr").index(tr);
+        var reminderNo = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(0)").text());
+        var creater = trim($("#ETTbody tr:eq(" + trSeq + ") td:eq(8)").text());
+        tr.addClass("selected");
+        //弹框提示
+        $('#deleteModal').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true
+        });
+
+        $('#confirmDeleteBtn').click(function () {
+            //连接数据库删除数据
+            $.ajax({
+                url: "/PatientInfo/DeleteReminder",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { pid: $("#PatientId").val(), reminderNo: reminderNo, creater: creater },
+                success: function (res) {
+                    if (res == 2) {
+                        alert("数据库中无此数据，请刷新页面后重试！")
+                    }
+                    else if (res == 0) {
+                        alert("数据删除失败，请重试！")
+                    }
+                    else {
+                        $.modal.close();
+                        //删除控件
+                        tr.remove();
+                        $('#confirmDeleteBtn').unbind("click");
+                    }
+                }
+            });
+        })
+
+        $('#cancelDeleteBtn').click(function () {
+            $.modal.close();
+            tr.removeClass("selected");
+            $('#cancelDeleteBtn').unbind("click");
+        })
+    });
+
+    //增加各种提醒方式的输入控件
+    function AddEveryDayControl() {
+        var everydayT = $("#EveryDayTime" + addEveryDayNumber.value);
+        if (everydayT.val() != "") {
+            var $parent = everydayT.parent().parent();
+            $parent.find(".btn-add-green").remove();
+            $parent.append('<input type="button" class="btn-delete-green DeleteControl" title="删除" />');
+            addEveryDayNumber.value++;
+            $("#EveryDay").append('<div class="form-group">'
+        + '<div class="col-sm-offset-2 col-sm-5"><input type="text" id="EveryDayTime' + addEveryDayNumber.value + '" name="EveryDayTime' + addEveryDayNumber.value + '" class = "form-control" onclick = "WdatePicker({dateFmt:\'HH:mm:ss\',isShowToday: false})"></div>'
+        + '<input class="btn-add-green" type="button" onclick="AddEveryDayControl();" title="增加" />'
+        + '</div>');
+        }
+        else {
+            alert('请输入时间，格式为HH:MM:SS');
+        }
+    }
+
+    function AddWeeklyControl() {
+        var weeklyT = $("#WeeklyTime" + addWeeklyNumber.value);
+        if (weeklyT.val() != "") {
+            var $parent = weeklyT.parent().parent();
+            $parent.find(".btn-add-green").remove();
+            $parent.append('<input type="button" class="btn-delete-green DeleteControl" title="删除" />');
+            var $options = $("#WeeklyWeek" + addWeeklyNumber.value + " option").clone();
+            addWeeklyNumber.value++;
+            $("#Weekly").append('<div class="form-group">'
+        + '<div class="col-sm-offset-2 col-sm-2"><select id="WeeklyWeek' + addWeeklyNumber.value + '" name="WeeklyWeek' + addWeeklyNumber.value + '" class="form-control" style="font-size:18px"></select></div>'
+        + '<div class="col-sm-3"><input type="text" id="WeeklyTime' + addWeeklyNumber.value + '" name="WeeklyTime' + addWeeklyNumber.value + '" class = "form-control" onclick = "WdatePicker({dateFmt:\'HH:mm:ss\',isShowToday: false})"></div>'
+        + '<input class="btn-add-green" type="button" onclick="AddWeeklyControl();" title="增加" />'
+        + '</div>');
+            $("#WeeklyWeek" + addWeeklyNumber.value).append($options);
+        }
+        else {
+            alert('请输入时间，格式为HH:MM:SS');
+        }
+    }
+
+    function AddMonthlyControl() {
+        var monthlyT = $("#MonthlyTime" + addMonthlyNumber.value);
+        if (monthlyT.val() != "") {
+            var $parent = monthlyT.parent().parent();
+            $parent.find(".btn-add-green").remove();
+            $parent.append('<input type="button" class="btn-delete-green DeleteControl" title="删除" />');
+            var $options = $("#MonthlyDay" + addMonthlyNumber.value + " option").clone();
+            addMonthlyNumber.value++;
+            $("#Monthly").append('<div class="form-group">'
+        + '<div class="col-sm-offset-2 col-sm-2"><select id="MonthlyDay' + addMonthlyNumber.value + '" name="MonthlyDay' + addMonthlyNumber.value + '" class="form-control" style="font-size:18px"></select></div>'
+        + '<div class="col-sm-3"><input type="text" id="MonthlyTime' + addMonthlyNumber.value + '" name="MonthlyTime' + addMonthlyNumber.value + '" class = "form-control" onclick = "WdatePicker({dateFmt:\'HH:mm:ss\',isShowToday: false})"></div>'
+        + '<input class="btn-add-green" type="button" onclick="AddMonthlyControl();" title="增加" />'
+        + '</div>');
+            $("#MonthlyDay" + addMonthlyNumber.value).append($options);
+        }
+        else {
+            alert('请输入时间，格式为HH:MM:SS');
+        }
+    }
+
+    function AddAnnualControl() {
+        var annualT = $("#AnnualTime" + addAnnualNumber.value);
+        if (annualT.val() != "") {
+            var $parent = annualT.parent().parent();
+            $parent.find(".btn-add-green").remove();
+            $parent.append('<input type="button" class="btn-delete-green DeleteControl" title="删除" />');
+            var $options1 = $("#AnnualMonth" + addAnnualNumber.value + " option").clone();
+            var $options2 = $("#AnnualDay" + addAnnualNumber.value + " option").clone();
+            addAnnualNumber.value++;
+            $("#Annual").append('<div class="form-group">'
+        + '<div class="col-sm-offset-2 col-sm-2"><select id="AnnualMonth' + addAnnualNumber.value + '" name="AnnualMonth' + addAnnualNumber.value + '" class="form-control" style="font-size:18px"></select></div>'
+        + '<div class="col-sm-2"><select id="AnnualDay' + addAnnualNumber.value + '" name="AnnualDay' + addAnnualNumber.value + '" class="form-control" style="font-size:18px"></select></div>'
+        + '<div class="col-sm-3"><input type="text" id="AnnualTime' + addAnnualNumber.value + '" name="AnnualTime' + addAnnualNumber.value + '" class = "form-control" onclick = "WdatePicker({dateFmt:\'HH:mm:ss\',isShowToday: false})"></div>'
+        + '<input class="btn-add-green" type="button" onclick="AddAnnualControl();" title="增加" />'
+        + '</div>');
+            $("#AnnualMonth" + addAnnualNumber.value).append($options1);
+            $("#AnnualDay" + addAnnualNumber.value).append($options2);
+        }
+        else {
+            alert('请输入时间，格式为HH:MM:SS');
+        }
+    }
+
+    //ETForm中的删除按钮
+    $(document).on("click", ".DeleteControl", function () {
+        $(this).parent().remove();
+    });
+
+    //提交表单
+    function SubmitET() {
+        if ($("#Content").val() == "" || $("#ReminderTypeList option:selected").val() == "0") {
+            //alert("请输入主题，并选择提醒类型");
+            Text = "";
+            if ($("#Content").val() == "") {
+                Text += "主题、";
+            }
+            if ($("#ReminderTypeList option:selected").val() == "0") {
+                Text += "提醒类型、";
+            }
+            Text = Text.substr(0, Text.length - 1);
+            Text += "不能为空！";
+            $('#alertP').html(Text);
+            $('#addDataAlertModal').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                overlayClose: true     //点击蒙层关闭窗口
+            });
+        }
+        else {
+            var ETform = document.getElementById("ETForm");
+            ETform.submit();
+        }
+    }
+
+    //取消
+    function Cancel() {
+        $('#ETForm').hide();
+        if (editSelected != null) {
+            editSelected.removeClass("selected");
+        }
+    }
+
+    function trim(str) {  //删除左右两端的空格
+        return str.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+            + " " + date.getHours() + seperator2 + date.getMinutes()
+            + seperator2 + date.getSeconds();
+        return currentdate;
+    }
+</script>

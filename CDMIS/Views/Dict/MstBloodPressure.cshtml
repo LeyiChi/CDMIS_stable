@@ -1,0 +1,459 @@
+﻿@model IEnumerable<CDMIS.Models.BloodPressure>
+@{
+    ViewBag.Title = "MstBloodPressure";
+}
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/jquery-1.11.1.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 430px;
+        width: 400px;
+    }
+    #delete-container
+    {
+        height: 320px;
+        width: 400px;
+    }
+</style>
+<div style="text-align: right;">
+    <input type="button" value="新增数据" class="btn btn-primary insertBtn" style="margin-right: 10px" />
+</div>
+<div id="tableContainer1" class="tableContainer" style="margin-top: 5px">
+    <table width="100%" id="DataTable" class="display">
+        <thead>
+            <tr>
+                <th align="left">
+                    编码
+                </th>
+                <th align="left">
+                    名称
+                </th>
+                <th align="left">
+                    描述
+                </th>
+                <th align="left">
+                    收缩压
+                </th>
+                <th align="left">
+                    舒张压
+                </th>
+                <th align="left">
+                    等级
+                </th>
+                <th align="left">
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody id="TableBody">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td width="35%">
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.SBP)
+                    </td>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.DBP)
+                    </td>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.PatientClass)
+                    </td>
+                    <td width="15%">
+                        <input type="button" value="编辑" class="btn btn-primary editBtn" />
+                        |
+                        <input type="button" value="删除" class="btn btn-primary deleteBtn" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@*编辑页面弹框*@
+<div id="addDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>血压字典表编辑</span>
+    </div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="Code" class="col-sm-3 control-label">
+                编码
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="Code" readonly="readonly" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="Name" class="col-sm-3 control-label">
+                名称
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="Name" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="Description" class="col-sm-3 control-label">
+                描述
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="Description" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="SBP" class="col-sm-3 control-label" id = "SBPLable">
+                收缩压
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="SBP" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="DBP" class="col-sm-3 control-label" id = "DBPLable">
+                舒张压
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="DBP" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="PatientClass" class="col-sm-3 control-label">
+                等级
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="PatientClass" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-7">
+                <input type="button" class="btn btn-primary save" onclick="AddDataToDB();" value="保存" />
+                <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+            </div>
+        </div>
+        <p align="center" style="color: red" class="notice">
+        </p>
+        </form>
+    </div>
+</div>
+@*删除页面弹框*@
+<div id="deleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>血压字典表删除</span>
+    </div>
+    <div class="modalContent">
+        <p style="font-size: 16px; color: #EE9A00; font-weight: bold">
+            是否确定删除：
+        </p>
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="Code_del" class="col-sm-3 control-label">
+                编码
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="Code_del" readonly="readonly">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="Name_del" class="col-sm-3 control-label">
+                名称
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="Name_del" readonly="readonly">
+            </div>
+        </div>
+        <p style="font-size: 16px; color: #EE9A00; font-weight: bold">
+            的这条数据（删除操作将永久删除该条数据）
+        </p>
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-7">
+                <input type="button" class="btn btn-primary" onclick="DeleteDataFromDB();" value="确定" />
+                <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+            </div>
+        </div>
+        </form>
+        <p align="center" style="color: red" class="notice">
+        </p>
+    </div>
+</div>
+<script type="text/javascript">
+    var trSeq = -1; //选定的行标
+    var editType = 0; //编辑类型，0：无  1：编辑  2：新增
+    var CodeFlag = 0;
+    var NameFlag = 0;
+    var DescriptionFlag = 0;
+    var SBPFlag = 0;
+    var DBPFlag = 0;
+    var PatientClassFlag = 0; //编辑弹框输入合法性标志位 0 不合法 1 合法
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "420px",
+            "bLengthChange": false,
+            "iDisplayLength": 8,
+            "bFilter": true
+        });
+
+        //编辑按钮触发
+        $(".editBtn").click(function () {
+            editType = 1;
+            CodeFlag = 1;
+            NameFlag = 1;
+            DescriptionFlag = 1;
+            SBPFlag = 1;
+            DBPFlag = 1;
+            PatientClassFlag = 1;
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var Name = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            var Description = $("#TableBody tr:eq(" + trSeq + ") td:eq(2)").text().trim();
+            var SBP = $("#TableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+            var DBP = $("#TableBody tr:eq(" + trSeq + ") td:eq(4)").text().trim();
+            var PatientClass = $("#TableBody tr:eq(" + trSeq + ") td:eq(5)").text().trim();
+            EditData(Code, Name, Description, SBP, DBP, PatientClass);
+        });
+
+        //新增按钮触发
+        $(".insertBtn").click(function () {
+            editType = 2;
+            InsertData();
+        });
+
+        //删除按钮触发
+        $(".deleteBtn").click(function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var Name = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            DeleteData(Code, Name);
+        });
+    });
+
+    //编辑数据
+    function EditData(Code, Name, Description, SBP, DBP, PatientClass) {
+        document.getElementById("Code").value = Code;
+        document.getElementById("Name").value = Name;
+        document.getElementById("Description").value = Description;
+        document.getElementById("SBP").value = SBP;
+        document.getElementById("DBP").value = DBP;
+        document.getElementById("PatientClass").value = PatientClass;
+        $('.save').removeAttr('disabled');
+        $('#Code').attr('readonly', "readonly");
+        $('#addDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //新增数据
+    function InsertData() {
+        document.getElementById("Code").value = "";
+        document.getElementById("Name").value = "";
+        document.getElementById("Description").value = "";
+        document.getElementById("SBP").value = "";
+        document.getElementById("DBP").value = "";
+        document.getElementById("PatientClass").value = "";
+        $('.save').attr('disabled', "disabled");
+        $('#Code').removeAttr('readonly');
+        $('#addDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除数据
+    function DeleteData(Code, Name) {
+        document.getElementById("Code_del").value = Code;
+        document.getElementById("Name_del").value = Name;
+        $('#deleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除提交
+    function DeleteDataFromDB() {
+        var Code = document.getElementById("Code_del").value;
+        $.ajax({
+            url: "/Dict/BloodPressureDelete",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {
+                Code: Code
+            },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    trSeq = -1;
+                    notice();
+                }
+                else {
+                    alert("数据删除失败！");
+                }
+            }
+        });
+    }
+
+    //编辑or新增提交
+    function AddDataToDB() {
+        var Code = document.getElementById("Code").value;
+        var Name = document.getElementById("Name").value;
+        var Description = document.getElementById("Description").value;
+        var SBP = document.getElementById("SBP").value;
+        var DBP = document.getElementById("DBP").value;
+        var PatientClass = document.getElementById("PatientClass").value;
+        $.ajax({
+            url: "/Dict/BloodPressureEdit",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {
+                Code: Code,
+                Name: Name,
+                Description: Description,
+                SBP: SBP,
+                DBP: DBP,
+                PatientClass: PatientClass
+            },  //输入参数 
+            success: function (res) {
+                if (res == true) {
+                    if (editType == 1) {
+                        editType = 0;
+                        trSeq = -1;
+                        editType = 0;
+                        CodeFlag = 0;
+                        NameFlag = 0;
+                        DescriptionFlag = 0;
+                        SBPFlag = 0;
+                        DBPFlag = 0;
+                        PatientClassFlag = 0;
+                    }
+                    if (editType == 2) {
+                        editType = 0;
+                        CodeFlag = 0;
+                        NameFlag = 0;
+                        DescriptionFlag = 0;
+                        SBPFlag = 0;
+                        DBPFlag = 0;
+                        PatientClassFlag = 0;
+                    }
+                    notice();
+                }
+                else {
+                    alert("数据插入失败，请重新输入！");
+                }
+            }
+        });
+    }
+
+    //验证输入合法性  
+    function IsLegal(o) {
+        if (document.getElementById(o).value == "") {          
+            $('.save').attr('disabled', "disabled");
+            switch (o) {
+                case "Code":
+                    CodeFlag = 0;
+                    break;
+                case "Name":
+                    NameFlag = 0;
+                    break;
+                case "Description":
+                    DescriptionFlag = 0;
+                    break;
+                case "SBP":
+                    SBPFlag = 0;
+                    break;
+                case "DBP":
+                    DBPFlag = 0;
+                    break;
+                case "PatientClass":
+                    PatientClassFlag = 0;
+                    break;
+            }
+        }
+        else {
+            switch (o) {
+                case "Code":
+                    CodeFlag = 1;
+                    break;
+                case "Name":
+                    NameFlag = 1;
+                    break;
+                case "Description":
+                    DescriptionFlag = 1;
+                    break;
+                case "SBP":
+                    var re1 = /^\d+$/;
+                    if (re1.test(document.getElementById(o).value)) {
+                        document.getElementById("SBPLable").style.color = "Black"; 
+                        $('.notice').text("");
+                        SBPFlag = 1;
+                    }
+                    else {
+                        document.getElementById("SBPLable").style.color = "Red";
+                        $('.notice').text("输入格式有误！");
+                        SBPFlag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+                case "DBP":
+                    var re2 = /^\d+$/;
+                    if (re2.test(document.getElementById(o).value)) {
+                        document.getElementById("DBPLable").style.color = "Black";
+                        $('.notice').text("");
+                        DBPFlag = 1;
+                    }
+                    else {
+                        document.getElementById("DBPLable").style.color = "Red";
+                        $('.notice').text("输入格式有误！");
+                        DBPFlag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+                case "PatientClass":
+                    PatientClassFlag = 1;
+                    break;
+            }
+            if (CodeFlag * NameFlag * DescriptionFlag * SBPFlag * DBPFlag * PatientClassFlag == 1) {
+                $('.save').removeAttr('disabled');
+            }
+        }
+    }
+
+    //操作成功提醒+关闭窗口+字典表刷新
+    var wait = 1.5;
+    function notice() {
+        if (wait == 0) {
+            window.location.reload();
+            $.modal.close();
+            wait = 1.5
+        }
+        else {
+            $('.notice').text("操作成功！字典表将立刻自动刷新");
+            wait = wait - 0.5;
+            setTimeout(notice, 500);
+        }
+    }
+
+    //去除空格
+    String.prototype.trim = function () {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
+</script>

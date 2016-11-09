@@ -1,0 +1,125 @@
+﻿@model CDMIS.ViewModels.PatientDetailInfoViewModel
+@{
+    ViewBag.Title = "详细信息";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+@using (Ajax.BeginForm(
+ "PatientDetailInfoEdit", "PatientHome",
+     new AjaxOptions
+     {
+         UpdateTargetId = "tableContainer",
+         HttpMethod = "Post",
+         OnSuccess = "",
+         
+     },
+   new {@class = "form-horizontal"}))
+{
+
+    <style type="text/css">
+        h2
+        {
+            font-size: 22px;
+            font-family: 微软雅黑;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 15px;
+            margin-top: 20px;
+        }
+        h3
+        {
+            font-size: 18px;
+            font-family: 微软雅黑;
+            font-weight: normal;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        .table1
+        {
+            font-size: 17px;
+        }
+    </style>
+    
+    @Html.HiddenFor(model => model.UserId)    
+
+    if (Model.PatientDetailInfo.Count > 0)
+    {
+        foreach (var items in Model.PatientDetailInfo)
+        {
+            
+           <div>         
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#@items[0].CategoryName">+ @items[0].CategoryName</button>
+    
+    <div id="@items[0].CategoryName" class="collapse in">
+        @if (items.Count > 0)
+        {
+            foreach (var item in items)
+            {
+                if (item.ParentCode == "")
+                {
+                    if (@item.ItemCode == "Doctor")
+                    {
+            <h3>
+                <span>@item.ItemName</span><span style="margin-left: 20px;">@item.Description</span></h3>
+                    }
+
+                    else
+                    {
+            <h3>@item.ItemName</h3>  
+                    }
+                }
+                else
+                {                    
+            <div class="form-group">
+                <label class="col-sm-4 control-label" style="font-size: 16px;">
+                    @item.ItemName
+                </label>
+                <div class="col-sm-3">
+                    @if (item.ControlType == "1")
+                    {
+                        
+                        @Html.DropDownList(item.ItemCode, item.OptionList, new { id = item.ItemCode, style = "font-size:17px;", @class = "form-control" })
+                        
+                    }
+                    else
+                    {
+                         
+                        @Html.TextBox(item.ItemCode, item.Content, new { id = item.ItemCode, style = "font-size:17px;", @class = "form-control" })
+                        
+                    }
+                </div>
+            </div>
+            
+                }
+            }
+        }
+    </div>
+    
+    </div>
+    
+           <div id="white"  style="height:20px;width:100%">
+           </div>
+        }
+        
+            
+
+      
+    <div style="margin-left:200px;margin-top:60px;">
+        <input type="submit" class="btn btn-primary" id="Sure" value="保存" style="font-size: 16px;" name="action:PatientDetailInfoEdit" />
+        <input type="submit" class="btn btn-info" style="font-size: 16px; margin-left: 100px" title="" name="action:EditCancel" value="取消" />
+    </div>
+     
+    }
+    <div id="white1" style="height: 40px; width: 100%">
+    </div>
+}
+<script type="text/javascript">
+
+    $(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(0) a").attr("id", "current");
+
+        //        $("#Sure").bind("click", function (event) {
+        //            return confirm("确定要执行此操作?")
+        //        });
+    })
+</script>

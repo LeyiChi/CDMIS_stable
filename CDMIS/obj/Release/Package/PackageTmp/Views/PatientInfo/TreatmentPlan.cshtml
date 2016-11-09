@@ -1,0 +1,291 @@
+﻿@model CDMIS.ViewModels.TreatmentViewModel
+@{
+    ViewBag.Title = "治疗方案（医生）";
+    Layout = "~/Views/Shared/_PatientInfoLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 150px;
+        width: 300px;
+    }
+    
+    #alert-container
+    {
+        height: 120px;
+        width: 350px;
+    }
+</style>
+<div onload="ShowOptions()">
+    <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+        <h2 class="text-center">
+            已有治疗列表</h2>
+        <table id="DataTable" class="display">
+            <thead>
+                <tr>
+                    <th style="width: 190px">
+                        治疗目标
+                    </th>
+                    <th style="width: 190px">
+                        治疗措施
+                    </th>
+                    <th style="width: 190px">
+                        特殊人群
+                    </th>
+                    <th style="width: 190px">
+                        治疗方案
+                    </th>
+                    <th style="width: 190px">
+                        治疗时间
+                    </th>
+                    <th style="width: 190px">
+                        疗程
+                    </th>
+                    <th style="width: 190px">
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="TPTbody">
+                @foreach (var item in Model.TreatmentList)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentGoal)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentAction)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Group)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentPlan)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatTime)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Duration)
+                        </td>
+                        <td>
+                            @if (@item.IsAllowed == true)
+                            {
+                                <button type = "button" value= "@Model.UserId#@item.UserId#@item.SortNo#@item.ReInUserId" class="btn btn-danger" id="DeleteSyp" style="font-size: 16px;" onclick="Delete(this.value)">
+                                    删除</button>
+                            }
+                            else
+                            {
+                                <button type = "button"  class="btn btn-primary"  style="font-size: 16px;" disabled="disabled">
+                                    删除</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+@using (Html.BeginForm("TreatmentPlan", "PatientInfo", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+@*@using (Ajax.BeginForm(
+     "TreatmentPlan", "PatientInfo",
+     new AjaxOptions
+     {
+         UpdateTargetId = "tableContainer",
+         HttpMethod = "Post",
+         OnSuccess = "",
+     },
+     new { @class = "form-horizontal", role="form"}))
+ {*@
+    <div style="margin-top: 2.0em; width: 100%; border: 2px dotted #3567d1; padding: 0 2.0em 2.0em 2.0em;">
+        <h2>
+            添加新的治疗方案</h2>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>治疗目标：</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.TreatmentInfo.TreatmentGoal, Model.TreatmentGoalList(), new { id = "TreatmentGoalDropDownList", @class = "form-control", style = "font-size:18px" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>治疗措施：</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.TreatmentInfo.TreatmentAction, Model.TreatmentAction(), new { id = "TreatmentActionDropDownList", @class = "form-control", style = "font-size:18px" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>特殊人群：</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.TreatmentInfo.Group, Model.SpecialGroupList(), new { id = "SpecialGroupDropDownList", @class = "form-control", style = "font-size:18px" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                疗程：</label>
+            <div class="col-sm-9">
+                @Html.DropDownListFor(model => model.TreatmentInfo.Duration, Model.DurationNameList(), new { id = "DurationNameDropDownList", @class = "form-control", style = "font-size:18px" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">
+                <sup>*</sup>治疗方案：</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.TreatmentInfo.TreatmentPlan, new { id = "TreatmentInfoTreatmentPlan", @class = "form-control" })
+            </div>
+        </div>
+        <div>
+            @Html.HiddenFor(model => model.UserId)
+            @Html.HiddenFor(model => model.PId)
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" class="btn btn-primary" id="TGBtn" value="添加" style="font-size: 16px;" />
+            </div>
+        </div>
+    </div>
+}
+@*<div id="CheckDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>错误</span></div>
+    <div class="modalContent">
+        <p>
+            治疗目标、治疗措施、特殊人群、治疗计划均不能为空！</p>
+        <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+    </div>
+</div>
+*@
+
+    <div id="addDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>信息不全！</span></div>
+    <div class="modalContent">
+        <center>
+            <p id="addDataP"></p>
+            <input type="button" class="btn btn-default simplemodal-close" value="确定" />
+        </center>
+    </div>
+</div>
+ 
+ <div id="deleteModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            是否删除此数据？</h4>
+        <div class="col-md-offset-3">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmDeleteBtn" />
+            <input type="button" value="取消" class="btn btn-default" id="cancelDeleteBtn" />
+        </div>
+    </div>
+</div>
+ 
+  
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(4) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": true,  //是否分页。
+            "iDisplayLength": 10,
+            "order": [4, 'desc'],   //排序
+            //            "sScrollX": "100%",
+            //            "sScrollY": "250px",
+            "bFilter": false
+            //            "aoColumnDefs": [{ "sWidth": "30px", "aTargets": [0] },
+            //            { "sWidth": "200px", "aTargets": [1]}]
+
+        });
+    });
+
+    //点击删除按钮，弹出对话框
+    function Delete(value) {
+        var UserId = value.split("#")[0];
+        var PId = value.split("#")[1];
+        var SortNo = value.split("#")[2];
+        var ReInUserId = value.split("#")[3];
+        //弹框提示
+        $('#deleteModal').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true
+        });
+
+        $('#confirmDeleteBtn').click(function () {
+            //连接数据库删除数据
+            $.ajax({
+                url: "/PatientInfo/DeleteTreatmentInfo",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PId: PId, SortNo: SortNo },  //输入参数
+                success: function (res) {
+                    if (res == 1) {
+                        location.reload();
+                    }
+                    else if (res == 0) {
+                        alert("删除失败！");
+                    }
+                    else {
+                        alert("数据库中未找到该数据！");
+                    }
+                }
+            });
+
+        })
+
+        $('#cancelDeleteBtn').click(function () {
+            $.modal.close();
+            $('#cancelDeleteBtn').unbind("click");
+        })
+
+    }
+
+
+    $("#TGBtn").bind("click", function (event) {
+        var TreatmentGoal = document.getElementById("TreatmentGoalDropDownList").value;
+        var TreatmentAction = document.getElementById("TreatmentActionDropDownList").value;
+        var SpecialGroup = document.getElementById("SpecialGroupDropDownList").value;
+        var TreatmentPlan = document.getElementById("TreatmentInfoTreatmentPlan").value;
+        if ((TreatmentGoal == "0") || (TreatmentAction == "0") || (SpecialGroup == "0") || (TreatmentPlan == "")) {
+            event.preventDefault();
+            Text = "";
+            if (TreatmentGoal == "0") {
+                Text += "治疗目标、";
+            }
+            if (TreatmentAction == "0") {
+                Text += "治疗措施、";
+            }
+            if (SpecialGroup == "0") {
+                Text += "特殊人群、";
+            }
+            if (TreatmentPlan == "") {
+                Text += "治疗方案、";
+            }
+            Text = Text.substr(0, Text.length - 1);
+            Text += "不能为空！";
+            $('#addDataP').html(Text);
+            $('#addDataDiv').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                containerId: 'alert-container',
+                overlayClose: true     //点击蒙层关闭窗口
+            });
+//             alert("治疗目标、治疗措施、特殊人群、治疗方案均不能为空！");
+        }
+    });
+
+
+
+
+</script>

@@ -1,0 +1,596 @@
+﻿@model CDMIS.ViewModels.BasicProfileViewModel
+@{
+    ViewBag.Title = "患者建档--个人信息";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/flexibleDisplay.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>
+<script src="../../Scripts/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 250px;
+        width: 400px;
+    }
+    #delete-container
+    {
+        height: 160px;
+        width: 400px;
+    }
+    #findPatient-container
+    {
+        height: 600px;
+        width: 900px;
+    }
+    .odd
+    {
+        background-color: #E0E0E0;
+    }
+    .even
+    {
+        background-color: #FFFFFF;
+    }
+    /* Adjusting the margins, paddings and no list styles */
+    
+    #nav
+    {
+        overflow: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #nav li
+    {
+        float: left;
+        margin: 0 -15px 0 0;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+    }
+    
+    #nav li a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 30px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #6C6C6C;
+        opacity: .8;
+        filter: alpha(opacity=30);
+    }
+    
+    #nav a:hover, #tabs a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #nav a:focus
+    {
+        outline: 0;
+    }
+    
+    #nav #currentnav
+    {
+        border-bottom-color: #00A600;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+</style>
+<input type="text" id="UId" style="display:none" value="@Model.Patient.UserId"/>
+<input type="text" id="OperationInvalidFlag" style="display:none" value="@ViewBag.OperationInvalidFlag"/>
+<input type="text" id="EditDeleteFlag" style="display:none" value="@ViewBag.EditDeleteFlag"/>
+<div style="height: 40px; display: none" id="navDiv">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId, Role = "Patient" }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@using (Html.BeginForm("BasicProfile", "DoctorHome", FormMethod.Post, new { id = "Form1", enctype = "multipart/form-data", onkeydown = "Enter()" }))
+{
+    //个人信息
+    <div class="personalInfoDiv">
+        <p class="dropdown" id="personalInfoToggle">
+            个人信息<i class="icon-arrow open-arrow"></i></p>
+        <div id="personalInfo" class="dropdown-div">
+            <div class="form-horizontal" role="form">
+                <div class="form-group" id="PhoneNoDiv">
+                    <label class="col-sm-2 control-label">
+                        *手机号</label>
+                    <div class="col-sm-4">
+                        @Html.TextBox("PhoneNo", "", new { id = "PhoneNo", @class = "form-control", @onkeyup = "IsLegal(this.id);", @onmouseup = "IsLegal(this.id);" })
+                    </div>
+                    <div class="col-sm-6">
+                        <p id="PhoneNoNull" style="display: none; color: Red">
+                            登录手机号码未填写！</p>
+                        <p id="PhoneNoError" style="display: none; color: Red">
+                            手机号码输入有误！</p>
+                        @*  <p id="PhoneNoValid" style="display: none; color: green">
+                            手机号码可以使用！</p>*@
+                        <input type="button" value="确定" style="display: none;" class="btn btn-primary validatePhoneNo" id="validatePhoneNo"/>
+                        <p id="PhoneNoTip" style="display: none; color: red">
+                            请确认手机号！</p>
+                    </div>
+                    <label class="col-sm-2 control-label idClass">
+                        患者Id</label>
+                    <div class="col-sm-4 idClass">
+                        @Html.TextBoxFor(model => model.Patient.UserId, new { id = "UserId", @class = "form-control", @readonly = "readonly" })
+                        @Html.ValidationMessageFor(model => model.Patient.UserId)
+                    </div>
+                </div>
+                <div class="form-group basicInfo integrateBasicInfoDiv" style="display: none">
+                    <label class="col-sm-2 control-label">
+                        就诊医院</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model=>model.Patient.HospitalCode, Model.HospitalList(), new { id = "HospitalCode", @class = "form-control" })
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        就诊号</label>
+                    <div class="col-sm-2">
+                        @Html.TextBoxFor(model => model.Patient.HospitalId, new { id = "HospitalUserId", @class = "form-control" })
+                    </div>
+                    @*<div class="col-sm-2">
+                        <input type="button" value="新建" class="btn btn-primary addNewPat" disabled="disabled" />
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="button" value="查找" class="btn btn-primary findPat" />
+                    </div>*@
+                    <div class="col-sm-2">
+                        <input type="button" value="同步基本信息" class="btn btn-primary integrateBasicInfo" />
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        *患者姓名</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Patient.UserName, new { id = "UserName", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.UserName)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        *性别</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model => model.Patient.Gender, Model.GenderList(), new { id = "GenderListDropDownList", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.Gender)
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        *出生日期</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Patient.Birthday, new { id = "Birthday", @onclick = "WdatePicker({maxDate:'%y-%M-%d'})", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.Birthday)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        血型</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model => model.Patient.BloodType, Model.BloodTypeList(), new { id = "BloodTypeDropDownList", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.BloodType)
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        医保类型</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(model => model.Patient.InsuranceType, Model.InsuranceTypeList(), new { id = "InsuranceTypeDropDownListFor", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.InsuranceType)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        身份证号码</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Patient.IDNo, new { id = "IDNo", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Patient.IDNo)
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        联系电话</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Phone, new { id = "Phone", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Phone)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        家庭住址</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Address, new { id = "Address", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Address)
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        职业</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Occupation, new { id = "Occupation", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Occupation)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        国籍</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.Nationality, new { id = "Nationality", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Nationality)
+                    </div>
+                </div>
+                <div class="form-group basicInfo">
+                    <label class="col-sm-2 control-label">
+                        紧急联系人</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.EmergencyContact, new { id = "EmergencyContact", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.EmergencyContact)
+                    </div>
+                    <label class="col-sm-2 control-label">
+                        紧急联系人电话</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(model => model.EmergencyContactNumber, new { id = "EmergencyContactNumber", style = "font-size:15px", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.EmergencyContactNumber)
+                    </div>
+                </div>
+            </div>
+            <input type="submit" value="下一步" class="btn btn-primary submitBtn" style="float: right" />
+        </div>
+    </div>                              
+}
+@*查找患者*@
+<div id="findPatient" style="display: none; text-align: center">
+    <div class="modalHeader">
+        <span style="margin-top: 20px">患者列表</span>
+    </div>
+    <div class="modalContent">
+        <table style="margin-top: 20px; line-height: 40px;">
+            <thead>
+                <tr>
+                    <th style="text-align: center">
+                        患者Id
+                    </th>
+                    <th style="text-align: center">
+                        患者姓名
+                    </th>
+                    <th style="text-align: center">
+                        性别
+                    </th>
+                    <th style="text-align: center">
+                        年龄
+                    </th>
+                    <th style="text-align: center">
+                        已购模块
+                    </th>
+                    <th style="text-align: center">
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="TableBody">
+                @if (Model.PatientList.Count > 0)
+                {
+                    foreach (var item in Model.PatientList)
+                    {            
+                    <tr>
+                        <td width="5%" style="border: 0;">
+                            @item.UserId
+                        </td>
+                        <td width="5%" style="border: 0;">
+                            @item.UserName
+                        </td>
+                        <td width="5%" style="border: 0;">
+                            @item.Gender
+                        </td>
+                        <td width="5%" style="border: 0;">
+                            @item.Age
+                        </td>
+                        <td width="50%" style="border: 0;">
+                            @item.Module
+                        </td>
+                        <td width="5%" style="border: 0;">
+                            <input type="button" value="选择" class="btn btn-primary selectPatBtn" style="width: 50px;
+                                height: 30px" />
+                        </td>
+                    </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="NotExist">
+                        <td style="font-size: 15px;" colspan="9">
+                            暂无数据！
+                        </td>
+                    </tr>
+            
+                }
+            </tbody>
+        </table>
+    </div>
+    <input type="button" class="btn btn-primary simplemodal-close" id="cancel" value="取消" />
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+
+        if ($("#OperationInvalidFlag").val() == "false") {
+            $("#PhoneNo").attr("readonly", "readonly");
+            //$(".integrateBasicInfoDiv").hide();
+
+            var UserId = "@Model.Patient.UserId";
+
+            GetPhoneNoByUserId(UserId);
+            //$(".basicInfo").hide();
+
+        }
+        else {
+            $(".basicInfo").hide();
+            $(".idClass").hide();
+            $(".submitBtn").hide();
+        }
+
+        $("#TableBody tr:odd").addClass("odd");
+        $("#TableBody tr:even").addClass("even");
+
+        var UId = "@Model.Patient.UserId";
+        if (UId != "") {
+            $("#navDiv").show();
+            $("#nav a").attr("id", ""); //Reset id's 
+            $("#nav li:eq(0) a").attr("id", "currentnav");
+
+        }
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+        }
+    })
+
+    function addNewPat() {
+        $.ajax({
+            url: "/DoctorHome/AddNewPat",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {},  //输入参数
+            success: function (res) {
+                if (res != "") {
+                    $("#UserId").val(res);
+                    //$(".addNewPat").attr('disabled', 'disabled');
+                }
+                else {
+                    alert("新建患者失败，请重试！");
+                }
+            }
+        })
+    }
+
+    $(".findPat").click(function () {
+        $('#findPatient').modal({
+            //closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'findPatient-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    })
+
+    $(document).on("click", ".selectPatBtn", function () {
+        var trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+        var PId = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+        $("#cancel").click();
+        window.location.href = "/DoctorHome/BasicProfile?PatientId=" + PId;
+    })
+
+    //验证输入参数值合法性
+    function IsLegal(o) {
+        if (document.getElementById(o).value != "") {
+            var re = /^1[3|4|5|7|8][0-9]\d{8}$/;
+            if (!re.test(document.getElementById(o).value)) {
+                $("#PhoneNoError").show();
+                $(".validatePhoneNo").hide();
+
+            }
+            else {
+                $("#PhoneNoError").hide();
+                $(".validatePhoneNo").show();
+            }
+        }
+    }
+
+    function Enter() {
+        if (event.keyCode == 13) {
+            document.getElementById("validatePhoneNo").click();
+            return false;
+        }
+    }
+
+    $(document).on("click", ".validatePhoneNo", function () {
+        var PhoneNo = $("#PhoneNo").val();
+        checkPhoneNoRepeat(PhoneNo);
+    })
+
+    function checkPhoneNoRepeat(PhoneNo) {
+        $.ajax({
+            url: "/DoctorHome/checkPhoneNoRepeat",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PhoneNo: PhoneNo },  //输入参数
+            success: function (res) {
+                if (res == "1") {
+                    //手机号码不存在
+                    $(".validatePhoneNo").hide();
+                    $("#PhoneNo").attr("readonly", "readonly");
+                    $(".basicInfo").show();
+                    addNewPat();
+                    $(".idClass").show();
+                    $(".integrateBasicInfoDiv").show();
+                    $(".submitBtn").show();
+                }
+                else {
+                    //手机号码已存在,根据手机号码获取Id
+                    UserId = GetIDByPhoneNo(PhoneNo);
+                    if (UserId != "") {
+                        //患者，医生，健康专员，管理员   
+
+                        //角色判断
+                        GetRolesByUserId(UserId);
+                    }
+                    else {
+                        //管理员使用该手机号码 没有使用过其他角色
+                        $("#PhoneNoTip").show();
+                        //                        $(".validatePhoneNo").hide();
+                        //                        $("#PhoneNo").attr("readonly", "readonly");
+                        //                        $(".basicInfo").show();
+                        //                        addNewPat();
+                        //                        $(".idClass").show();
+                        //                        $(".integrateBasicInfoDiv").show();
+                        //                        $(".submitBtn").show();
+
+
+                    }
+                }
+            }
+        })
+    }
+
+    function GetIDByPhoneNo(PhoneNo) {
+        var UserId = "";
+        $.ajax({
+            url: "/DoctorHome/GetIDByPhoneNo",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PhoneNo: PhoneNo },  //输入参数
+            success: function (res) {
+                if (res != "") {
+                    //取到Id
+                    //$("#PhoneNoValid").show();
+                    UserId = res;
+                }
+                else {
+                    //Id未取到
+                    $(".basicInfo").show();
+                    UserId = "";
+                }
+            }
+        })
+        return UserId;
+    }
+
+    function GetPhoneNoByUserId(UserId) {
+        //var UserId = "";
+        $.ajax({
+            url: "/DoctorHome/GetPhoneNoByUserId",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId },  //输入参数
+            success: function (res) {
+
+                if (res != "") {
+
+                    //取到Id
+                    $("#PhoneNo").val(res);
+                }
+                else {
+                    //手机号码未取到
+                    $("#PhoneNoNull").show();
+                }
+            },
+            error: function () { alert("GetPhoneNoByUserIdError"); }
+        })
+        //return UserId;
+    }
+
+    function GetRolesByUserId(UserId) {
+        //alert(UserId);
+        $.ajax({
+            url: "/DoctorHome/GetRolesByUserId",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId },  //输入参数
+            success: function (res) {
+                if (res.length != 0) {
+                    //ID存在，有角色
+                    for (var item in res) {
+                        if (res[item] == "Patient") {
+                            //患者角色
+                            window.location.href = "/DoctorHome/BasicProfile?PatientId=" + UserId + "&Role=" + res[item];
+                        }
+                    }
+                    for (var item in res) {
+                        //alert(res[item]);
+                        //医生和健康专员角色
+                        window.location.href = "/DoctorHome/BasicProfile?PatientId=" + UserId + "&Role=" + res[item];
+
+                    }
+                }
+                else {
+                    //ID存在，没有角色
+                    window.location.href = "/DoctorHome/BasicProfile?PatientId=" + UserId + "&Role=Patient";
+                }
+            }
+        })
+    }
+
+    $(document).on("click", ".integrateBasicInfo", function () {
+
+        var CDMISPatientId = $("#UserId").val();
+        var PhoneNo = $("#PhoneNo").val();
+        var HospitalCode = $("#HospitalCode").val();
+        var PatientId = $("#HospitalUserId").val();
+
+        $.ajax({
+            url: "/DoctorHome/GetIntegrationBasicData",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: CDMISPatientId, PatientId: PatientId, HospitalCode: HospitalCode },  //输入参数
+            success: function (res) {
+                if (res == "") {
+                    //集成成功
+                    //alert(res);
+                    //$("#simple-overlay").hide();
+                    //集成成功后操作
+                    //alert(UserId);
+                    IntegrationSuccess(CDMISPatientId, PhoneNo, PatientId, HospitalCode);
+                }
+                else {
+                    alert("基本信息集成失败，请重试！");
+                }
+            }
+
+        });
+
+    })
+
+    function IntegrationSuccess(UserId, PhoneNo, HospitalId, HospitalCode) {
+        $.ajax({
+            url: "/DoctorHome/setMstUserPhoneNoRoleMatch",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId, PhoneNo: PhoneNo, HospitalId: HospitalId, HospitalCode: HospitalCode },  //输入参数
+            success: function (res) {
+                if (res == "1") {
+                    //操作成功
+                    window.location.href = "/DoctorHome/BasicProfile?PatientId=" + UserId + "&Role=" + "Patient";
+                }
+                else {
+                    alert("基本信息集成失败，请重试！");
+                }
+            }
+
+        });
+    }
+</script>

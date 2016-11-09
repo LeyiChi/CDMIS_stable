@@ -1,0 +1,1629 @@
+﻿@model CDMIS.ViewModels.BasicProfileViewModel
+@{
+    ViewBag.Title = "患者建档--健康模块";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/flexibleDisplay.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<link rel="Stylesheet" href="../../Content/chosen.css" />
+<script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+
+<script src="../../Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+<script src="../../Scripts/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 250px;
+        width: 400px;
+    }
+    #delete-container
+    {
+        height: 160px;
+        width: 400px;
+    }
+    #alert-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+    .scrollTbody{
+	    display: block;
+		height: 600px;
+		overflow: auto;
+		width: 100%;
+		
+    }
+</style>
+<input type="text" id="UId" style="display:none" value="@Model.Patient.UserId"/>
+<input type="text" id="OperationInvalidFlag" style="display:none" value="@ViewBag.OperationInvalidFlag"/>
+<input type="text" id="EditDeleteFlag" style="display:none" value="@ViewBag.EditDeleteFlag"/>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId, Role = "Patient" }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo", new { PointedPatient = @Model.Patient.UserId });}
+@using (Html.BeginForm("ModuleProfile", "DoctorHome", FormMethod.Post, new { id = "Form1", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(model => model.Patient.UserId);
+    @Html.HiddenFor(model => model.Patient.UserName);
+    @Html.HiddenFor(model => model.Patient.Gender);
+    @Html.HiddenFor(model => model.Patient.Birthday);
+
+                                                    //健康模块
+    <div class="moduleInfoDiv">
+        <p class="dropdown" id="moduleInfoToggle">
+            健康模块<i class="icon-arrow close-arrow"></i></p>
+        <div id="moduleInfo" class="dropdown-div">
+            <div id="editModule" class="form-horizontal" role="form" style="margin-left: 12px;">
+                @if (Model.ModuleBoughtInfo.Count > 0)
+                {
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" style="text-align: left; font-size: 17px">
+                            已购买的模块信息</label>
+                    </div>
+                    <div class="form-group">
+                        @foreach (var items in Model.ModuleBoughtInfo)
+                        {
+                            <div class="col-sm-2">
+                                @Html.ActionLink(@items.ModuleName, "ModuleProfile", new { PatientId = @Model.Patient.UserId, Category = @items.Category }, new { @class = "btn btn-primary" })</div>
+                        }
+                    </div>
+                }
+                @if (Model.ModuleUnBoughtInfo.Count > 0)
+                {
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" style="text-align: left; font-size: 17px">
+                            未购买的模块信息</label>
+                    </div>
+                    <div class="form-group">
+                        @foreach (var items in Model.ModuleUnBoughtInfo)
+                        {
+                            <div class="col-sm-2">
+                                @Html.ActionLink(@items.ModuleName, "ModuleProfile", new { PatientId = @Model.Patient.UserId, Category = @items.Category }, new { @class = "btn btn-primary" })</div>
+                        }
+                    </div>
+                }
+                @if (Model.ModuleDetailList.Count > 0)
+                {
+                    @Html.HiddenFor(model => model.ModuleDetailList[0].CategoryCode);
+                    @Html.HiddenFor(model => model.InvalidFlag);
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" style="text-align: left; font-size: 17px">@Model.ModuleDetailList[0].CategoryName</label>
+                        @if (Model.InvalidFlag == true)
+                        {
+                            if (Model.ModuleDetailList[0].EditDeleteFlag == "true")
+                            {
+                                <input type="button" class="btn btn-primary editModuleBtn" value="编辑" onclick="EnableEdit();"/>
+                                <input type="button" class="btn btn-primary deleteModuleBtn" value="删除" id="@Model.ModuleDetailList[0].CategoryCode"/>
+                            }
+                            else
+                            {
+                                <input type="button" class="btn btn-primary editModuleBtn" value="编辑" onclick="EnableEdit();" disabled="disabled"/>
+                                <span>您没有权限编辑，请找相应负责医生！</span>
+                                <input type="button" class="btn btn-primary deleteModuleBtn" value="删除" id="@Model.ModuleDetailList[0].CategoryCode" disabled="disabled"/>
+                                <span>您没有权限删除，请找相应负责医生！</span>
+                            }
+                        }
+                        @if (Model.InvalidFlag == true)
+                        {
+                            <input type="submit" value="保存" class="btn btn-primary submitBtn" disabled="disabled"/>
+                            <input type="button" class="btn btn-primary" value="同步模块信息" name="@Model.ModuleDetailList[0].CategoryCode" onclick="SynDetailInfo(this.name);" disabled="disabled"/>
+                        }
+                        else
+                        {
+                            <input type="submit" value="保存" class="btn btn-primary submitBtn"/>
+                            <input type="button" class="btn btn-primary" value="同步模块信息" name="@Model.ModuleDetailList[0].CategoryCode" onclick="SynDetailInfo(this.name);"/>
+                        }
+                    </div>
+                    <div class="scrollTbody" style="overflow:-Scroll;overflow-x:hidden">
+                        @foreach (var items in Model.ModuleDetailList)
+                        {
+                            if (items.ParentCode == "")
+                            {
+                                if (@items.ItemCode == "Doctor")
+                                {
+                                    if (Model.InvalidFlag == true)
+                                    {
+                                        <p>
+                                            <span>@items.ItemName</span><input type="text" style="display:none" id="DoctorIdInDuty" readonly="readonly" value="@items.Value" /><span>@items.Content</span></p>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">@items.ItemName</label>
+                                    </div> 
+                                }
+                            }
+                            else
+                            {
+                                <div class="form-group" title="@items.GroupHeaderFlag" lang="@items.ParentCode">
+                                    <label class="col-sm-4 control-label">
+                                        @if (items.ItemSeq != 1) { }
+                                        else
+                                        {
+                                            @items.ItemName
+                                        }
+                                    </label>
+                                            
+                                    @if (items.ControlType == "1" || items.ControlType == "3")
+                                    { 
+                                        @* 1：下拉框  3：单选框*@
+                                        <div class="col-sm-6">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                if (items.ControlType == "1" && items.GroupHeaderFlag == 0)
+                                                {
+                                                    @Html.DropDownList(items.ItemCode, items.OptionList, new { id = items.ItemCode, style = "font-size:18px", title = "M", @class = "form-control defaultSelected", disabled = "disabled", @onchange = "ShowOrHide(this.id, this.value);" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownList(items.ItemCode, items.OptionList, new { id = items.ItemCode, style = "font-size:18px", title = "M", @class = "form-control defaultSelected", disabled = "disabled" })
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (items.ControlType == "1" && items.GroupHeaderFlag == 0)
+                                                {
+                                                    @Html.DropDownList(items.ItemCode, items.OptionList, new { id = items.ItemCode, style = "font-size:18px", title = "M", @class = "form-control defaultSelected", @onchange = "ShowOrHide(this.id, this.value);" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownList(items.ItemCode, items.OptionList, new { id = items.ItemCode, style = "font-size:18px", title = "M", @class = "form-control defaultSelected" })
+                                                }
+                                            }
+                                            <p class="@items.ItemCode" style="font-size: 24px; color: Red"></p>
+                                        </div>
+                                    }
+                                    @if (items.ControlType == "2")
+                                    {
+                                        @* 复选框 *@
+                                        <div class="col-sm-6">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                @Html.ListBox(items.ItemCode, items.OptionList, new { id = items.ItemCode, title = "M", @class = "form-control chzn-select", multiple = "multiple", style = "font-size:34px;width:100%;height:34px;" })
+                                            }
+                                            else
+                                            {
+                                                @Html.ListBox(items.ItemCode, items.OptionList, new { id = items.ItemCode, title = "M", @class = "form-control chzn-select", multiple = "multiple", style = "font-size:34px;width:100%;height:34px;" })
+                                            }
+                                        </div>
+                                    }
+                                    @if (items.ControlType == "4" || items.ControlType == "6")
+                                    { 
+                                        @* 4：自由文本  6：数字加单位*@
+                                        <div class="col-sm-6">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, title = "M", style = "font-size:17px;", @class = "form-control", disabled = "disabled" })
+                                            }
+                                            else
+                                            {
+                                                @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, title = "M", style = "font-size:17px;", @class = "form-control" })
+                                            }
+                                            <p class="@items.ItemCode" style="font-size: 24px; color: Red"></p>
+                                        </div>
+                                    }
+                                    @if (items.ControlType == "5")
+                                    { 
+                                        @* 数字 *@
+                                        <div class="col-sm-6">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                if (items.ItemName == "身高（cm）" || items.ItemName == "体重（kg）" || items.ItemName == "尿白蛋白浓度" || items.ItemName == "尿肌酐" || items.ItemName == "腰围" || items.ItemName == "臀围")
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);", @onchange = "Calculate(this.lang,this.value);", disabled = "disabled", @lang = items.ItemName })
+                                                }
+                                                else if (items.ItemName == "BMI" || items.ItemName == "腰臀比" || (items.ItemName == "尿白蛋白与尿肌酐的比值" && Model.ModuleDetailList[0].CategoryCode != "M3"))
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);", disabled = "disabled", @lang = items.ItemName })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);", disabled = "disabled" })
+                                                }
+                                                <p class="@items.ItemCode" style="font-size: 24px; color: Red"></p>
+                                            }
+                                            else
+                                            {
+                                                if (items.ItemName == "身高（cm）" || items.ItemName == "体重（kg）" || items.ItemName == "尿白蛋白浓度" || items.ItemName == "尿肌酐" || items.ItemName == "腰围" || items.ItemName == "臀围")
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);", @onchange = "Calculate(this.lang,this.value);", @lang = items.ItemName })
+                                                }
+                                                else if (items.ItemName == "BMI" || items.ItemName == "腰臀比" || (items.ItemName == "尿白蛋白与尿肌酐的比值" && Model.ModuleDetailList[0].CategoryCode != "M3"))
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);", @lang = items.ItemName })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onkeyup = "IsLegal(this.id);" })
+                                                }
+                                                <p class="@items.ItemCode" style="font-size: 24px; color: Red"></p>
+                                            }
+                                        </div>
+                                    }
+                                    @if (items.ControlType == "7")
+                                    {
+                                        @* 两层选择 *@
+                                        <div class="col-sm-3">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                <select id="@items.ItemCode@items.ItemSeq" title="M" name="@items.OptionCategory" class="form-control" onchange="DrugTypeChanged('@items.OptionCategory','@items.ItemCode',@items.ItemSeq);" style="font-size:17px;" disabled="disabled">
+                                                    <option value="@items.Value"></option>
+                                                </select>
+                                            }
+                                            else
+                                            {
+                                                <select id="@items.ItemCode@items.ItemSeq" title="M" name="@items.OptionCategory" class="form-control" onchange="DrugTypeChanged('@items.OptionCategory','@items.ItemCode',@items.ItemSeq);" style="font-size:17px;">
+                                                    <option value="@items.Value"></option>
+                                                </select>
+                                            }
+                                        </div>
+                                        <div class="col-sm-3">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                <select id="@items.ItemSeq@items.ItemCode" title="M" name="@items.OptionCategory" class="form-control" style="font-size:17px" disabled="disabled">
+                                                    <option value=""></option>
+                                                </select>
+                                            }
+                                            else
+                                            {
+                                                <select id="@items.ItemSeq@items.ItemCode" title="M" name="@items.OptionCategory" class="form-control" style="font-size:17px">
+                                                    <option value=""></option>
+                                                </select>
+                                            }
+                                        </div>
+                                            if (items.OptionCategory != "")
+                                            {
+                                                if (Model.InvalidFlag == true)
+                                                {
+                                                    if (items.ItemSeq == 1)
+                                                    {
+                                                        <div class="col-sm-1"><input type="button" class="btn btn-primary" id="@items.OptionCategory.Substring(3)" name="@items.ItemCode" lang="@items.ItemSeq" title="M" value="添加" onclick="AddDrugInfo(this.id,this.name,this.lang);" disabled="disabled"/></div>
+                                                        <div class="col-sm-1"><input type="button" class="btn btn-primary" id="@items.OptionCategory.Substring(3)" name="@items.ItemCode" lang="@items.ItemSeq" title="M" value="删除" onclick="DeleteDrugInfo(this.id,this.name,this.lang);" disabled="disabled"/></div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (items.ItemSeq == 1)
+                                                    {
+                                                        <div class="col-sm-1"><input type="button" class="btn btn-primary" id="@items.OptionCategory.Substring(3)" name="@items.ItemCode" lang="@items.ItemSeq" title="M" value="添加" onclick="AddDrugInfo(this.id,this.name,this.lang);"/></div>
+                                                        <div class="col-sm-1"><input type="button" class="btn btn-primary" id="@items.OptionCategory.Substring(3)" name="@items.ItemCode" lang="@items.ItemSeq" title="M" value="删除" onclick="DeleteDrugInfo(this.id,this.name,this.lang);"/></div>
+                                                    }
+                                                }
+                                            }
+                                    }
+                                    @if (items.ControlType == "8")
+                                    {
+                                        <div class="col-sm-6">
+                                            <input type="button" class="btn btn-primary" id="@items.ItemCode" name="@items.ItemCode" value="+" onclick="ShowOrHide(this.id,this.value);"/>
+                                        </div>
+                                    }
+                                    @if (items.ControlType == "9")
+                                    {
+                                        @*日期选择*@
+                                        <div class="col-sm-6">
+                                            @if (Model.InvalidFlag == true)
+                                            {
+                                                @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onclick = "WdatePicker({maxDate:'%y-%M-%d'})", disabled = "disabled" })
+                                            }
+                                            else
+                                            {
+                                                @Html.TextBox(items.ItemCode, items.Content, new { id = items.ItemCode, style = "font-size:17px;", title = "M", @class = "form-control", @onclick = "WdatePicker({maxDate:'%y-%M-%d'})" })
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>       
+        @Html.ActionLink("下一步", "HealthCoachManagement", new { PatientId = @Model.Patient.UserId }, new { @class = "btn btn-primary" })
+}
+<div id="DeleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>删除</span></div>
+    <div class="modalContent">
+        <div class="form-horizontal" role="form">
+            <p>
+                确定删除？</p>
+            <table>
+                <tr>
+                    <td>
+                        <input type="button" class="btn btn-primary sureModuleBtn" value="确定" />
+                    </td>
+                    <td>
+                        <input type="button" class="btn btn-default simplemodal-close" id="cancelDelete"
+                            value="取消" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+@*alert弹出框*@
+<div id="alertDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>提示框</span></div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        @*<input type="text" disabled="disabled" id="Warning"/>*@
+        <p id="Warning">
+        </p>
+        <table>
+            <tr>
+                <td>
+                    <input type="button" class="btn btn-primary Sure" value="确定" />
+                </td>
+                <td>
+                    <input type="button" class="btn btn-default simplemodal-close" id="Close" style="display: none"
+                        value="取消" />
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</div>
+@*同步成功弹出框*@
+<div id="integrateDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>提示框</span></div>
+    <div class="modalContent">
+        @*<input type="text" disabled="disabled" id="Warning"/>*@
+        <center>
+            <h4 id="warningP">
+            </h4>
+            <input type="button" class="btn btn-primary Sure" value="确定" />
+        </center>
+    </div>
+</div>
+<script type="text/javascript">
+    var PatientId = "@Model.Patient.UserId";
+    var weight = $('*[lang="体重（kg）"]').val();
+    var height = $('*[lang="身高（cm）"]').val();
+    var WSize = $('*[lang="腰围"]').val();
+    var HSize = $('*[lang="臀围"]').val();
+    var NDB = $('*[lang = "尿白蛋白浓度"]').val();
+    var NJG = $('*[lang = "尿肌酐"]').val();
+
+    //进入编辑状态
+    function EnableEdit() {
+        $('*[title="M"]').removeAttr('disabled');
+        $('*[type="submit"]').removeAttr('disabled');
+        $('*[value="同步模块信息"]').removeAttr('disabled');
+    }
+
+    function Calculate(name, value) {
+        if (name == "体重（kg）" || name == "身高（cm）") {
+            weight = $('*[lang="体重（kg）"]').val();
+            height = $('*[lang="身高（cm）"]').val();
+            if (height != 0 && height != undefined)
+                $('*[lang="BMI"]').val((weight * 10000 / (height * height)).toFixed(1));
+            else
+                $('*[lang="BMI"]').val("");
+        }
+        if (name == "腰围" || name == "臀围") {
+            WSize = $('*[lang="腰围"]').val();
+            HSize = $('*[lang="臀围"]').val();
+            if (HSize != 0 && HSize != undefined)
+                $('*[lang="腰臀比"]').val((WSize / HSize).toFixed(1));
+            else
+                $('*[lang="腰臀比"]').val("");
+        }
+        if (name == "尿白蛋白浓度" || name == "尿肌酐") {
+            NDB = $('*[lang = "尿白蛋白浓度"]').val();
+            NJG = $('*[lang = "尿肌酐"]').val();
+            if (NJG != 0 && NJG != undefined)
+                $('*[lang="尿白蛋白与尿肌酐的比值"]').val((NDB / NJG).toFixed(1));
+            else
+                $('*[lang="尿白蛋白与尿肌酐的比值"]').val("");
+        }
+    }
+
+    //初始加载药品类型和药品名
+    function GetDrugTypeList() {
+        var DrugHTValue = new Array();
+        var DrugDBValue = new Array();
+        var DrugLPValue = new Array();
+        var DrugUAValue = new Array();
+        var i = 1;
+        while ($("#QE0001" + i).length > 0) {
+            $.ajax({
+                url: "/DoctorHome/GetTypeNameList",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { Category: "MstHypertensionDrug" },  //输入参数
+                success: function (res) {
+                    DrugHTValue[i - 1] = $("#QE0001" + i).val();
+                    $("#QE0001" + i).empty();
+                    var InitialElement = $("<option></option>").text("请选择");
+                    InitialElement.attr('value', "");
+                    $("#QE0001" + i).append(InitialElement);
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Name = TypeNameList.split("|")[0];
+                        var Code = TypeNameList.split("|")[1];
+                        var NewElement = $("<option></option>").text(Name);
+                        NewElement.attr('value', Code);
+                        $("#QE0001" + i).append(NewElement);
+                    }
+                }
+            });
+            $('*[id="MstHypertensionDrug"]').attr('lang', i);
+            i = i + 1;
+        }
+        i = 1;
+        while ($("#QE0002" + i).length > 0) {
+            $.ajax({
+                url: "/DoctorHome/GetTypeNameList",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { Category: "MstDiabetesDrug" },  //输入参数
+                success: function (res) {
+                    DrugDBValue[i - 1] = $("#QE0002" + i).val();
+                    $("#QE0002" + i).empty();
+                    var InitialElement = $("<option></option>").text("请选择");
+                    InitialElement.attr('value', "");
+                    $("#QE0002" + i).append(InitialElement);
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Name = TypeNameList.split("|")[0];
+                        var Code = TypeNameList.split("|")[1];
+                        var NewElement = $("<option></option>").text(Name);
+                        NewElement.attr('value', Code);
+                        $("#QE0002" + i).append(NewElement);
+                    }
+                }
+            });
+            $('*[id="MstDiabetesDrug"]').attr('lang', i);
+            i = i + 1;
+        }
+        i = 1;
+        while ($("#QE0003" + i).length > 0) {
+            $.ajax({
+                url: "/DoctorHome/GetTypeNameList",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { Category: "MstLipidDrug" },  //输入参数
+                success: function (res) {
+                    DrugLPValue[i - 1] = $("#QE0003" + i).val();
+                    $("#QE0003" + i).empty();
+                    var InitialElement = $("<option></option>").text("请选择");
+                    InitialElement.attr('value', "");
+                    $("#QE0003" + i).append(InitialElement);
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Name = TypeNameList.split("|")[0];
+                        var Code = TypeNameList.split("|")[1];
+                        var NewElement = $("<option></option>").text(Name);
+                        NewElement.attr('value', Code);
+                        $("#QE0003" + i).append(NewElement);
+                    }
+                }
+            });
+            $('*[id="MstLipidDrug"]').attr('lang', i);
+            i = i + 1;
+        }
+        i = 1;
+        while ($("#QE0004" + i).length > 0) {
+            $.ajax({
+                url: "/DoctorHome/GetTypeNameList",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { Category: "MstUricAcidReductionDrug" },  //输入参数
+                success: function (res) {
+                    DrugUAValue[i - 1] = $("#QE0004" + i).val();
+                    $("#QE0004" + i).empty();
+                    var InitialElement = $("<option></option>").text("请选择");
+                    InitialElement.attr('value', "");
+                    $("#QE0004" + i).append(InitialElement);
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Name = TypeNameList.split("|")[0];
+                        var Code = TypeNameList.split("|")[1];
+                        var NewElement = $("<option></option>").text(Name);
+                        NewElement.attr('value', Code);
+                        $("#QE0004" + i).append(NewElement);
+                    }
+                }
+            });
+            $('*[id="MstUricAcidReductionDrug"]').attr('lang', i);
+            i = i + 1;
+        }
+        for (i = 1; i <= DrugHTValue.length; i++) {
+            $("#QE0001" + i).val(DrugHTValue[i - 1].split(",")[0]);
+            DrugTypeChanged("Cm.MstHypertensionDrug", "QE0001", i);
+            $("#" + i + "QE0001").val(DrugHTValue[i - 1].split(",")[1]);
+        }
+        for (i = 1; i <= DrugDBValue.length; i++) {
+            $("#QE0002" + i).val(DrugDBValue[i - 1].split(",")[0]);
+            DrugTypeChanged("Cm.MstDiabetesDrug", "QE0002", i);
+            $("#" + i + "QE0002").val(DrugDBValue[i - 1].split(",")[1]);
+        }
+        for (i = 1; i <= DrugLPValue.length; i++) {
+            $("#QE0003" + i).val(DrugLPValue[i - 1].split(",")[0]);
+            DrugTypeChanged("Cm.MstLipidDrug", "QE0003", i);
+            $("#" + i + "QE0003").val(DrugLPValue[i - 1].split(",")[1]);
+        }
+        for (i = 1; i <= DrugUAValue.length; i++) {
+            $("#QE0004" + i).val(DrugUAValue[i - 1].split(",")[0]);
+            DrugTypeChanged("Cm.MstUricAcidReductionDrug", "QE0004", i);
+            $("#" + i + "QE0004").val(DrugUAValue[i - 1].split(",")[1]);
+        }
+    }
+
+    //根据类型动态加载药品名
+    function DrugTypeChanged(Category, ItemCode, ItemSeq) {
+        var DrugTypeSelected = $("#" + ItemCode + ItemSeq).val()
+        $.ajax({
+            url: "/DoctorHome/GetListbyTypeName",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { TypeSelected: DrugTypeSelected, Category: Category },  //输入参数
+            success: function (res) {
+                $("#" + ItemSeq + ItemCode).empty();
+                var InitialElement = $("<option></option>").text("");
+                InitialElement.attr('value', "");
+                $("#" + ItemSeq + ItemCode).append(InitialElement);
+                for (var item in res) {
+                    var DrugNameList = res[item];
+                    var Name = DrugNameList.split("|")[0];
+                    var Code = DrugNameList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#" + ItemSeq + ItemCode).append(NewElement);
+                }
+            }
+        });
+    }
+
+    //增加药品
+    function AddDrugInfo(Category, ItemCode, ItemSeq) {
+        var Seq = parseInt(ItemSeq);
+        $("#" + ItemCode + Seq).after('<select id="' + ItemCode + (Seq + 1) + '" title="M" name="Cm.' + Category + '" class="form-control" onchange="DrugTypeChanged(this.name,' + "'" + ItemCode + "'," + (Seq + 1) + ');" style="font-size:17px;margin-top:15px;"><option value=""></option></select>');
+        $.ajax({
+            url: "/DoctorHome/GetTypeNameList",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { Category: Category },  //输入参数
+            success: function (res) {
+                $("#" + ItemCode + (Seq + 1)).empty();
+                var InitialElement = $("<option></option>").text("请选择");
+                InitialElement.attr('value', "");
+                $("#" + ItemCode + (Seq + 1)).append(InitialElement)
+                for (var item in res) {
+                    var TypeNameList = res[item];
+                    var Name = TypeNameList.split("|")[0];
+                    var Code = TypeNameList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#" + ItemCode + (Seq + 1)).append(NewElement)
+                }
+            }
+        });
+        $("#" + Seq + ItemCode).after('<select id="' + (Seq + 1) + ItemCode + '" title="M" name="Cm.' + Category + '" class="form-control" style="font-size:17px;margin-top:15px;"><option value=""></option></select>');
+        $("*[id=" + Category + "]").attr('lang', (Seq + 1));
+    }
+
+    //删除药品
+    function DeleteDrugInfo(Category, ItemCode, ItemSeq) {
+        var Seq = parseInt(ItemSeq);
+        if (Seq == "1") {
+            $("#" + ItemCode + ItemSeq).val("");
+            DrugTypeChanged("Cm." + Category, ItemCode, ItemSeq);
+            return;
+        }
+        else {
+            $("#" + ItemCode + ItemSeq).remove();
+            $("#" + ItemSeq + ItemCode).remove();
+            $("*[id=" + Category + "]").attr('lang', (Seq - 1));
+        }
+    }
+
+    //添加口服药数据
+    $(".submitBtn").click(function () {
+        var k = 0;
+        for (i = 1; i <= 4; i++) {
+            if ($("#QE000" + i + "1").length != 0) {
+                k = 0;
+                for (j = 1; k != 2; j++) {
+                    $.ajax({
+                        url: "/DoctorHome/DeleteDrugData",
+                        type: "GET",
+                        dataType: "json",
+                        async: false,
+                        data: { PatientId: PatientId, CategoryCode: "M", ItemCode: "QE000" + i, ItemSeq: j },  //输入参数
+                        success: function (res) {
+                            k = res;
+                        }
+                    });
+                }
+            }
+        }
+        for (i = 1; i <= 4; i++) {
+            k = 0;
+            for (j = 1; k != 2; j++) {
+                k = 2;
+                var Type = $("#QE000" + i + j).val();
+                var Code = $("#" + j + "QE000" + i).val();
+                if (Code != undefined && Code != "") {
+                    var Value = Type + "," + Code;
+                    $.ajax({
+                        url: "/DoctorHome/SetDrugData",
+                        type: "GET",
+                        dataType: "json",
+                        async: false,
+                        data: { PatientId: PatientId, CategoryCode: "M", ItemCode: "QE000" + i, ItemSeq: j, Value: Value, SortNo: j },  //输入参数
+                        success: function (res) {
+                            k = res;
+                        }
+                    });
+                }
+            }
+        }
+    })
+
+    //同步部分模块信息
+    function SynDetailInfo(Module) {
+        if(Module == 'M1'){
+            $.ajax({
+                url: "/DoctorHome/SynBasicInfoDetail",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PatientId: PatientId },  //输入参数
+                success: function (res) {
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Code = TypeNameList.split("|")[0];
+                        var Value = TypeNameList.split("|")[1];
+                        var EDate = TypeNameList.split("|")[2];
+                        if (Code == "左心室肥大") {
+                            $("#QB0002").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60)
+                            {
+                                $("#QB0002").attr("style", $("#QB0002").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QB0002").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QB0002").show();
+                            }
+                            else
+                            {
+                                $("#QB0002").attr("style", $("#QB0002").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QB0002").hide();
+                            }
+                        }
+                        if (Code == "房颤") {
+                            $("#QA0005").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QA0005").attr("style", $("#QA0005").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QA0005").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QA0005").show();
+                            }
+                            else {
+                                $("#QA0005").attr("style", $("#QA0005").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QA0005").hide();
+                            }
+                        }
+                        if (Code == "心脏瓣膜疾病") {
+                            $("#QA0006").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QA0006").attr("style", $("#QA0006").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QA0006").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QA0006").show();
+                            }
+                            else {
+                                $("#QA0006").attr("style", $("#QA0006").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QA0006").hide();
+                            }
+                        }
+                        if (Code == "62.00028") {
+                            $("#QH0003").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0003").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0003").show();
+                            }
+                            else {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0003").hide();
+                            }
+                        }
+                        if (Code == "62.2713") {
+                            $("#QH0001").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0001").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0001").show();
+                            }
+                            else {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0001").hide();
+                            }
+                        }   
+                        if (Code == "62.63304") {
+                            $("#QH0002").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0002").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0002").show();
+                            }
+                            else {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0002").hide();
+                            }
+                        }
+                        if (Code == "JY0277") {
+                            $("#QH0004").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0004").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0004").show();
+                            }
+                            else {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0004").hide();
+                            }
+                        }
+                    }
+                    if (item != null) {
+                        $("#warningP").html("同步成功！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                    else {
+                        $("#warningP").html("没有任何信息可以同步！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                }
+            });
+        }
+        if (Module == 'M2') {
+            $.ajax({
+                url: "/DoctorHome/SynDiabetesInfoDetail",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PatientId: PatientId },  //输入参数
+                success: function (res) {
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Code = TypeNameList.split("|")[0];
+                        var Value = TypeNameList.split("|")[1];
+                        var EDate = TypeNameList.split("|")[2];
+                        if (Code == "62.2713") {
+                            $("#QH0001").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0001").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0001").show();
+                            }
+                            else {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0001").hide();
+                            }
+                        }
+                        if (Code == "62.63304") {
+                            $("#QH0002").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0002").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0002").show();
+                            }
+                            else {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0002").hide();
+                            }
+                        }
+                        if (Code == "62.00028") {
+                            $("#QH0003").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0003").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0003").show();
+                            }
+                            else {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0003").hide();
+                            }
+                        }
+                        if (Code == "JY0277") {
+                            $("#QH0004").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0004").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0004").show();
+                            }
+                            else {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0004").hide();
+                            }
+                        }
+                        if (Code == "JY2473") {
+                            $("#QH0037").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0037").attr("style", $("#QH0037").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0037").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0037").show();
+                            }
+                            else {
+                                $("#QH0037").attr("style", $("#QH0037").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0037").hide();
+                            }
+                        }
+                        if (Code == "JY1131") {
+                            $("#QH0041").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0041").attr("style", $("#QH0041").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0041").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0041").show();
+                            }
+                            else {
+                                $("#QH0041").attr("style", $("#QH0041").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0041").hide();
+                            }
+                        }
+                        if (Code == "69.TSH00") {
+                            $("#QH0043").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0043").attr("style", $("#QH0043").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0043").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0043").show();
+                            }
+                            else {
+                                $("#QH0043").attr("style", $("#QH0043").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0043").hide();
+                            }
+                        }
+                        if (Code == "10200901") {
+                            $("#QH0044").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0044").attr("style", $("#QH0044").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0044").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0044").show();
+                            }
+                            else {
+                                $("#QH0044").attr("style", $("#QH0044").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0044").hide();
+                            }
+                        }
+                        if (Code == "JY2701") {
+                            $("#QH0045").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0045").attr("style", $("#QH0045").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0045").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0045").show();
+                            }
+                            else {
+                                $("#QH0045").attr("style", $("#QH0045").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0045").hide();
+                            }
+                        }
+                        if (Code == "61000102" || Code == "61000103" || Code == "61000202" || Code == "61000204") {
+                            var temp = $("#QG0016").val();
+                            $("#QG0016").val(temp + Value + " ; ");
+                            $("#QG0016").attr("style", $("#QG0016").attr("style") + ";background-color:#BBFFBB");
+                        }
+                    }
+                    NDB = $('*[lang = "尿白蛋白浓度"]').val();
+                    NJG = $('*[lang = "尿肌酐"]').val();
+                    Calculate("尿肌酐", NJG);
+                    if (item != null) {
+                        $("#warningP").html("同步成功！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                    else {
+                        $("#warningP").html("没有任何信息可以同步！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                }
+            });
+        }
+        if (Module == 'M3') {
+            $.ajax({
+                url: "/DoctorHome/SynBasicInfoDetailForM3",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PatientId: PatientId },  //输入参数
+                success: function (res) {
+                    for (var item in res) {
+                        var TypeNameList = res[item];
+                        var Code = TypeNameList.split("|")[0];
+                        var Value = TypeNameList.split("|")[1];
+                        var EDate = TypeNameList.split("|")[2];
+                        if (Code == "62.00028") {
+                            $("#QH0003").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0003").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0003").show();
+                            }
+                            else {
+                                $("#QH0003").attr("style", $("#QH0003").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0003").hide();
+                            }
+                        }
+                        if (Code == "62.2713") {
+                            $("#QH0001").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0001").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0001").show();
+                            }
+                            else {
+                                $("#QH0001").attr("style", $("#QH0001").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0001").hide();
+                            }
+                        }
+                        if (Code == "62.63304") {
+                            $("#QH0002").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0002").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0002").show();
+                            }
+                            else {
+                                $("#QH0002").attr("style", $("#QH0002").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0002").hide();
+                            }
+                        }
+                        if (Code == "JY0277") {
+                            $("#QH0004").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0004").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0004").show();
+                            }
+                            else {
+                                $("#QH0004").attr("style", $("#QH0004").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0004").hide();
+                            }
+                        }
+                        if (Code == "JY0002") {
+                            $("#QH0008").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0008").attr("style", $("#QH0008").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0008").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0008").show();
+                            }
+                            else {
+                                $("#QH0008").attr("style", $("#QH0008").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0008").hide();
+                            }
+                        }
+                        if (Code == "JY3069") {
+                            $("#QH0010").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0010").attr("style", $("#QH0010").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0010").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0010").show();
+                            }
+                            else {
+                                $("#QH0010").attr("style", $("#QH0010").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0010").hide();
+                            }
+                        }
+                        if (Code == "JY3071") {
+                            $("#QH0011").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0011").attr("style", $("#QH0011").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0011").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0011").show();
+                            }
+                            else {
+                                $("#QH0011").attr("style", $("#QH0011").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0011").hide();
+                            }
+                        }
+                        if (Code == "JY3072") {
+                            $("#QH0012").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0012").attr("style", $("#QH0012").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0012").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0012").show();
+                            }
+                            else {
+                                $("#QH0012").attr("style", $("#QH0012").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0012").hide();
+                            }
+                        }
+                        if (Code == "JY3062") {
+                            $("#QH0013").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0013").attr("style", $("#QH0013").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0013").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0013").show();
+                            }
+                            else {
+                                $("#QH0013").attr("style", $("#QH0013").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0013").hide();
+                            }
+                        }
+                        if (Code == "JY3065") {
+                            $("#QH0014").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0014").attr("style", $("#QH0014").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0014").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0014").show();
+                            }
+                            else {
+                                $("#QH0014").attr("style", $("#QH0014").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0014").hide();
+                            }
+                        }
+                        if (Code == "JY3077") {
+                            $("#QH0015").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0015").attr("style", $("#QH0015").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0015").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0015").show();
+                            }
+                            else {
+                                $("#QH0015").attr("style", $("#QH0015").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0015").hide();
+                            }
+                        }
+                        if (Code == "50.21377") {
+                            $("#QH0016").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0016").attr("style", $("#QH0016").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0016").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0016").show();
+                            }
+                            else {
+                                $("#QH0016").attr("style", $("#QH0016").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0016").hide();
+                            }
+                        }
+                        if (Code == "JY1131") {
+                            $("#QH0041").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0041").attr("style", $("#QH0041").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0041").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0041").show();
+                            }
+                            else {
+                                $("#QH0041").attr("style", $("#QH0041").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0041").hide();
+                            }
+                        }
+                        if (Code == "JY1562") {
+                            $("#QH0018").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0018").attr("style", $("#QH0018").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0018").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0018").show();
+                            }
+                            else {
+                                $("#QH0018").attr("style", $("#QH0018").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0018").hide();
+                            }
+                        }
+                        if (Code == "JY1057") {
+                            $("#QH0019").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0019").attr("style", $("#QH0019").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0019").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0019").show();
+                            }
+                            else {
+                                $("#QH0019").attr("style", $("#QH0019").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0019").hide();
+                            }
+                        }
+                        if (Code == "JY1056") {
+                            $("#QH0020").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0020").attr("style", $("#QH0020").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0020").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0020").show();
+                            }
+                            else {
+                                $("#QH0020").attr("style", $("#QH0020").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0020").hide();
+                            }
+                        }
+                        if (Code == "62.79599") {
+                            $("#QH0021").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0021").attr("style", $("#QH0021").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0021").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0021").show();
+                            }
+                            else {
+                                $("#QH0021").attr("style", $("#QH0021").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0021").hide();
+                            }
+                        }
+                        if (Code == "JY1064") {
+                            $("#QH0022").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0022").attr("style", $("#QH0022").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0022").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0022").show();
+                            }
+                            else {
+                                $("#QH0022").attr("style", $("#QH0022").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0022").hide();
+                            }
+                        }
+                        if (Code == "JY1007") {
+                            $("#QH0024").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0024").attr("style", $("#QH0024").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0024").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0024").show();
+                            }
+                            else {
+                                $("#QH0024").attr("style", $("#QH0024").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0024").hide();
+                            }
+                        }
+                        if (Code == "JY3861") {
+                            $("#QH0025").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0025").attr("style", $("#QH0025").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0025").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0025").show();
+                            }
+                            else {
+                                $("#QH0025").attr("style", $("#QH0025").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0025").hide();
+                            }
+                        }
+                        if (Code == "69.TSH00") {
+                            $("#QH0029").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0029").attr("style", $("#QH0029").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0029").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0029").show();
+                            }
+                            else {
+                                $("#QH0029").attr("style", $("#QH0029").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0029").hide();
+                            }
+                        }
+                        if (Code == "JY1931") {
+                            $("#QH0032").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0032").attr("style", $("#QH0032").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0032").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0032").show();
+                            }
+                            else {
+                                $("#QH0032").attr("style", $("#QH0032").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0032").hide();
+                            }
+                        }
+                        if (Code == "JY1391") {
+                            $("#QH0033").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0033").attr("style", $("#QH0033").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0033").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0033").show();
+                            }
+                            else {
+                                $("#QH0033").attr("style", $("#QH0033").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0033").hide();
+                            }
+                        }
+                        if (Code == "JY0165") {
+                            $("#QH0035").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0035").attr("style", $("#QH0035").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0035").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0035").show();
+                            }
+                            else {
+                                $("#QH0035").attr("style", $("#QH0035").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0035").hide();
+                            }
+                        }
+                        if (Code == "JY0113") {
+                            $("#QH0036").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0036").attr("style", $("#QH0036").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0036").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0036").show();
+                            }
+                            else {
+                                $("#QH0036").attr("style", $("#QH0036").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0036").hide();
+                            }
+                        }
+                        if (Code == "JY2473") {
+                            $("#QH0037").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0037").attr("style", $("#QH0037").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0037").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0037").show();
+                            }
+                            else {
+                                $("#QH0037").attr("style", $("#QH0037").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0037").hide();
+                            }
+                        }
+                        if (Code == "10200901") {
+                            $("#QH0039").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0039").attr("style", $("#QH0039").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0039").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0039").show();
+                            }
+                            else {
+                                $("#QH0039").attr("style", $("#QH0039").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0039").hide();
+                            }
+                        }
+                        if (Code == "31100901") {
+                            $("#QH0040").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QH0040").attr("style", $("#QH0040").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QH0040").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QH0040").show();
+                            }
+                            else {
+                                $("#QH0040").attr("style", $("#QH0040").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QH0040").hide();
+                            }
+                        }
+                        if (Code.substring(0, 3) == "ECG") {
+                            $("#QJ0021").val(Value);
+                            if (new Date(EDate).DateDiff("d", new Date()) >= 60) {
+                                $("#QJ0021").attr("style", $("#QJ0021").attr("style") + ";background-color:#FFBBBB");
+                                $("." + "QJ0021").html("该信息为至少60天前所测，请慎重使用");
+                                $("." + "QJ0021").show();
+                            }
+                            else {
+                                $("#QJ0021").attr("style", $("#QJ0021").attr("style") + ";background-color:#BBFFBB");
+                                $("." + "QJ0021").hide();
+                            }
+                        }
+                    }
+                    if (item != null) {
+                        $("#warningP").html("同步成功！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                    else {
+                        $("#warningP").html("没有任何信息可以同步！");
+                        $('#integrateDiv').modal({
+                            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                            containerId: 'alert-container',
+                            overlayClose: true     //点击蒙层关闭窗口
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    $("#tabs li a").click(function () {
+        $(this).attr("id", "current");
+    })
+
+    function show(i) {
+        $("#module-choice").each(function () {
+            document.getElementById(i).style.display = (document.getElementById("Module" + i).checked == true) ? "block" : "none";
+
+        })
+    }
+
+    $(document).ready(function () {
+        $(":checkbox").attr("checked", false);
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(3) a").attr("id", "currentnav");
+        GetDrugTypeList();
+        $('*[onchange = "ShowOrHide(this.id, this.value);"]').each(function () {
+            ShowOrHide(this.id, this.value);
+        })
+        $("*[title = 3]").hide();
+        Calculate("体重（kg）", weight);
+        Calculate("腰围", WSize);
+        Calculate("尿肌酐", NJG);
+        //document.getElementById("VitalSignsTypeNameListDropDownListFor").value = "";
+
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+        }
+        var UserId = document.getElementById("UId").value;
+
+
+        $('.chzn-select').chosen({
+            placeholder_text_multiple: " "
+        });
+        //$(element).css("width", "100%");
+        //document.Element.style.width = "100%";
+        $(".chosen-container").css("width", "100%");
+
+        $.ajax({
+            url: "/DoctorHome/GetVitalSignsFocusedList",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId },  //输入参数
+            success: function (res) {
+                $("#VitalSignsFocused").empty();
+                for (var item in res) {
+                    var VitalSignsFocusedList = res[item];
+                    var VitalSignsType = VitalSignsFocusedList.split("-")[0];
+                    var VitalSignsTypeName = VitalSignsFocusedList.split("-")[1];
+                    var VitalSignsCode = VitalSignsFocusedList.split("-")[2];
+                    var VitalSignsName = VitalSignsFocusedList.split("-")[3];
+                    var Code = VitalSignsType + "-" + VitalSignsCode;
+                    var Name = VitalSignsTypeName + "-" + VitalSignsName;
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#VitalSignsFocused").append(NewElement);
+                }
+            }
+        });
+
+        $("#addVitalsignsBtn").click(function () {
+            var VitalSignsType = document.getElementById("VitalSignsTypeNameListDropDownListFor").value;
+            var VitalSignsCode = document.getElementById("VitalSignsName").value;
+            if (VitalSignsType == "" || VitalSignsCode == "0") {
+                var Text = "";
+                if (VitalSignsType == "") { Text = Text + "体征类别 "; }
+                if (VitalSignsCode == "0") { Text = Text + "体征名称 "; }
+                Text = Text + "不能为空！";
+                $("#Warning").html(Text);
+                $('#alertDiv').modal({
+                    closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                    containerId: 'alert-container',
+                    overlayClose: true     //点击蒙层关闭窗口
+                });
+            }
+            else {
+                var InvalidFlag = "0";
+
+                $.ajax({
+                    url: "/DoctorHome/VitalSignsFocusedAdd",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode, InvalidFlag: InvalidFlag },  //输入参数
+                    success: function (res) {
+                        if (res == true) {
+
+                            var VitalSignsTypeName = document.getElementById("VitalSignsTypeNameListDropDownListFor").options[document.getElementById("VitalSignsTypeNameListDropDownListFor").selectedIndex].text;
+                            var VitalSignsName = document.getElementById("VitalSignsName").options[document.getElementById("VitalSignsName").selectedIndex].text;
+                            var Code = VitalSignsType + "-" + VitalSignsCode;
+                            var Name = VitalSignsTypeName + "-" + VitalSignsName;
+                            var NewElement = $("<option></option>").text(Name);
+                            NewElement.attr('value', Code);
+                            $("#VitalSignsFocused").append(NewElement);
+
+                            document.getElementById('VitalSignsTypeNameListDropDownListFor').value = "";
+                            document.getElementById('VitalSignsName').value = "";
+
+                        }
+                        else {
+                            alert("数据插入失败，请重新输入！");
+                        }
+                    }
+                })
+            }
+        })
+    })
+
+    function ShowOrHide(HeaderId, HeaderStatus) {
+        if (HeaderStatus == "1") {
+            $("*[lang=" + HeaderId + "]").show();
+        }
+        else if (HeaderStatus == "+") {
+            $("*[lang=" + HeaderId + "]").show();
+            $("#" + HeaderId).val("-");
+        }
+        else if (HeaderStatus == "-") {
+            $("*[lang=" + HeaderId + "]").hide();
+            $("#" + HeaderId).val("+");
+        }
+        else {
+            $("*[lang=" + HeaderId + "]").hide();
+        }
+    }
+
+    var CategoryCode = "";
+    $(document).on("click", ".deleteModuleBtn", function () {
+        CategoryCode = $(this).attr("id");
+        $('#DeleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    });
+
+    $(".sureModuleBtn").click(function () {
+        var UserId = document.getElementById("UId").value;
+
+        $.ajax({
+            url: "/DoctorHome/ModuleProfileDelete",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId, CategoryCode: CategoryCode },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    $("#cancelDelete").click();
+                    self.location.reload();
+                    window.location.href = "/DoctorHome/ModuleProfile?PatientId=" + UserId;
+                    //location: "/DoctorHome/ModuleProfile";
+                }
+                else {
+                    alert("数据删除失败，请重试！");
+                }
+            }
+
+        })
+    })
+
+    function show(name) {
+        $("#" + name).toggle();
+    }
+
+    function VitalSignsTypeChanged() {
+        var VitalSignsTypeNameSelected = document.getElementById("VitalSignsTypeNameListDropDownListFor").value;
+
+        $.ajax({
+            url: "/DoctorHome/GetListbyVitalSignsTypeName",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { VitalSignsTypeNameSelected: VitalSignsTypeNameSelected },  //输入参数
+            success: function (res) {
+                $("#VitalSignsName").empty();
+                for (var item in res) {
+                    var VitalSignsNameList = res[item];
+                    var Name = VitalSignsNameList.split("|")[0];
+                    var Code = VitalSignsNameList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#VitalSignsName").append(NewElement);
+                }
+            }
+        });
+    }
+
+    $("#btnMove").click(function () {
+        var $options = $("#VitalSignsFocused option:selected");
+        var UserId = document.getElementById("UId").value;
+        for (var i = 0; i < $options.length; i++) {
+            var VitalSignsType = $options[i].value.split("-")[0];
+            var VitalSignsCode = $options[i].value.split("-")[1];
+
+            $.ajax({
+                url: "/DoctorHome/VitalSignsFocusedDelete",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode },  //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        var $remove = $options.remove();
+                        $remove.appendTo("#VitalSignsFocusCancle");
+                    }
+                    else {
+                        alert("取消失败，请重试！");
+                    }
+                }
+            })
+        }
+    });
+
+    $("#btnMoveLeft").click(function () {
+        var $options = $("#VitalSignsFocusCancle option:selected");
+        var UserId = document.getElementById("UId").value;
+        for (var i = 0; i < $options.length; i++) {
+            var VitalSignsType = $options[i].value.split("-")[0];
+            var VitalSignsCode = $options[i].value.split("-")[1];
+            var InvalidFlag = "0";
+
+            $.ajax({
+                url: "/DoctorHome/VitalSignsFocusedAdd",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode, InvalidFlag: InvalidFlag },  //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        var $remove = $options.remove();
+                        $remove.appendTo("#VitalSignsFocused");
+                    }
+                    else {
+                        alert("重新关注失败，请重试！");
+                    }
+                }
+            })
+        }
+    });
+
+    $("#moduleInfoToggle").click(function () {
+        $("#moduleInfo").toggle();
+        $(this).find("i").toggleClass("open-arrow");
+    })
+
+    $("#vitalSignInfoToggle").click(function () {
+        $("#vitalSignInfo").toggle();
+        $(this).find("i").toggleClass("open-arrow");
+    })
+
+    $(".Sure").click(function () {
+        $("#Close").click();
+    })
+
+    //验证输入参数值合法性
+    function IsLegal(o) {
+        if (document.getElementById(o).value != "") {
+            var re = /^\d+$|^\d+\.\d+$/;
+            if (!re.test(document.getElementById(o).value)) {
+                $("." + o).html("输入格式有误！");
+
+                $("."+o).show();
+            }
+            else {
+                $("."+o).hide();
+            }
+        }
+    }
+
+    //计算日期差
+    Date.prototype.DateDiff = function(strInterval, dtEnd) {   
+        var dtStart = this;  
+        if (typeof dtEnd == 'string' )//如果是字符串转换为日期型  
+        {   
+            dtEnd = StringToDate(dtEnd);  
+        }  
+        switch (strInterval) {   
+            case 's' :return parseInt((dtEnd - dtStart) / 1000);  
+            case 'n' :return parseInt((dtEnd - dtStart) / 60000);  
+            case 'h' :return parseInt((dtEnd - dtStart) / 3600000);  
+            case 'd' :return parseInt((dtEnd - dtStart) / 86400000);  
+            case 'w' :return parseInt((dtEnd - dtStart) / (86400000 * 7));  
+            case 'm' :return (dtEnd.getMonth()+1)+((dtEnd.getFullYear()-dtStart.getFullYear())*12) - (dtStart.getMonth()+1);  
+            case 'y' :return dtEnd.getFullYear() - dtStart.getFullYear();  
+        }  
+    }
+</script>

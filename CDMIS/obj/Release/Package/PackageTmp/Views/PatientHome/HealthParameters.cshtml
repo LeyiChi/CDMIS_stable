@@ -1,0 +1,404 @@
+﻿@model CDMIS.ViewModels.HealthParametersViewModel
+@{
+    ViewBag.Title = "健康参数";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+<script type="text/javascript" src="../../Scripts/amcharts.js"></script>
+<script type="text/javascript" src="../../Scripts/serial.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<style>
+    
+ @* 弹框大小*@ 
+
+ #simplemodal-container {height:360px; width:500px; text-align:left; background:#fff; border:2px solid #336699;}  
+</style>
+
+
+<div id="dropDownList" class="form-group" style="margin-top: 20px" align="center">
+    <label class="col-sm-offset-1 col-sm-3 control-label" style="font-size: 20px;" id="paralist">请选择查看的参数：</label>
+    <div class="col-sm-4">
+        @Html.DropDownListFor(model => model.VitalSignSelectItem, Model.VitalSignList, new { id = "VitalSignDropDownList", style = "font-size:20px", onchange = "change(this)", @class = "form-control" })
+    </div>
+</div>
+
+<div id="loading" style="display: none; margin-top: 30px" align="center">
+    <img alt="Load" src="/Content/Image/loading.gif" width="300" height="20" style="max-width: 90%" />
+    <p>
+        加载中，请稍后</p>
+</div>
+
+<div id="resultDiv" style="display: none; margin-top: 70px" align="center">
+    <p style="font-size: 20px; color: Red;" id="resultContent"></p>
+</div>
+
+<div id="pictureCon" class="form-group" style="margin-top: 80px; margin-left: 140px" >
+    <div>
+        <h3><span id="nowItemName"></span>参数图</h3>
+        <a href="#" onclick="AddVitalSign();">添加数据</a>
+        <div id="chartDiv" style="margin-right: auto; width: 700px; height: 420px; font-size: 10px;" align="center">
+            @* 图的位置*@
+        </div>
+    </div>
+</div>
+
+
+<div class="white" style="height: 40px;">
+</div>
+
+@Html.HiddenFor(model => model.UserId)
+
+@*添加数据*@
+<div id="AddVitalSignDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>数据添加</span>
+    </div>
+    <div class="modalContent">
+        <div>
+            <p style="font-size: 16px; margin-top: 20px;margin-left: 20px;">
+                <span id="nowItemName1"></span>&nbsp;&nbsp;&nbsp;单位：<span id="recommendUnit"></span>
+            </p>
+        </div>
+        <div style="height:25px;">
+        <p align="center" style="color:red;font-size: 16px; " class="notice">
+        </p>
+        </div>
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="itemValue" class="col-sm-3 control-label" id="itemValueLabel" style="font-size: 16px;">*值</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="itemValue" placeholder="请输入值" onkeyup="IsLegal(this.id);">  @*onkeyup:按键松开时触发*@
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="compoundTime" class="col-sm-3 control-label" id="compoundTimeLabel" style="font-size: 16px;">*记录时间</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="compoundTime" placeholder="请输入记录时间" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH时',maxDate:'%y-%M-%d'})">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8" style="margin-top: 30px;">
+                <input type="button" class="btn btn-primary" onclick="AddVitalSignToDB();" value="保存"  disabled="disabled" id="dataSure"/>
+                <input type="button" class="btn btn-default simplemodal-close" value="取消" id="cancel1" style="margin-left: 60px;" />
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+
+@*页面初始加载：参数图绘制和div初始化*@
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(2) a").attr("id", "current");
+
+        var pid = document.getElementById("UserId").value;
+        if (document.getElementById("VitalSignDropDownList").length > 0) {
+            var target1 = document.getElementById("resultDiv");
+            target1.style.display = "none";
+            var target = document.getElementById("dropDownList");
+            target.style.display = "block";
+
+            var firstitemcode = document.getElementById("VitalSignDropDownList").options[0].value;
+            var firstitemname = document.getElementById("VitalSignDropDownList").options[0].text;
+            document.getElementById("nowItemName").innerText = firstitemname;
+            DrawPicture(pid, firstitemcode, firstitemname);  //画图
+        }
+        else {
+            //没有关注的体征参数，所有内容隐藏，提示没有
+            //            $("#con").attr("display", "none");
+            //            $("#resultContent").append("您还没有关注任何生理参数！");
+
+            var target = document.getElementById("pictureCon");
+            target.style.display = "none";
+            var target = document.getElementById("dropDownList");
+            target.style.display = "none";
+            document.getElementById("resultContent").innerText = "您还没有关注任何生理参数！";
+            var target = document.getElementById("resultDiv");
+            target.style.display = "block";
+        }
+
+    });
+</script>
+@*函数集合：画图、提交、打开div*@
+<script type="text/javascript">
+
+    function change() {     //下拉框切换，刷新页面
+        var userid = document.getElementById("UserId").value;
+        var obj = document.getElementById("VitalSignDropDownList");
+        var itemcode = obj.value;                              //获取option被选中的value
+        var itemname = obj.options[obj.selectedIndex].text;        //获取option被选中的text
+
+        var target = document.getElementById("pictureCon");     //隐藏画图区域，展开进度条
+        target.style.display = "none";
+        var target1 = document.getElementById("loading");
+        target1.style.display = "block";
+
+        document.getElementById("nowItemName").innerText = itemname;
+        DrawPicture(userid, itemcode, itemname);                  //画图
+    }
+
+    function AddVitalSign() {   //弹出框（添加数据）
+
+        $('#AddVitalSignDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+
+        //div初始化，主要是获取单位，暂时用这个
+        var userid = document.getElementById("UserId").value;    //取值(文本形式)
+        var obj = document.getElementById("VitalSignDropDownList");
+        var itemcode = obj.value;                                 //获取option被选中的value
+        var itemname = obj.options[obj.selectedIndex].text;        //获取option被选中的text
+
+        $.ajax({
+            url: "/PatientHome/GetUnit",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { ItemCode: itemcode },
+            success: function (res) {
+                document.getElementById("nowItemName1").innerText = itemname;
+                document.getElementById("recommendUnit").innerText = res.Redundance;
+            }
+        });
+
+    }
+
+
+    function AddVitalSignToDB() {                                   //提交添加的数据
+
+        var userid = document.getElementById("UserId").value;       //取值(文本形式)
+        var obj = document.getElementById("VitalSignDropDownList");
+        var itemcode = obj.value;                                   //获取option被选中的value
+        var itemname = obj.options[obj.selectedIndex].text;          //获取option被选中的text
+
+        var itemvalue = document.getElementById("itemValue");
+        var unit = document.getElementById("recommendUnit");
+        var compoundtime = document.getElementById("compoundTime");
+
+        var flag = true;
+
+        if (flag && (compoundTime.value.length == 0)) {
+            compoundTime.focus();
+            flag = false;
+            //document.getElementById("errorinfo").innerText = "记录时间输入不正确";
+            $('.notice').text("记录时间输入不能为空！");
+        }
+        //String(compoundtime.value)
+
+        if (flag == true) {
+            $.ajax({
+                url: "/PatientHome/AddVitalSign",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: userid, Itemcode: itemcode, Value: itemValue.value, Unit: unit.value, CompoundTime: compoundTime.value },
+                success: function (res) {
+                    if (res != -1) {
+                        //alert("成功!");
+                        $("#cancel1").click();
+                        var target = document.getElementById("chartDiv");     //某项生理参数无数据，则隐藏该区域，并提示信息
+                        target.style.display = "block";
+                        var target = document.getElementById("pictureCon");     //隐藏画图区域，展开进度条
+                        target.style.display = "block";
+                        var target1 = document.getElementById("loading");
+                        target1.style.display = "none";                        //刷新警报值
+
+                        document.getElementById("alertNumber").innerHTML = res;
+                        DrawPicture(userid, itemcode, itemname);                //画图（刷新原页面）
+
+                    }
+                    else {
+                        alert("数据添加失败!");
+                    }
+                }
+            });
+        }
+
+    }
+
+    function DrawPicture(pid, itemcode, itemname) {
+        //画图
+        $.ajax({
+            url: "/PatientHome/GetPicture",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PatientId: pid, Itemcode: itemcode },
+            success: function (res) {
+                if (res.length == 0) {
+                    var target1 = document.getElementById("loading");
+                    target1.style.display = "none";
+                    var target = document.getElementById("chartDiv");     //某项生理参数无数据，隐藏图，并提示信息
+                    target.style.display = "none";
+                    var target = document.getElementById("pictureCon");
+                    target.style.marginTop = "30px";
+                    target.style.display = "block";
+                    document.getElementById("resultContent").innerText = "该生理参数还没有数据，赶快添加数据吧！";
+                    var target = document.getElementById("resultDiv");
+                    target.style.display = "block";
+                }
+
+                else {
+                    var target = document.getElementById("resultDiv");
+                    target.style.display = "none";
+                    var target1 = document.getElementById("loading");
+                    target1.style.display = "none";
+                    var target = document.getElementById("chartDiv");
+                    target.style.display = "block";
+                    var target2 = document.getElementById("pictureCon");
+                    target2.style.marginTop = "90px";
+                    target2.style.display = "block";
+
+                    var title = itemname + "（单位：" + res[0].unit + ")";         //图中的一些变量
+
+                    var chart = AmCharts.makeChart("chartDiv", {
+                        "type": "serial",    //连续
+                        "theme": "none",
+                        "pathToImages": "../../Content/Image/",         //图片路径，比如游标图片http://www.amcharts.com/lib/3/images/
+                        "dataProvider": res,                     //画图数据
+                        "balloon": { "cornerRadius": 6 },         //角 半径？
+                        "valueAxes": [{                           //Y轴 （可以多个）                                                               
+                            "id": "v1",                   //id   
+                            //"maximum": 6,              //最大值，上限
+                            //"minimum": 1,             //最小值，起始
+                            //"reversed": false,        //使图倒转
+                            "dashLength": 5,            //破折号长度,类似虚线
+                            //"gridCount": 1,          //网格数量
+                            "axisColor": "#FF6600",   //颜色
+                            "axisThickness": 2,     //轴粗
+                            "gridAlpha": 0.5,       //Y网格透明度
+                            "axisAlpha": 1,         //Y轴的透明度               
+                            "position": "left",     //位置
+                            "title": title,  //y轴标题
+                            "axisAlpha": 1     //轴的透明度
+                        }],
+                        //"startDuration": 3,    //弹出曲线时间
+                        "graphs": [{        //图 （可以多个）
+                            "id": "g1",
+                            // "hidden": true,        //隐藏？
+                            "valueAxis": "v1",             //指定Y值？
+                            "balloonText": "时间[[category]]<br /><b><span style='font-size:14px;'>值: [[value]]</span></b>[[unit]]<br />阈值[[min]]-[[max]]", //点值显示
+                            "bullet": "round",                //点的形状
+                            "bulletBorderAlpha": 1,           //点周透明度
+                            "bulletBorderThickness": 2,       //点粗  
+                            "legendValueText": "[[value]]",
+                            "lineColorField": "lineColor",   //给点赋颜色
+                            //  "title": "duration",         //若折线显示，则下方标题显示
+                            // "lineColor": "#FCD202",      //若折线显示，颜色
+                            "valueField": "duration",   //指明X数据是谁
+                            "fillAlphas": 0,            //线下区域，0不显示
+                            //"fillColors":"#000"      //区域颜色
+                            "lineThickness": 0        //线粗为0，不显示
+                            //"lineAlpha":0,         //线透明度，0不显示
+                        }],
+                        "chartScrollbar": {
+                            //  "graphFillAlpha": 0,   
+                            //"selectedGraphFillAlpha": 0,
+                            //"graphLineAlpha": 0,           //全显示
+                            // "selectedGraphLineAlpha": 1,   //被选中的显示
+                            "autoGridCount": true,          //自动放大缩小中网格
+                            "graph": "g1",                         //放大缩小图示
+                            "scrollbarHeight": 20                          //放大器宽度
+                        },
+                        "chartCursor": {
+                            "categoryBalloonDateFormat": "YYYY-MM-DD-JJ时",  //X值数据格式
+                            "cursorAlpha": 0,                               //游标（提示框）透明度，不透则黑竖线 
+                            "zoomable": true                              //可缩放
+                            //"cursorPosition": "mouse"                      //游标位置-鼠标（默认）
+                        },
+                        "dataDateFormat": "YYYYMMDD JJ",
+                        "categoryField": "date",                   //X值域
+                        "categoryAxis": {
+                            //"fontSize": 0,
+                            //"labelOffset": 0,
+                            //"tickLength": 1,  
+                            //"labelsEnabled": false,  
+                            // "ignoreAxisWidth": true,            //类似autoGridCount
+                            "equalSpacing": true,                    //让值平均分布
+                            // "boldPeriodBeginning": true,              //年份加粗
+                            // "autoWrap": true,                      //类似autoGridCount
+                            //"boldLabels":true,                   //lable加粗
+                            "minPeriod": "hh",               //最小单位
+                            //"minorGridEnabled": true,   //最小格显示出来
+                            "dateFormats": [                 //数据格式的组成部分
+                            {"period": 'hh', "format": "JJ" },
+                         { "period": "DD", "format": "DD" },
+                            //{ "period": "WW", "format": "MM DD" },
+                         {"period": "MM", "format": "MMM" },
+                         { "period": "YYYY", "format": "YYYY"}],
+                            "parseDates": true,         //按时间排
+                            // "autoGridCount": true,        //自动调节间隔，但孔隙大，缩放不一致
+                            "axisColor": "#555555",      //X轴颜色
+                            "gridAlpha": 0.5,              //网格透明度
+                            "gridCount": 50,
+                            "title": "时间"     //X轴标题
+                            // "axisThickness": 2,     //轴粗
+                            //"position": "top"         //轴位置，上方
+                            //"fillAlpha": 0.05,        //透明度
+                            //"fillColor": "#fff",      //填充曲颜色，即大份格      
+                        }
+                        //    ,
+                        //    "exportConfig": {         //下载图片
+                        //        "menuBottom": "15px",
+                        //        "menuRight": "15px",   //按钮位置
+                        //        "menuItems": [{
+                        //            "icon": '/lib/3/images/export.png',
+                        //            "format": 'png'
+                        //        }]
+                        //    }
+
+                    });    //chart的结尾
+
+                }         //else的结尾
+            }
+        });          //ajax的结尾
+    }
+
+    //验证输入合法性
+    var dataflag = 0;
+    function IsLegal(o) {
+        if (document.getElementById(o).value == "") {
+            $('.save').attr('disabled', "disabled");
+            switch (o) {
+                case "itemValue":
+                    dataflag = 0;
+                    $('.notice').text("参数值不能输入为空");
+                    break;
+            }
+        }
+        else {
+            switch (o) {
+                case "itemValue":
+                    data = parseFloat(document.getElementById(o).value);
+                    var re = /^\d+(\.\d+)?$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("itemValueLabel").style.color = "#333";
+                        dataflag = 1;
+                        $('.notice').text("");
+
+                    }
+                    else {
+                        document.getElementById("itemValueLabel").style.color = "#BB5E00";
+                        $("itemValue").focus();
+                        $('.notice').text("输入格式有误！");
+                        dataflag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+            }
+            if (dataflag == 1) {
+                $('#dataSure').removeAttr('disabled');
+                //document.getElementById("dataSure").disabled = false;
+            }
+            else {
+                $('#dataSure').attr('disabled', "disabled");
+                //document.getElementById("dataSure").disabled = true;
+            }
+        }
+    }
+
+
+</script>

@@ -1,0 +1,47 @@
+﻿@model CDMIS.Models.MessageInfo
+
+@{
+    ViewBag.Title = "信箱-已发送";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+ <div id="MailBoxShare">
+           @{Html.RenderAction("MailBoxShare", "MailBox");}         
+ </div>
+
+ <div id = "Content" style="border:5px solid #DDDDFF;">
+<table>
+        <tr class = "trht">
+            <td width="60px" align="left" class="otherfont">
+                主&nbsp;&nbsp;&nbsp;题：
+            </td>
+            <td align = "left">@Model.Title
+            </td>
+        </tr>
+        <tr class = "trht">
+            <td width="60px" align="left" class="otherfont">
+                收件人：
+            </td>
+            <td align = "left">@Model.ReceiverName<span>＜</span><span>@Model.Receiver</span><span>＞</span>
+            </td>
+        </tr>
+        <tr class = "trht">
+            <td width="60px" align="left" class="otherfont">
+                时&nbsp;&nbsp;&nbsp;间：
+            </td>
+            <td align = "left">@Model.SendDateTime
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <div style="border: 3px solid #DDDDFF;">
+                    <textarea style="width: 1009px; height: 500px;" readonly="readonly">@Model.Content</textarea></div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    //改变按钮颜色
+    $(document).ready(function () {
+        $("#bn3").toggleClass("myButtonChange");
+    });
+</script>

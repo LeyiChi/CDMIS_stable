@@ -1,0 +1,17 @@
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.dll.config
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.XmlSerializers.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\CDMIS.pdb
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\EntityFramework.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\log4net.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\System.Net.Http.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\EntityFramework.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\log4net.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.pdb
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\Newtonsoft.Json.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\System.Net.Http.xml
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\bin\zh-Hans\System.Net.Http.resources.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Release\CDMIS.dll
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Release\CDMIS.pdb
+E:\Work\chronic disease management\github\CDMIS备份\CDMIS\obj\Release\CDMIS.XmlSerializers.dll

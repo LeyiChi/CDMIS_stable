@@ -1,0 +1,525 @@
+﻿@model CDMIS.ViewModels.BasicProfileViewModel
+@{
+    ViewBag.Title = "患者建档--健康模块";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/flexibleDisplay.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="../../Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+<script src="../../Scripts/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 250px;
+        width: 400px;
+    }
+    #delete-container
+    {
+        height: 160px;
+        width: 400px;
+    }
+    #alert-container
+    {
+        height: 160px;
+        width: 300px;
+    }
+   
+</style>
+<input type="text" id="UId" style="display:none" value="@Model.Patient.UserId"/>
+<input type="text" id="OperationInvalidFlag" style="display:none" value="@ViewBag.OperationInvalidFlag"/>
+<input type="text" id="EditDeleteFlag" style="display:none" value="@ViewBag.EditDeleteFlag"/>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.Patient.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo");}
+@using (Html.BeginForm("ModuleProfile", "DoctorHome", FormMethod.Post, new { id = "Form1", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(model => model.Patient.UserId);
+    @Html.HiddenFor(model => model.Patient.UserName);
+    @Html.HiddenFor(model => model.Patient.Gender);
+    @Html.HiddenFor(model => model.Patient.Birthday);
+
+                                                    //健康模块
+    <div class="moduleInfoDiv">
+        <p class="dropdown" id="moduleInfoToggle">
+            健康模块<i class="icon-arrow close-arrow"></i></p>
+        <div id="moduleInfo" class="dropdown-div">
+            <div id="editModule" class="form-horizontal" role="form" style="margin-left: 12px;">
+                @if (Model.PatientDetailInfo.Count > 0)
+                {
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" style="font-size: 17px">
+                            已购买的模块信息</label>
+                        <div class="col-sm-10">
+                            @Html.ActionLink("编辑", "ModuleProfileEdit", new { UserId = @Model.Patient.UserId }, new { @class = "btn btn-primary" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @foreach (var items in Model.PatientDetailInfo)
+                        {
+                            <div class="col-sm-2">
+                                <input type="checkbox" name="@items[0].CategoryName" onclick="show(this.name)"/>@items[0].CategoryName</div>
+                        }
+                    </div>
+                        foreach (var items in Model.PatientDetailInfo)
+                        {             
+                    @Html.HiddenFor(model => model.Patient.UserId)    
+                    <div id="@items[0].CategoryName" style="display:none;">
+                        <fieldset>
+                            <legend>@items[0].CategoryName &nbsp&nbsp
+                                @if (items[0].EditDeleteFlag == "true")
+                                {
+                                    <input type="button" class="btn btn-primary deleteModuleBtn" value="删除" id="@items[0].CategoryCode" name="@items[0].CategoryCode" />
+                                }
+                                else
+                                {
+                                    <input type="button" class="btn btn-primary deleteModuleBtn" value="删除" id="@items[0].CategoryCode" name="@items[0].CategoryCode" disabled="disabled"/>
+                                    <span>您没有权限删除，请找相应负责医生！</span>
+                                }
+                            </legend>
+                            <div>
+                                @if (items.Count > 0)
+                                {
+                                    foreach (var item in items)
+                                    {
+                                        if (item.ParentCode == "")
+                                        {
+                                            if (@item.ItemCode == "Doctor")
+                                            {
+                                    <p>
+                                        <span>@item.ItemName</span><input type="text" style="display:none" id="DoctorIdInDuty" readonly="readonly" value="@item.Value" /><span>@item.Content</span></p>
+                                            }
+
+                                            else
+                                            {
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">@item.ItemName</label>
+                                    </div> 
+                                            }
+                                        }
+                                        else
+                                        { 
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">
+                                            @item.ItemName
+                                        </label>
+                                        <div class="col-sm-5">
+                                            @if (item.ControlType == "1")
+                                            {
+                                                @item.Content       
+                                            }
+                                            else
+                                            {
+                                                @item.Content  
+                                            }
+                                        </div>
+                                    </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </fieldset>
+                    </div>                                         
+                        }
+                }
+            </div>
+            @*未购买模块选择*@
+            <div id="module-choice" class="form-horizontal" role="form" style="margin-top: 10px;">
+                <div class="form-group" style="margin-left: 12px;">
+                    <label class="control-label" style="font-size: 17px">
+                        模块选择</label>
+                </div>
+                <div class="form-group" style="margin-left: 0px;">
+                    @for (int i = 0; i < Model.moduleUnBoughtCode.Count; i++)
+                    {
+                        <div class="col-sm-2">
+                            @Html.CheckBox("select" + Model.moduleUnBoughtCode[i], new { id = "Module" + i, @class = "Module" + i, onclick = "show(" + i + ")" })
+                            @Html.HiddenFor(m => m.moduleUnBoughtCode[i])
+                            @Html.DisplayFor(m => m.moduleUnBoughtName[i])
+                        </div>           
+                    }
+                </div>
+                @for (int i = 0; i < Model.moduleUnBoughtCode.Count; i++)
+                {
+                    <div id="@i" style="display:none">
+                        <p>
+                            【@Model.moduleUnBoughtName[i]】关注详细信息
+                        </p>
+                        @if (Model.InfoItemList[i].Count > 0)
+                        {
+                            foreach (var items in Model.InfoItemList[i])
+                            {
+
+                                if (items.GroupHeaderFlag == 1)
+                                { 
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    @items.Name</label>
+                            </div>
+                                }
+                                else
+                                {
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    @items.Name</label>
+                                <div class="col-sm-5">
+                                    @if (items.ControlType == "1")
+                                    {
+                                        @Html.DropDownList(items.Code, items.OptionList, new { style = "font-size:18px", @class = "form-control defaultSelected" })
+                                
+                                    }
+                                    else
+                                    { 
+                                        @Html.TextBox(items.Code, "", new { id = items.Code, style = "font-size:17px;", @class = "form-control" })
+                                    }
+                                </div>
+                            </div>
+                            
+                                }
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>  
+    
+                //体征信息
+    <div class="vitalSignInfoDiv">
+        <p class="dropdown" id="vitalSignInfoToggle">
+            体征信息<i class="icon-arrow close-arrow"></i></p>
+        <div id="vitalSignInfo" class="dropdown-div">
+            @*添加体征信息*@
+            <div id="addVitalsigns" style="margin-top: 15px; text-align: center;">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">
+                            *体征类别</label>
+                        <div class="col-sm-3">
+                            @Html.DropDownListFor(model => model.VitalSignsTypeNameSelected, Model.VitalSignsTypeNameList(), new { id = "VitalSignsTypeNameListDropDownListFor", onclick = "VitalSignsTypeChanged();", @class = "form-control" })
+                        </div>
+                        <label class="col-sm-2 control-label">
+                            *体征名称</label>
+                        <div class="col-sm-3">
+                            <select id="VitalSignsName" name="VitalSignsNameSelected" class="form-control">
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="button" id="addVitalsignsBtn" class="btn btn-primary" value="添加" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*读取体征信息*@
+            <div id="readVitalSigns" style="text-align: center;">
+                <div class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">
+                        </label>
+                        <div class="col-sm-3">
+                            <label class="control-label">
+                                已关注
+                            </label>
+                            <select size="10" name="VitalSignsFocused" class="form-control" id="VitalSignsFocused"
+                                multiple="multiple">
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="button" id="btnMove" value="取消关注" class="form-control btn btn-primary"
+                                style="margin-top: 40px" />
+                            <input type="button" id="btnMoveLeft" value="重新关注" class="form-control btn btn-primary"
+                                style="margin-top: 60px" />
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="control-label">
+                                取消关注
+                            </label>
+                            <select size="10" name="VitalSignsFocusCancle" class="form-control" id="VitalSignsFocusCancle"
+                                multiple="multiple">
+                            </select>
+                        </div>
+                        <label class="col-sm-2 control-label">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="submit" value="下一步" class="btn btn-primary submitBtn" style="float: right" />
+    
+}
+<div id="DeleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>删除</span></div>
+    <div class="modalContent">
+        <div class="form-horizontal" role="form">
+            <p>
+                确定删除？</p>
+            <table>
+                <tr>
+                    <td>
+                        <input type="button" class="btn btn-primary sureModuleBtn" value="确定" />
+                    </td>
+                    <td>
+                        <input type="button" class="btn btn-default simplemodal-close" id="cancelDelete"
+                            value="取消" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+@*alert弹出框*@
+<div id="alertDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>提示框</span></div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+        @*<input type="text" disabled="disabled" id="Warning"/>*@
+        <p id="Warning">
+        </p>
+        <table>
+            <tr>
+                <td>
+                    <input type="button" class="btn btn-primary Sure" value="确定" />
+                </td>
+                <td>
+                    <input type="button" class="btn btn-default simplemodal-close" id="Close" style="display: none"
+                        value="取消" />
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#tabs li a").click(function () {
+        $(this).attr("id", "current");
+    })
+    function show(i) {
+        $("#module-choice").each(function () {
+            document.getElementById(i).style.display = (document.getElementById("Module" + i).checked == true) ? "block" : "none";
+
+        })
+    }
+
+    $(document).ready(function () {
+
+        $(":checkbox").attr("checked", false);
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(1) a").attr("id", "currentnav");
+
+        document.getElementById("VitalSignsTypeNameListDropDownListFor").value = "";
+
+        var UserId = document.getElementById("UId").value;
+
+        $.ajax({
+            url: "/DoctorHome/GetVitalSignsFocusedList",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId },  //输入参数
+            success: function (res) {
+                $("#VitalSignsFocused").empty();
+                for (var item in res) {
+                    var VitalSignsFocusedList = res[item];
+                    var VitalSignsType = VitalSignsFocusedList.split("-")[0];
+                    var VitalSignsTypeName = VitalSignsFocusedList.split("-")[1];
+                    var VitalSignsCode = VitalSignsFocusedList.split("-")[2];
+                    var VitalSignsName = VitalSignsFocusedList.split("-")[3];
+                    var Code = VitalSignsType + "-" + VitalSignsCode;
+                    var Name = VitalSignsTypeName + "-" + VitalSignsName;
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#VitalSignsFocused").append(NewElement);
+                }
+            }
+        });
+
+        $("#addVitalsignsBtn").click(function () {
+            var VitalSignsType = document.getElementById("VitalSignsTypeNameListDropDownListFor").value;
+            var VitalSignsCode = document.getElementById("VitalSignsName").value;
+            if (VitalSignsType == "" || VitalSignsCode == "0") {
+                var Text = "";
+                if (VitalSignsType == "") { Text = Text + "体征类别 "; }
+                if (VitalSignsCode == "0") { Text = Text + "体征名称 "; }
+                Text = Text + "不能为空！";
+                $("#Warning").html(Text);
+                $('#alertDiv').modal({
+                    closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                    containerId: 'alert-container',
+                    overlayClose: true     //点击蒙层关闭窗口
+                });
+            }
+            else {
+                var InvalidFlag = "0";
+
+                $.ajax({
+                    url: "/DoctorHome/VitalSignsFocusedAdd",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode, InvalidFlag: InvalidFlag },  //输入参数
+                    success: function (res) {
+                        if (res == true) {
+
+                            var VitalSignsTypeName = document.getElementById("VitalSignsTypeNameListDropDownListFor").options[document.getElementById("VitalSignsTypeNameListDropDownListFor").selectedIndex].text;
+                            var VitalSignsName = document.getElementById("VitalSignsName").options[document.getElementById("VitalSignsName").selectedIndex].text;
+                            var Code = VitalSignsType + "-" + VitalSignsCode;
+                            var Name = VitalSignsTypeName + "-" + VitalSignsName;
+                            var NewElement = $("<option></option>").text(Name);
+                            NewElement.attr('value', Code);
+                            $("#VitalSignsFocused").append(NewElement);
+
+                            document.getElementById('VitalSignsTypeNameListDropDownListFor').value = "";
+                            document.getElementById('VitalSignsName').value = "";
+
+                        }
+                        else {
+                            alert("数据插入失败，请重新输入！");
+                        }
+                    }
+                })
+            }
+        })
+    })
+
+    var CategoryCode = "";
+    $(document).on("click", ".deleteModuleBtn", function () {
+        CategoryCode = $(this).attr("id");
+        alert(CategoryCode);
+        $('#DeleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    });
+
+    $(".sureModuleBtn").click(function () {
+        var UserId = document.getElementById("UId").value;
+
+        $.ajax({
+            url: "/DoctorHome/ModuleProfileDelete",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { UserId: UserId, CategoryCode: CategoryCode },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    $("#cancelDelete").click();
+                    self.location.reload();
+                    //location: "/DoctorHome/ModuleProfile";
+                }
+                else {
+                    alert("数据删除失败，请重试！");
+                }
+            }
+
+        })
+    })
+
+    function show(name) {
+        $("#" + name).toggle();
+    }
+
+    function VitalSignsTypeChanged() {
+        var VitalSignsTypeNameSelected = document.getElementById("VitalSignsTypeNameListDropDownListFor").value;
+
+        $.ajax({
+            url: "/DoctorHome/GetListbyVitalSignsTypeName",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { VitalSignsTypeNameSelected: VitalSignsTypeNameSelected },  //输入参数
+            success: function (res) {
+                $("#VitalSignsName").empty();
+                for (var item in res) {
+                    var VitalSignsNameList = res[item];
+                    var Name = VitalSignsNameList.split("|")[0];
+                    var Code = VitalSignsNameList.split("|")[1];
+                    var NewElement = $("<option></option>").text(Name);
+                    NewElement.attr('value', Code);
+                    $("#VitalSignsName").append(NewElement);
+                }
+            }
+        });
+    }
+
+    $("#btnMove").click(function () {
+        var $options = $("#VitalSignsFocused option:selected");
+        var UserId = document.getElementById("UId").value;
+        for (var i = 0; i < $options.length; i++) {
+            var VitalSignsType = $options[i].value.split("-")[0];
+            var VitalSignsCode = $options[i].value.split("-")[1];
+
+            $.ajax({
+                url: "/DoctorHome/VitalSignsFocusedDelete",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode },  //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        var $remove = $options.remove();
+                        $remove.appendTo("#VitalSignsFocusCancle");
+                    }
+                    else {
+                        alert("取消失败，请重试！");
+                    }
+                }
+            })
+        }
+    });
+
+    $("#btnMoveLeft").click(function () {
+        var $options = $("#VitalSignsFocusCancle option:selected");
+        var UserId = document.getElementById("UId").value;
+        for (var i = 0; i < $options.length; i++) {
+            var VitalSignsType = $options[i].value.split("-")[0];
+            var VitalSignsCode = $options[i].value.split("-")[1];
+            var InvalidFlag = "0";
+
+            $.ajax({
+                url: "/DoctorHome/VitalSignsFocusedAdd",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { UserId: UserId, VitalSignsType: VitalSignsType, VitalSignsCode: VitalSignsCode, InvalidFlag: InvalidFlag },  //输入参数
+                success: function (res) {
+                    if (res == true) {
+                        var $remove = $options.remove();
+                        $remove.appendTo("#VitalSignsFocused");
+                    }
+                    else {
+                        alert("重新关注失败，请重试！");
+                    }
+                }
+            })
+        }
+    });
+
+    $("#moduleInfoToggle").click(function () {
+        $("#moduleInfo").toggle();
+        $(this).find("i").toggleClass("open-arrow");
+    })
+
+    $("#vitalSignInfoToggle").click(function () {
+        $("#vitalSignInfo").toggle();
+        $(this).find("i").toggleClass("open-arrow");
+    })
+
+    $(".Sure").click(function () {
+        $("#Close").click();
+    })
+</script>

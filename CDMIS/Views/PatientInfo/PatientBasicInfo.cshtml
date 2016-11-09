@@ -1,0 +1,113 @@
+﻿@model CDMIS.ViewModels.PatientBasicInfoViewModel
+@{
+    ViewBag.Title = "患者首页";
+                //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    /* Adjusting the margins, paddings and no list styles */
+    
+    #nav
+    {
+        overflow: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #nav li
+    {
+        float: left;
+        margin: 0 -15px 0 0;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+    }
+    
+    #nav li a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 30px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #6C6C6C;
+        opacity: .8;
+        filter: alpha(opacity=30);
+    }
+    
+    #nav a:hover, #tabs a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #nav a:focus
+    {
+        outline: 0;
+    }
+    
+    #nav #currentnav
+    {
+        border-bottom-color: #00A600;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+</style>
+@*<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.PatientBasicInfo.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.PatientBasicInfo.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.PatientBasicInfo.UserId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.PatientBasicInfo.UserId }, new { target = "_self" })</li>
+    </ul>
+</div>*@
+<div style="width: 100%; border: 1px solid #3567d1; padding: 1.0em 1.0em 1.0em 1.0em;
+    margin-bottom: 10px">
+    <div class="row">
+        <div class="col-sm-3">
+            <h4>
+                <strong>患者ID：@Model.PatientBasicInfo.UserId</strong></h4>
+        </div>
+        <div class="col-sm-3">
+            <h4>
+                <strong>患者姓名：@Model.PatientBasicInfo.UserName</strong></h4>
+        </div>
+        <div class="col-sm-3">
+            <h4>
+                <strong>性别：@Model.PatientBasicInfo.Gender</strong></h4>
+        </div>
+        <div class="col-sm-3">
+            <h4>
+                <strong>年龄：@Model.PatientBasicInfo.Age</strong></h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <h4>
+                <strong>血型：@Model.PatientBasicInfo.BloodType</strong></h4>
+        </div>
+        <div class="col-sm-3">
+            <h4>
+                <strong>医保类型：@Model.PatientBasicInfo.InsuranceType</strong></h4>
+        </div>
+        <!--修改：隐藏警报 ZC 2015-05-13 -->
+        @*<div class="col-sm-3">
+            <h4>
+                <strong>未处理警报数：<span id="alertNumber">@Model.PatientBasicInfo.AlertNumber</span></strong></h4>
+        </div>*@
+        <div class="col-sm-6">
+            <h4>
+                <strong>模块信息：@Model.PatientBasicInfo.Module</strong></h4>
+        </div>
+    </div>
+</div>

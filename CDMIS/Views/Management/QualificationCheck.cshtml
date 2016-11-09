@@ -1,0 +1,263 @@
+﻿@model CDMIS.ViewModels.QualiCheckViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "用户资质审核";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<p class="DctorClass">
+    医生</p>
+<div class="tableContainer" style="margin-top: 5px; width: 100%;">
+    <table class="display">
+        <thead>
+            <tr>
+                <th>
+                    姓名
+                </th>
+                <th>
+                    Id
+                </th>
+                <th style="display: none">
+                    邀请码
+                </th>
+                <th>
+                    手机号
+                </th>
+                <th>
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.QualiCheckList[0] != null)
+            {
+                if (Model.QualiCheckList[0].Count > 0)
+                {
+                    foreach (CDMIS.Models.QualiCheck item in Model.QualiCheckList[0])
+                    {
+                <tr>
+                    <td>@item.UserName
+                    </td>
+                    <td id = "Doctor||@item.UserId">@item.UserId
+                    </td>
+                    <td style="display: none">@item.ActivationCode
+                    </td>
+                    <td>@item.PhoneNo
+                    </td>
+                    <td>
+                        <button class="btn btn-primary activateBtn">
+                            激活</button>
+                    </td>
+                </tr>
+                    }
+                }
+            }</tbody></table>
+</div>
+<p class="DctorClass">
+    健康专员</p>
+<div class="tableContainer" style="margin-top: 5px; width: 100%;">
+    <table class="display">
+        <thead>
+            <tr>
+                <th>
+                    姓名
+                </th>
+                <th>
+                    Id
+                </th>
+                <th style="display: none">
+                    邀请码
+                </th>
+                <th>
+                    手机号
+                </th>
+                <th>
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.QualiCheckList[1] != null)
+            {
+                if (Model.QualiCheckList[1].Count > 0)
+                {
+                    foreach (CDMIS.Models.QualiCheck item in Model.QualiCheckList[1])
+                    {
+                <tr>
+                    <td>@item.UserName
+                    </td>
+                    <td id = "HealthCoach||@item.UserId">@item.UserId
+                    </td>
+                    <td style="display: none">@item.ActivationCode
+                    </td>
+                    <td>@item.PhoneNo
+                    </td>
+                    <td>
+                        <button class="btn btn-primary activateBtn">
+                            激活</button>
+                    </td>
+                </tr>
+                    }
+                }
+            }</tbody></table>
+</div>
+
+
+@*激活页面弹框*@
+<div id="activateDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>激活用户</span>
+    </div>
+
+    <div style="margin-top: 2.0em; width: 45%; float: left; text-align: center;">
+        <div>
+            <img src="" id="img0" style="width: 168px; height:168px" alt="头像未上传"/>
+        </div>
+    </div>
+
+    <div style="margin-top: 2.0em; width: 54%; float: left; text-align: center;">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="AlertItemCode" class="col-sm-3 control-label">
+                    姓名
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="UserName" onkeyup="IsLegal(this.id);" disabled="disabled">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="AlertItemName" class="col-sm-3 control-label">
+                    Id
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="UserId" onkeyup="IsLegal(this.id);" disabled="disabled">
+                    <input type="text" class="form-control" id="ActivateCode" onkeyup="IsLegal(this.id);" style="display: none">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Max" class="col-sm-3 control-label">
+                    手机号
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="PhoneNo" onkeyup="IsLegal(this.id);" disabled="disabled">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-6" align="center">
+                    <input type="button" class="btn btn-primary SendSMSBtn"  value="已激活" />
+                </div>
+                <div class="col-sm-6" align="center">
+                    <input type="button" class="btn btn-primary SendSMSBtn"  value="激活失败" />
+                </div>
+            </div>
+            <p align="center" style="color:red" class="notice">
+            </p>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(2) a").attr("id", "current");
+    });
+
+    //表格样式
+    $(document).ready(function () {
+        var table = $('.display').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": false,  //是否分页。
+            "sScrollY": "150px",
+            "bLengthChange": false,
+            "iDisplayLength": 3,
+            "bFilter": false,
+            "bSort": false
+        });
+    });
+
+    //点击激活按钮
+    $(".activateBtn").click(function () {
+        var UserName = $(this).parent().parent().find("td:eq(0)").text().trim();
+        var ActivateCode = $(this).parent().parent().find("td:eq(2)").text().trim();
+        var UserId = $(this).parent().parent().find("td:eq(1)").text().trim();
+        var PhoneNo = $(this).parent().parent().find("td:eq(3)").text();
+        $.ajax({
+            url: "/Management/GetPhotoAddress",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {
+                UserId: UserId
+            },
+            success: function (res) {
+                $("#img0").attr("src", res);
+            }
+        });
+        $('#UserName').val(UserName);
+        $('#UserId').val(UserId);
+        $('#ActivateCode').val(ActivateCode);
+        $('#PhoneNo').val(PhoneNo);
+
+        $('#activateDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    });
+
+    //点击发送短信按钮
+    $(".SendSMSBtn").click(function () {
+        $.modal.close();
+        var UserId = $('#UserId').val();
+        var RoleClass = "";
+        var ActivationCode = $('#ActivateCode').val();
+        var Role = ActivationCode.substring(0, 1);
+        var PhoneNo = $('#PhoneNo').val().trim();
+        if (Role == "H") {
+            RoleClass = "HealthCoach";
+        }
+        else {
+            RoleClass = "Doctor";
+        }
+        SetActivationCode(UserId, RoleClass, ActivationCode, $(this).attr("value"), PhoneNo);
+    });
+
+    //将邀请码写入数据库
+    function SetActivationCode(UserId, RoleClass, ActivationCode, InvalidFlag, PhoneNo) {
+        $.ajax({
+            url: "/Management/SetActivationCodeJson",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {
+                UserId: UserId,
+                RoleClass: RoleClass,
+                ActivationCode: ActivationCode,
+                InvalidFlag: InvalidFlag,
+                PhoneNo: PhoneNo
+            },
+            success: function (res) {
+                window.location.href = "/Management/QualificationCheck";
+            }
+        });
+    }
+
+    String.prototype.trim = function () {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+</script>
+<style>
+    .DctorClass
+    {
+        font-size: 20px;
+        font-weight: bold;
+        background-color: rgb(231, 232, 243);
+        text-align: center;
+        margin-top: 40px;
+    }
+    
+    #simplemodal-container {height:300px; width:500px;}
+</style>

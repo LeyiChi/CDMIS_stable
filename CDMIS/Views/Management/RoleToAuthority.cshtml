@@ -1,0 +1,208 @@
+﻿@model CDMIS.ViewModels.Role2AuthorityViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "权限分配";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/MicrosoftAjax.js"></script>
+<script type="text/javascript" src="../../Scripts/MicrosoftMvcAjax.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>
+<div class="form-horizontal" role="form">
+    <fieldset style="width: 500px;">
+        <legend>角色信息设定框</legend>
+        @using (Ajax.BeginForm("r2aPartialView", "UserManagement", null,
+                           new AjaxOptions
+                           {
+                               UpdateTargetId = "RoleAuthorityTableContainer",
+                               HttpMethod = "Post",
+                               OnSuccess = " ",
+                           }))
+        { 
+                        
+            <div class="form-group">
+                <label class="col-sm-5 control-label">
+                    角色名称：
+                </label>
+                <div class="col-sm-5">
+                    @Html.DropDownListFor(model => model.RoleNameSelected, Model.RoleNameList(), new { id = "RoleNameDownList", @class = "form-control chosen", style = "font-size:15px" })
+                </div>
+                <input type="submit" id="SearchBtn" class="col-sm-2" value="查询" />
+            </div>
+        }
+    </fieldset>
+</div>
+<div class="form-horizontal" role="form">
+    <table width="100%" border="0" cellspacing="3" cellpadding="3" align="center">
+        <tr>
+            <td width="40%" style="border: 0;">
+                <fieldset style="width: 400px; height: 760px;">
+                    <legend>数据库中的所有权限一览</legend>
+                    <div id="AllAuthorityTableContainer">
+                        <table width="80%" id="AllAuthorityListDT" class="display">
+                            <thead class="fixedHeader">
+                                <tr>
+                                    <th width="160px">
+                                        权限编码
+                                    </th>
+                                    <th width="160px">
+                                        权限名称
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="scrollContent">
+                                @if (Model.AuthorityRowCount > 0)
+                                {
+                                    foreach (var item in Model.AuthorityList)
+                                    {
+                                    <tr class="normalRow">
+                                        <td width="110px">@item.Code
+                                        </td>
+                                        <td width="110px">@item.Name
+                                        </td>
+                                    </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </td>
+            <td style="width: 100px; height: 760px;">
+                <div style="margin-top: -300px; margin-left: 80px;">
+                    <input type="button" id="AddAllBtn" class="col-sm-4" value=">>" />
+                    <br />
+                    <br />
+                    <input type="button" id="AddOneBtn" class="col-sm-4" value=">" />
+                    <br />
+                    <br />
+                    <input type="button" id="RemoveAllBtn" class="col-sm-4" value="<<" />
+                    <br />
+                    <br />
+                    <input type="button" id="RemoveOneBtn" class="col-sm-4" value="<" />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <input type="submit" class="button blue side" id="Save" value="保存" style="font-size: 16px;
+                        margin-top: 30px" />
+                    <input type="button" class="button blue side" id="Cancel" value="取消" style="font-size: 16px;
+                        margin-top: 30px" />
+                </div>
+            </td>
+            <td width="40%" style="border: 0;">
+                <fieldset style="width: 400px; height: 760px;">
+                    <legend>该角色已有权限一览</legend>
+                    <div id="RoleAuthorityTableContainer">
+                        <table width="80%" id="RoleAuthorityListDT" class="display">
+                            <thead class="fixedHeader">
+                                <tr>
+                                    <th width="160px">
+                                        权限编码
+                                    </th>
+                                    <th width="160px">
+                                        权限名称
+                                    </th>
+                                    <th width="160px">
+                                        子权限编码
+                                    </th>
+                                    <th width="160px">
+                                        子权限名称
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="scrollContent">
+                                @if (Model.RoleAuthorityRowCount > 0)
+                                {
+                                    foreach (var item in Model.RoleAuthorityList)
+                                    {
+                                    <tr class="normalRow">
+                                        <td width="110px">@item.AuthorityCode
+                                        </td>
+                                        <td width="110px">@item.AuthorityName
+                                        </td>
+                                        <td width="110px">@item.SubAuthorityCode
+                                        </td>
+                                        <td width="110px">@item.SubAuthorityName
+                                        </td>
+                                    </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    var selectedAuthorityCodes = [];
+    $(document).ready(function () {
+        var table = $('#AllAuthorityListDT').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "250px",
+            "bFilter": false
+
+        });
+
+
+    });
+    $(document).on('click', ".normalRow", function () {
+        
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+            for (var i = 0; i < selectedAuthorityCodes.length; ++i) 
+　　          { 
+　　              if ( selectedAuthorityCodes[i] ==$(this).find("td:eq(0)").text() ) {
+                     selectedAuthorityCodes.splice(i, 1);　　
+                  } 
+　　          } 
+          
+        }
+        else {
+            $(this).addClass('selected');
+            selectedAuthorityCodes.push($(this).find("td:eq(0)").text()); 
+        }
+       
+    });
+
+    $("#AddOneBtn").on('click', function () {
+        var roleList = document.getElementById("RoleNameDownList");
+        var roleCode = roleList.options[roleList.selectedIndex].value;
+
+        $.each(selectedAuthorityCodes, function (key, val) {
+            //      console.log('index in arr:' + key + ", corresponding value:" + val);
+            $.ajax({                                                //合并新增权限（authorityCode大分类下所有子项目）和角色原有权限的 List<AuthorityDetail>
+                url: "/UserManagement/GetNewAuthorityList",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { authorityCode: val, roleCode: roleCode },
+                success: function (res) {
+                
+              //     alert( res[0].AuthorityCode);
+                    $.each(res, function (index, content) {
+                        alert("AuthorityName" + content.AuthorityName + "SubAuthorityName" + content.SubAuthorityName);
+                    });
+                    //　　var trs = "";
+                    //　　trs += "<tr><td>" + value.name + "</td><td>" + value.password + "</td></tr>";
+                    //   tbody += trs;
+
+                    // $("#project").append(tbody);
+
+                }
+            });
+        });
+
+    });
+</script>

@@ -1,0 +1,152 @@
+﻿@{
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<head>
+    <link href="../../Content/FixedHeader.css" rel="stylesheet" type="text/css" />
+    <link href="../../Content/button.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../Scripts/MicrosoftAjax.js"></script>
+    <script type="text/javascript" src="../../Scripts/MicrosoftMvcAjax.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <link rel="Stylesheet" href="../../Content/chosen.css" />
+    <link href="../../Content/button.css" rel="stylesheet" type="text/css" />
+    <link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../Scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="../../Scripts/chinese-string.js"></script>
+    <script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>
+    <style type="text/css">
+        /* Adjusting the margins, paddings and no list styles */
+        .navigation
+        {
+            margin: 10px;
+            padding: 0;
+            list-style: none;
+            font: .8em \9ED1\4F53;
+            font-size: 14px;
+            height: 40px;
+        }
+        /* Little tricking with positions */
+        .navigation li
+        {
+            float: left; /* Show list items inline */
+            width: 330px;
+            position: relative;
+        }
+        /* Playing with Main Categories */
+        .navigation li a
+        {
+            background: #262626;
+            color: #fff;
+            display: block; /* Making sure a element covers whole li area */
+            padding: 8px 7px 8px 7px;
+            text-decoration: none; /* No underline */
+            border: 1px solid #ffffff;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .navigation li a:hover
+        {
+            color: #F2861D;
+        }
+        /* Sub Cat Menu stuff*/
+        .navigation ul
+        {
+            position: absolute;
+            left: 0;
+            display: none; /* Hide it by default */
+            margin: 0 0 0 -1px;
+            padding: 0;
+            list-style: none;
+        }
+        .navigation ul li
+        {
+            width: 200px;
+            float: left;
+            border-top: none;
+        }
+        /* Sub Cat menu link properties */
+        .navigation ul a
+        {
+            display: block; /* Making sure a element covers whole li area */
+            height: 15px;
+            padding: 8px 7px 13px 7px;
+            color: #fff;
+            text-decoration: none;
+            border-top: none;
+            border-bottom: 1px dashed #6B6B6B;
+        }
+        .navigation ul a:hover
+        {
+            color: #F2861D;
+        }
+    </style>
+</head>
+<div style="height: 760px;">
+   <ul class="navigation">
+        <li><a href="#" onclick="loadTab('DoctorHome','PatientList')">患者列表</a> </li>
+        <li><a href="#" onclick="loadTab('DoctorHome','BasicProfile')">患者建档</a> </li>
+        <li><a href="#" onclick="loadTab('DoctorHome','AlertList')">警报</a> </li>
+    </ul>
+    <div style="text-align: center;">
+        <iframe id="tabboard" src="/DoctorHome/PatientList" width="100%" height="700px" onload="SetCwinHeight(this)" scrolling="no"
+            frameborder="0"></iframe>
+    </div>
+</div>
+@Html.Hidden("WebUrl", @ViewData["Web"])
+<script type="text/javascript">
+    // Executes the function when DOM will be loaded fully
+    $(document).ready(function () {
+        // hover property will help us set the events for mouse enter and mouse leave
+        $('.navigation li').hover(
+        // When mouse enters the .navigation element
+	        function () {
+	            //Fade in the navigation submenu
+	            $('ul', this).fadeIn(); 	// fadeIn will show the sub cat menu
+	        },
+        // When mouse leaves the .navigation element
+	        function () {
+	            //Fade out the navigation submenu
+	            $('ul', this).fadeOut();  // fadeOut will hide the sub cat menu		
+	        }
+	    );
+    });
+
+    function loadTab(controllerName, actionName) {
+        document.getElementById("tabboard").src = "/" + controllerName + "/" + actionName;
+        //        $("#tabboard").attr('src', "/" + controllerName + "/" + actionName);
+        
+    }
+</script>
+<script type="text/javascript" language="javascript">
+
+    function iFrameHeight() {
+
+        var ifm = document.getElementById("tabboard");
+
+        var subWeb = document.frames ? document.frames["tabboard"].document :
+
+ifm.contentDocument;
+
+        if (ifm != null && subWeb != null) {
+
+            ifm.height = subWeb.body.scrollHeight;
+
+        }
+
+    }
+
+    function SetCwinHeight(iframeObj) {
+        if (document.getElementById) {
+            if (iframeObj) {
+                if (iframeObj.contentDocument && iframeObj.contentDocument.body.offsetHeight) {
+                    iframeObj.height = iframeObj.contentDocument.body.offsetHeight;
+                } else if (document.frames[iframeObj.name].document && document.frames[iframeObj.name].document.body.scrollHeight) {
+                    iframeObj.height = document.frames[iframeObj.name].document.body.scrollHeight;
+                }
+            }
+        }
+    }
+
+</script>

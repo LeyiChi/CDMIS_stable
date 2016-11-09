@@ -1,0 +1,105 @@
+﻿@model CDMIS.ViewModels.DictViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "字典维护";
+}
+<link rel="Stylesheet" href="../../Content/chosen.css" />
+<script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+<div class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="col-sm-1 control-label">
+            字典表</label>
+        <div class="col-sm-3">
+            @Html.DropDownListFor(model => model.DictSelected, Model.DictList(), new { id = "DictDropDownList", @class = "form-control chosen", style = "font-size:28px", onchange = "GetResult();" })
+        </div>
+    </div>
+</div>
+<div style="text-align: center; width: 100%;">
+    <iframe id="dashboardDict" src="/Dict/InfoItemCategory" style="width:100%;height:650px;border:none;">
+    </iframe>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+
+        $('.chosen').chosen({ disable_search_threshold: 10, no_results_text: "没有匹配结果：",
+            allow_single_deselect: true, //配置是否简单搜索
+            search_contains: true//配置是否开启全字匹配，不只是首字母搜索 
+        });
+    })
+
+    function GetResult() {
+        var dictlist = document.getElementById("DictDropDownList");
+        var dictionary = dictlist.options[dictlist.selectedIndex].value;
+        //alert(dictionary);
+        switch (dictionary) {
+            case '1':
+                document.getElementById("dashboardDict").src = "/Dict/InfoItemCategory";
+                break;
+            case '2':
+                document.getElementById("dashboardDict").src = "/Dict/InfoItem";
+                break;
+            case '3':
+                document.getElementById("dashboardDict").src = "/Dict/BasicType";
+                break;
+            case '4':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompDivision";
+                break;
+            case '5':
+                document.getElementById("dashboardDict").src = "/Dict/Hospital";
+                break;
+            case '6':
+                document.getElementById("dashboardDict").src = "/Dict/Symptoms";
+                break;
+            case '7':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompDiagnosis";
+                break;
+            case '8':
+                document.getElementById("dashboardDict").src = "/Dict/VitalSigns";
+                break;
+            case '9':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompExaminationItem";
+                break;
+            case '10':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompExamSubItem";
+                break;
+            case '11':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompLabTestItem";
+                break;
+            case '12':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompLabSubItem";
+                break;
+            case '13':
+                document.getElementById("dashboardDict").src = "/Dict/Treatment";
+                break;
+            case '14':
+                document.getElementById("dashboardDict").src = "/Dict/BasicAlert";
+                break;
+            case '15':
+                document.getElementById("dashboardDict").src = "/Dict/MstBloodPressure";
+                break;
+            case '16':
+                document.getElementById("dashboardDict").src = "/Dict/MstLifeStyle";
+                break;
+            case '17':
+                document.getElementById("dashboardDict").src = "/Dict/MstLifeStyleDetail";
+                break;
+            case '18':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompOperation";
+                break;
+            case '19':
+                document.getElementById("dashboardDict").src = "/Dict/UnCompDrug";
+                break;
+            case '20':
+                document.getElementById("dashboardDict").src = "/Dict/Insurance";
+                break;
+            case '21':
+                document.getElementById("dashboardDict").src = "/Dict/Task";
+                break;
+            case '22':
+                document.getElementById("dashboardDict").src = "/Dict/TaskDetail";
+                break;
+        }
+    }
+</script>

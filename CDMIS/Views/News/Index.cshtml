@@ -1,0 +1,224 @@
+﻿@model CDMIS.ViewModels.HealthEducationList
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "健康教育资料管理";
+}
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/jquery-1.11.1.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<style type="text/css">
+    #delete-container {height:300px; width:420px;}
+</style>
+
+<h2>
+    健康教育资料</h2>
+<table width="100%">
+    <tr>
+        <td width="20%" class="col-sm-1 control-label">
+            模块
+        </td>
+        <td width="40%">
+            @Html.DropDownListFor(model => model.selectedModuleId, Model.ModuleList, new { id = "ModuleDropDownList", @class = "form-control", @onchange = "ModuleSelect(this.value);"})
+        </td>
+        <td align="right">
+            @Html.ActionLink("添加", "Create", null, new { @class = "btn btn-primary editBtn" })
+        </td>
+    </tr>
+</table>
+<div id="tableContainer1" class="tableContainer" style="margin-top: 5px">
+    <table class="display " width="100%" id="DataTable">
+        <thead>
+            <tr>
+                <th style="display: none;">
+                    模块Id
+                </th>
+                <th style="display: none;">
+                    Id
+                </th>
+                <th width="80px">
+                    模块
+                </th>
+                <th width="500px">
+                    标题
+                </th>
+                <th width="35px">
+                    作者
+                </th>
+                <th width="100px">
+                    上传时间
+                </th>
+                <th width="150px">
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody id="TableBody">
+            @if (Model.HEList.Count > 0)
+            {
+                foreach (var item in Model.HEList)
+                {
+                <tr>
+                    <td  style="display: none;">
+                        @Html.DisplayFor(modelItem => item.Module)
+                    </td>
+                    <td style="display: none;">
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ModuleName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AuthorName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreateDateTime)
+                    </td>
+                    <td>
+                        @Html.ActionLink("编辑", "Edit", new { module = item.Module, id = item.Id }, new { @class = "btn btn-primary editBtn" })
+                        |
+                        <input type="button" value="删除" class="btn btn-primary deleteBtn" />
+                    </td>
+                </tr>
+                }
+            }
+            else
+            {
+
+            }
+        </tbody>
+    </table>
+</div>
+@*删除页面弹框*@
+<div id="deleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>用户信息表删除</span>
+    </div>
+    <div class="modalContent">
+        <p style="font-size: 16px; color: #EE9A00; font-weight: bold">
+            是否确定删除：
+        </p>
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="Module_del" class="col-sm-3 control-label">
+                模块
+            </label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="ModuleName_del" readonly="readonly">
+            </div>
+            <input type="hidden"  id="Module_del" >
+            <input type="hidden"  id="Id_del" >
+            <label for="Title_del" class="col-sm-3 control-label" style="padding-top:20px">
+                标题
+            </label>
+            <div class="col-sm-7" style="padding-top:10px">
+                <input type="text" class="form-control" id="Title_del" readonly="readonly">
+            </div>
+        </div>
+        <p style="font-size: 16px; color: #EE9A00; font-weight: bold">
+            这份文件
+        </p>
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-7">
+                <input type="button" class="btn btn-primary" onclick="DeleteDataFromDB();" value="确定" />
+                <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+            </div>
+        </div>
+        </form>
+        <p align="center" style="color: red" class="notice">
+        </p>
+    </div>
+</div>
+<script type="text/javascript">
+    var trSeq = -1;
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(3) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "420px",
+            "iDisplayLength": 8,
+            "bLengthChange": false,
+            "bFilter": true,
+            "columnDefs": [{ "bSortable": false, "aTargets": [6]}] //禁止某些列的排序功能
+        });
+
+        //删除按钮触发
+        $(".deleteBtn").click(function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+
+            var Module = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var ModuleName = $("#TableBody tr:eq(" + trSeq + ") td:eq(2)").text().trim();
+            var Id = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            var Title = $("#TableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+            DeleteData(Module, Id, ModuleName, Title);
+        });
+    });
+
+    //模块选择
+    function ModuleSelect(Module) {
+        window.location.assign("/News/Index?Module=" + Module);
+    }
+
+    //删除数据
+    function DeleteData(Module, Id, ModuleName, Title) {
+        document.getElementById("Module_del").value = Module;
+        document.getElementById("ModuleName_del").value = ModuleName;
+        document.getElementById("Title_del").value = Title;
+        document.getElementById("Id_del").value = Id;
+        $('#deleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除提交
+    function DeleteDataFromDB() {
+        var Module = document.getElementById("Module_del").value;
+        var Id = document.getElementById("Id_del").value;
+        $.ajax({
+            url: "/News/DeleteHealthEducation",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { Module: Module, Id: Id
+            },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    trSeq = -1;
+                    notice();
+                }
+                else {
+                    alert("数据删除失败！");
+                }
+            }
+        });
+    }
+
+    //操作成功提醒+关闭窗口+界面刷新
+    var wait = 1.5;
+    function notice() {
+        if (wait == 0) {
+            window.location.reload();
+            $.modal.close();
+            wait = 1.5
+        }
+        else {
+            $('.notice').text("操作成功！界面将立刻自动刷新");
+            wait = wait - 0.5;
+            setTimeout(notice, 500);
+        }
+    }
+</script>

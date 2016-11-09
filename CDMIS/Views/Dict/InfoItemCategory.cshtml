@@ -1,0 +1,398 @@
+﻿@model IEnumerable<CDMIS.Models.InfoItemCategory>
+
+@{
+    ViewBag.Title = "InfoItemCategory";
+}
+
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/jquery-1.11.1.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<style type="text/css">
+    #simplemodal-container {height:400px; width:400px;}
+    #delete-container {height:260px; width:400px;}
+</style>
+<div style="text-align: right;">
+    <input type="button" value="新增数据" class="btn btn-primary insertBtn" style="margin-right: 10px" disabled="disabled"/>
+</div>
+<div id="tableContainer1" class="tableContainer" style="margin-top: 5px" >
+    <table width="100%" id="DataTable" class="display">
+        <thead>
+            <tr>
+                <th align="left">
+                    编码
+                </th>
+                <th align="left">
+                    名称
+                </th>
+                <th align="left">
+                    序列号
+                </th>
+                <th align="left">
+                    有效期：起
+                </th>
+                <th align="left">
+                    有效期：止
+                </th>
+                <th align="left">
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody id="TableBody">
+             @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SortNo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StartDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EndDate)
+                    </td>
+                    <td>
+                        <input type="button" value="编辑" class="btn btn-primary editBtn" /> |
+                        <input type="button" value="删除" class="btn btn-primary deleteBtn" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@*编辑页面弹框*@
+<div id="addDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>用户信息表编辑</span>
+    </div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="Code" class="col-sm-3 control-label">
+                    编码
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="Code" readonly="readonly">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Name" class="col-sm-3 control-label">
+                    名称
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="Name" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="SortNo" class="col-sm-3 control-label" id="SortNoLabel">
+                    序列号
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="SortNo" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="StartDate" class="col-sm-3 control-label">
+                    有效期:起
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="StartDate" readonly="readonly">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="EndDate" class="col-sm-3 control-label" id="EndDateLabel">
+                    有效期:止
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="EndDate" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-7">
+                    <input type="button" class="btn btn-primary save" onclick="AddDataToDB();" value="保存" />
+                    <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+                </div>
+            </div>
+            <p align="center" style="color:red" class="notice">
+            </p>
+        </form>
+    </div>
+</div>
+
+@*删除页面弹框*@
+<div id="deleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>用户信息表删除</span>
+    </div>
+    <div class="modalContent">
+        <p style="font-size: 16px; color:#EE9A00; font-weight:bold">
+            是否确定删除：
+        </p>
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="Code_del" class="col-sm-3 control-label">
+                    编码
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="Code_del" readonly="readonly">
+                </div>
+            </div>
+            <p style="font-size: 16px; color:#EE9A00; font-weight:bold">
+                的整个模块（删除操作将永久删除多条数据）
+            </p>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-7">
+                    <input type="button" class="btn btn-primary" onclick="DeleteDataFromDB();" value="确定" />
+                    <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+                </div>
+            </div>
+        </form>
+        <p align="center" style="color:red" class="notice">
+        </p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var NameFlag = 0;
+    var SortNoFlag = 0;
+    var EndDateFlag = 0; //编辑弹框输入合法性标志位 0 不合法 1 合法
+    var trSeq = -1; //选定的行标
+    var editType = 0; //编辑类型，0：无  1：编辑  2：新增
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "420px",
+            "iDisplayLength": 8,
+            "bLengthChange": false,
+            "bFilter": true
+        });
+
+        //编辑按钮触发
+        $(".editBtn").click(function () {
+            NameFlag = 1;
+            SortNoFlag = 1;
+            EndDateFlag = 1;
+            editType = 1;
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var Name = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            var SortNo = $("#TableBody tr:eq(" + trSeq + ") td:eq(2)").text().trim();
+            var StartDate = $("#TableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+            var EndDate = $("#TableBody tr:eq(" + trSeq + ") td:eq(4)").text().trim();
+            EditData(Code, Name, SortNo, StartDate, EndDate);
+        });
+
+        //新增按钮触发
+        //        $(".insertBtn").click(function () {
+        //            editType = 2;
+        //            InsertData();
+        //        });
+
+        //删除按钮触发
+        $(".deleteBtn").click(function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var Code = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            DeleteData(Code);
+        });
+    });
+
+    //编辑数据
+    function EditData(Code, Name, SortNo, StartDate, EndDate) {
+        document.getElementById("Code").value = Code;
+        document.getElementById("Name").value = Name;
+        document.getElementById("SortNo").value = SortNo;
+        document.getElementById("StartDate").value = StartDate;
+        document.getElementById("EndDate").value = EndDate;
+        $('.save').removeAttr('disabled');
+        $('#Code').attr('readonly',"readonly");
+        $('#StartDate').attr('readonly',"readonly");
+        $('#addDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //新增数据
+//    function InsertData(){
+//        document.getElementById("Type").value = "";
+//        document.getElementById("Code").value = "";
+//        document.getElementById("Name").value = "";
+//        document.getElementById("SortNo").value = "";
+//        document.getElementById("StartDate").value = "";
+//        document.getElementById("EndDate").value = "";
+//        $('#Type').removeAttr('readonly');
+//        $('#Code').removeAttr('readonly');
+//        $('#StartDate').removeAttr('readonly');
+//        $('#addDataDiv').modal({
+//            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+//            overlayClose: true     //点击蒙层关闭窗口
+//        });
+//    }
+
+    //删除数据
+    function DeleteData(Code){
+        document.getElementById("Code_del").value = Code;
+        $('#deleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除提交
+    function DeleteDataFromDB(){
+        var Code = document.getElementById("Code_del").value;
+        $.ajax({
+            url: "/Dict/InfoItemCategoryDelete",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { Code: Code
+            },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    trSeq = -1;
+                    notice();
+                }
+                else {
+                    alert("数据删除失败！");
+                }
+            }
+        });
+    }
+
+    //编辑or新增提交
+    function AddDataToDB() {
+        var Code = document.getElementById("Code").value;
+        var Name = document.getElementById("Name").value;
+        var SortNo = document.getElementById("SortNo").value;
+        var StartDate = document.getElementById("StartDate").value;
+        var EndDate = document.getElementById("EndDate").value;
+        $.ajax({
+            url: "/Dict/InfoItemCategoryEdit",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { Code: Code,
+                    Name: Name,
+                    SortNo: SortNo,
+                    StartDate: StartDate,
+                    EndDate: EndDate
+             },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    if (editType == 1){
+                        editType = 0;
+                        trSeq = -1;
+                        NameFlag = 0;
+                        SortNoFlag = 0;
+                        EndDateFlag = 0;
+                    }
+                    if (editType == 2){
+                        editType = 0;
+                        NameFlag = 0;
+                        SortNoFlag = 0;
+                        EndDateFlag = 0;
+                    }
+                    notice();
+                }
+                else {
+                    alert("数据插入失败，请重新输入！");
+                }
+            }
+        });
+    }
+
+    //验证输入合法性
+    function IsLegal(o) {
+        if (document.getElementById(o).value == "") {
+            $('.save').attr('disabled', "disabled");
+            switch (o) {
+                case "Name":
+                    NameFlag = 0;
+                    break;
+                case "EndDate":
+                    EndDateFlag = 0;
+                    break;
+                case "SortNo":
+                    SortNoFlag = 0;
+                    break;
+            }
+        }
+        else {
+            switch (o) {
+                case "Name":
+                    NameFlag = 1;
+                    break;
+                case "EndDate":
+                    var re = /^\d{8}$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("EndDateLabel").style.color = "#333";
+                        $('.notice').text("");
+                        EndDateFlag = 1;
+                    }
+                    else {
+                        document.getElementById("EndDateLabel").style.color = "red";
+                        $('.notice').text("输入格式有误！");
+                        EndDateFlag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+                case "SortNo":
+                    var re = /^\d+$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("SortNoLabel").style.color = "#333";
+                        $('.notice').text("");
+                        SortNoFlag = 1;
+                    }
+                    else {
+                        document.getElementById("SortNoLabel").style.color = "red";
+                        $('.notice').text("输入格式有误！");
+                        SortNoFlag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+            }
+            if (NameFlag * EndDateFlag * SortNoFlag == 1) {
+                $('.save').removeAttr('disabled');
+            }
+        }
+    }
+
+    //操作成功提醒+关闭窗口+字典表刷新
+    var wait = 1.5;
+    function notice(){
+        if(wait == 0){
+            window.location.reload();
+            $.modal.close();
+            wait = 1.5
+        }
+        else{
+            $('.notice').text("操作成功！字典表将立刻自动刷新");
+            wait = wait - 0.5;
+            setTimeout(notice,500);
+        }
+    }
+
+    //去除空格
+    String.prototype.trim=function()
+    {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
+</script>

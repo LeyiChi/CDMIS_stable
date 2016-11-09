@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/sticky.full.css")" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../Scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/sticky.full.js"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+</head>
+<body>
+    <div id="userOverview">
+        @{Html.RenderAction("UserOverview", "Personal");}
+    </div>
+    <div id="header">
+        <h1>
+            慢病中心管理系统</h1>
+    </div>
+    <div id="page">
+        <ul id="menu">
+              @*<li>@Html.ActionLink("用户维护", "PatientList", "DoctorHome")</li>*@
+              <li>@Html.ActionLink("用户维护", "Index", "Management")</li>
+              <li>@Html.ActionLink("字典表维护", "Index", "Dict")</li>
+              @*<li>@Html.ActionLink("患者-医生匹配", "ModuleManagement", "Management")</li>*@
+              <li>@Html.ActionLink("用户资质审核", "QualificationCheck", "Management")</li>
+              <li>@Html.ActionLink("健康教育资料管理", "Index", "News")</li>
+        </ul>
+        <div id="content">
+            @RenderBody()
+        </div>
+        <div id="footer">
+            版权所有
+        </div>
+    </div>
+</body>
+</html>

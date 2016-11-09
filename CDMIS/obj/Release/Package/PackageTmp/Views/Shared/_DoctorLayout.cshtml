@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/chosen.css")" rel="Stylesheet" />
+    <link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/sticky.full.css")" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" src="../../Scripts/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/sticky.full.js"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+</head>
+<body>
+    <div id="userOverview">
+        @{Html.RenderAction("UserOverview", "Personal");}
+    </div>
+    <div id="header">
+        <h1>
+            慢病中心管理系统</h1>
+    </div>
+    <div id="page">
+        <ul id="menu">
+              <li>@Html.ActionLink("患者列表", "PatientList", "DoctorHome")</li>
+              <li>@Html.ActionLink("患者建档", "BasicProfile", "DoctorHome")</li>
+              <!--修改：隐藏警报 ZC 2015-05-13 -->
+              @*<li>@Html.ActionLink("警报信息", "AlertList", "DoctorHome")</li>*@  
+        </ul>
+        <div id="content">
+            @RenderBody()
+        </div>
+        <div id="footer">
+            版权所有
+        </div>
+    </div>
+</body>
+</html>

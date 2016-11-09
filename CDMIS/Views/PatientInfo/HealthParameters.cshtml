@@ -1,0 +1,507 @@
+﻿@model CDMIS.ViewModels.HealthParametersViewModel
+@{
+    ViewBag.Title = "患者健康参数";
+    Layout = "~/Views/Shared/_PatientInfoLayout.cshtml";
+}
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/amcharts.js"></script>
+<script type="text/javascript" src="../../Scripts/serial.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<style>
+ @* 弹框大小*@ 
+
+ #simplemodal-container {height:500px; width:600px; text-align:left; background:#fff; border:2px solid #336699;}  
+
+ svg a{display:none;}
+</style>
+   
+
+
+ <div class="form-group" style="margin-top: 20px"  id="paralist">
+        <label class="col-sm-offset-1 col-sm-3 control-label" style="font-size: 20px;">请选择查看的参数：</label>
+        <div class="col-sm-4">
+            @Html.DropDownListFor(model => model.VitalSignSelectItem, Model.VitalSignList, new { id = "VitalSignDropDownList", style = "font-size:20px", onchange = "change(this)", @class = "form-control" })
+        </div>
+ </div>
+
+
+<div id="loading" style="display: none; margin-top: 30px" align="center">
+    <img alt="Load" src="/Content/Image/loading.gif" width="300" height="20" style="max-width: 90%" />
+    <p>
+        加载中，请稍后</p>
+</div>
+
+<div id="resultDiv" style="display: none; margin-top: 70px" align="center">
+    <p style="font-size: 20px; color: Red;" id="resultContent"></p>
+</div>
+
+<div id="con" style="margin-top: 80px; margin-left: 140px">
+    <h3><span id="nowItemName">位置 </span>参数图</h3>
+    <a href="#" onclick="SetThreshold();">设置阈值</a>
+    <div id="chartdiv" style="margin-right: auto; width: 700px; height: 420px; font-size: 10px;">
+        @* 图的位置*@
+    </div>
+</div>
+
+
+
+
+<div class="white" style="height: 40px;">
+</div>
+
+@Html.HiddenFor(model => model.UserId)
+
+
+<div id="SetThresholdDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>阈值设置</span>
+    </div>
+    <div class="modalContent"  style="margin-top: 20px;margin-left:20px;">
+        <div id="thresholdTitle" >
+            <p style="font-size: 16px;">
+                <span id="nowItemName1"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;推荐值：最小值 <span id="recommendMin"></span>，最大值 <span
+                    id="recommendMax"></span>单位<span id="recommendUnit"></span>
+            </p>
+        </div>
+        <div style="height: 20px;margin-bottom: 5px;">
+            <p style="font-size: 16px; color: red;" id="errorinfo" align="center">
+            </p>
+        </div>
+
+        <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="min" class="col-sm-3 control-label"  id="MinLabel">
+                *最小值</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="min" placeholder="请输入最小值" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="max" class="col-sm-3 control-label" id="MaxLabel">
+                *最大值</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="max" placeholder="请输入最大值" onkeyup="IsLegal(this.id);">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="starttime" class="col-sm-3 control-label" id="StartTimeLabel">
+                *起始时间</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="startTime" placeholder="请输入起始时间" onclick="WdatePicker({maxDate:'#F{$dp.$D(\'endTime\',{d:-1})}'})">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="endtime" class="col-sm-3 control-label" id="StopTimeLabel">
+                *结束时间</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="endTime" placeholder="请输入结束时间" onclick="WdatePicker({minDate:'#F{$dp.$D(\'startTime\',{d:1})}'})">
+            </div>
+        </div>
+        <div class="form-group">  
+            <label for="remarks" class="col-sm-3 control-label">
+                备注</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" id="remarks" placeholder="请输入备注">
+            </div>
+        </div>
+
+        <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-9" style="margin-top: 20px;">
+                    <input type="button" class="btn btn-primary save" onclick="SetThresholdToDB();" value="保存"/>
+                    <input type="button" class="btn btn-default simplemodal-close" value="取消" style="margin-left: 80px;" id="cancel"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@*页面初始化：参数图绘制和div初始化*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(2) a").attr("id", "current");
+
+        var pid = document.getElementById("UserId").value;
+        if (document.getElementById("VitalSignDropDownList").length > 0) {
+            var target1 = document.getElementById("resultDiv");
+            target1.style.display = "none";
+            var target = document.getElementById("paralist");
+            target.style.display = "block";
+
+            var firstitemcode = document.getElementById("VitalSignDropDownList").options[0].value;
+            var firstitemname = document.getElementById("VitalSignDropDownList").options[0].text;
+
+            document.getElementById("nowItemName").innerText = firstitemname;
+
+            DrawPicture(pid, firstitemcode, firstitemname);  //画图
+        }
+        else {
+            var target = document.getElementById("con");
+            target.style.display = "none";
+            var target = document.getElementById("paralist");
+            target.style.display = "none";
+            document.getElementById("resultContent").innerText = "您还没有关注任何生理参数！";
+            var target1 = document.getElementById("resultDiv");
+            target1.style.display = "block";
+        }
+
+    });
+</script>
+
+@*函数集合：画图、提交、打开div*@
+<script type="text/javascript">
+
+    function change() {     //下拉框切换，刷新页面
+        // alert("改变");
+        var userid = document.getElementById("UserId").value;
+        var obj = document.getElementById("VitalSignDropDownList")
+        var itemcode = obj.value;                              //获取option被选中的value
+        var itemname = obj.options[obj.selectedIndex].text;        //获取option被选中的text
+
+        var target = document.getElementById("con");     //隐藏画图区域，展开进度条
+        target.style.display = "none";
+        var target1 = document.getElementById("loading");
+        target1.style.display = "block";
+
+        document.getElementById("nowItemName").innerText = itemname;
+        DrawPicture(userid, itemcode, itemname);                  //画图
+    }
+
+
+    function GetBasicAlert() {
+
+        //var userid = document.getElementById("UserId").value;
+        var obj = document.getElementById("VitalSignDropDownList")
+        var itemcode = obj.value;
+        var itemname = obj.options[obj.selectedIndex].text;
+
+
+        $.ajax({                                                //为设置阈值的弹框，获取推荐阈值
+            url: "/PatientInfo/GetBasicAlert",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: {ItemCode: itemcode },
+            success: function (res) {
+
+                document.getElementById("nowItemName1").innerText = itemname;
+                document.getElementById("recommendMin").innerText = res.Min;
+                document.getElementById("recommendMax").innerText = res.Max;
+                document.getElementById("recommendUnit").innerText = res.Units;
+                document.getElementById("min").value = res.Min;
+                document.getElementById("max").value = res.Max;
+                document.getElementById("remarks").value = res.Remarks;
+
+            }
+        });
+
+    }
+
+
+    function SetThreshold() {                //弹出框（设置阈值）
+        $('#SetThresholdDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+        GetBasicAlert();
+    }
+
+
+    //验证输入合法性
+    var min = -99999999;
+    var max = 99999999;
+    var minflag = 0;
+    var maxflag = 0;
+
+    function IsLegal(o) {      //缺陷：不能提示某某不能为空
+        if (document.getElementById(o).value == "") {
+            $('.save').attr('disabled', "disabled");
+            switch (o) {
+                case "min":
+                    minflag = 0;
+                    min = -99999999;
+                    break;
+                case "max":
+                    maxflag = 0;
+                    max = 99999999;
+                    break;
+            }
+        }
+        else {
+            switch (o) {
+                case "min":
+                    min = parseFloat(document.getElementById(o).value);
+                    var re = /^\d+(\.\d+)?$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("MinLabel").style.color = "#333";
+                        if (min >= max) {
+                            $('#errorinfo').text("最小值务必小于最大值！");
+                            minflag = 0;
+                            maxflag = 0;
+                        }
+                        else {
+                            $('#errorinfo').text("");
+                            minflag = 1;
+                            maxflag = 1;
+                        }
+                    }
+                    else {
+                        document.getElementById("MinLabel").style.color = "red";
+                        $('#errorinfo').text("最小值输入格式有误！");
+                        minflag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+                case "max":
+                    max = parseFloat(document.getElementById(o).value);
+                    var re = /^\d+(\.\d+)?$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("MaxLabel").style.color = "#333";
+                        if (min >= max) {
+                            $('#errorinfo').text("最小值务必小于最大值！");
+                            minflag = 0;
+                            maxflag = 0;
+                        }
+                        else {
+                            $('#errorinfo').text("");
+                            minflag = 1;
+                            maxflag = 1;
+                        }
+                    }
+                    else {
+                        document.getElementById("MaxLabel").style.color = "red";
+                        $('#errorinfo').text("最大值输入格式有误！");
+                        maxflag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+            }
+            if (minflag * maxflag == 1) {
+                $('.save').removeAttr('disabled');
+            }
+            else {
+                $('.save').attr('disabled', "disabled");
+            }
+        }
+    }
+
+
+    function SetThresholdToDB() {  //提交设置的阈值
+        var userid = document.getElementById("UserId").value;    //取值(文本形式)
+        var obj = document.getElementById("VitalSignDropDownList");
+        var itemcode = obj.value;                                 //获取option被选中的value
+        var itemname = obj.options[obj.selectedIndex].text;        //获取option被选中的text
+
+        var min = document.getElementById("min").value;
+        var max = document.getElementById("max").value;
+        var unit = document.getElementById("recommendUnit").innerText;
+        var starttime = document.getElementById("startTime");
+        var endtime = document.getElementById("endTime");
+        var remarks = document.getElementById("remarks");
+
+        //有效性验证
+        var flag = true;
+
+        //输入是否为null，或者不能为空
+
+        if (flag && (starttime.value.length == 0))   //判断是否为空 或者if(value.length == 0 || value.match(/[^0-9]/) != null)
+        {
+            starttime.focus();
+            flag = false;
+            document.getElementById("errorinfo").innerText = "起始时间输入不能为空";
+        }
+
+        if (flag && (endtime.value.length == 0)) {
+
+            endtime.focus();
+            flag = false;
+            document.getElementById("errorinfo").innerText = "结束时间输入不能为空";
+            // value = endtime.replace(/\s/img, "");
+        }
+
+        if (flag) {
+            var stopTime1 = parseInt(endtime.value.replace(/-/g, ""));
+            var startTime1 = parseInt(starttime.value.replace(/-/g, ""));
+            if (startTime1 >= stopTime1) {
+                document.getElementById("errorinfo").innerText = "截止日期务必大于起始日期！";
+                flag = false;
+            }
+        }
+
+        if (flag && (remarks.value.length == 0)) {
+            remarks.value = "";
+        }
+
+        if (flag == true) {
+
+            $.ajax({
+                url: "/PatientInfo/SetAlert",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: { PatientId: userid, ItemCode: itemcode, Min: min, Max: max, Unit: unit, StartTime: starttime.value, EndTime: endtime.value, Remarks: remarks.value },
+                success: function (res) {
+                    if (res == true) {
+                        //alert("成功!");
+                        $("#cancel").click();                             //关闭设置阈值的弹窗
+                        var target = document.getElementById("con");     //隐藏画图区域，展开进度条
+                        target.style.display = "none";
+                        var target1 = document.getElementById("loading");
+                        target1.style.display = "block";
+                        DrawPicture(userid, itemcode, itemname);                //画图（刷新原页面）
+                    }
+                    else {
+                        alert("设置失败!");
+                    }
+                }
+            });
+        }
+
+    }
+
+
+    function DrawPicture(pid, itemcode, itemname) {
+        //画图
+        $.ajax({
+            url: "/PatientInfo/GetPicture",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { PatientId: pid, Itemcode: itemcode },
+            success: function (res) {
+                if (res.length == 0) {
+                    // alert("没有");
+                    var target1 = document.getElementById("loading");
+                    target1.style.display = "none";
+                    var target = document.getElementById("chartdiv");     //某项生理参数无数据，则隐藏该区域，并提示信息
+                    target.style.display = "none";
+
+
+                    var target = document.getElementById("con");     //某项生理参数无数据，则隐藏该区域，并提示信息
+                    target.style.marginTop = "30px";
+                    target.style.display = "block";
+                    document.getElementById("resultContent").innerText = "该用户该生理参数还没有数据！";
+                    var target = document.getElementById("resultDiv");
+                    target.style.display = "block";
+                }
+
+                else {
+
+                    var target = document.getElementById("resultDiv");   //隐藏进度条，展开画图区域
+                    target.style.display = "none";
+                    var target1 = document.getElementById("loading");
+                    target1.style.display = "none";
+                    var target = document.getElementById("chartdiv");
+                    target.style.display = "block";
+                    var target2 = document.getElementById("con");
+                    target2.style.marginTop = "90px";
+                    target2.style.display = "block";
+
+                    var title = itemname + "（单位：" + res[0].unit + ")";         //图中的一些变量
+
+                    var chart = AmCharts.makeChart("chartdiv", {
+                        "type": "serial",    //连续
+                        "theme": "none",
+                        "pathToImages": "../../Content/Image/",         //图片路径，比如游标图片http://www.amcharts.com/lib/3/images/
+                        "dataProvider": res,                     //画图数据
+                        "balloon": { "cornerRadius": 6 },         //角 半径？
+                        "valueAxes": [{                           //Y轴 （可以多个）                                                               
+                            "id": "v1",                   //id   
+                            //"maximum": 6,              //最大值，上限
+                            //"minimum": 1,             //最小值，起始
+                            //"reversed": false,        //使图倒转
+                            "dashLength": 5,            //破折号长度,类似虚线
+                            //"gridCount": 1,          //网格数量
+                            "axisColor": "#FF6600",   //颜色
+                            "axisThickness": 2,     //轴粗
+                            "gridAlpha": 0.5,       //Y网格透明度
+                            "axisAlpha": 1,         //Y轴的透明度               
+                            "position": "left",     //位置
+                            "title": title,  //y轴标题
+                            "axisAlpha": 1     //轴的透明度
+                        }],
+                        //"startDuration": 3,    //弹出曲线时间
+                        "graphs": [{        //图 （可以多个）
+                            "id": "g1",
+                            // "hidden": true,        //隐藏？
+                            "valueAxis": "v1",             //指定Y值？
+                            "balloonText": "时间[[category]]<br /><b><span style='font-size:14px;'>值: [[value]]</span></b>[[unit]]<br />阈值[[min]]-[[max]]", //点值显示
+                            "bullet": "round",                //点的形状
+                            "bulletBorderAlpha": 1,           //点周透明度
+                            "bulletBorderThickness": 2,       //点粗  
+                            "legendValueText": "[[value]]",
+                            "lineColorField": "lineColor",   //给点赋颜色
+                            //  "title": "duration",         //若折线显示，则下方标题显示
+                            // "lineColor": "#FCD202",      //若折线显示，颜色
+                            "valueField": "duration",   //指明X数据是谁
+                            "fillAlphas": 0,            //线下区域，0不显示
+                            //"fillColors":"#000"      //区域颜色
+                            "lineThickness": 0        //线粗为0，不显示
+                            //"lineAlpha":0,         //线透明度，0不显示
+                        }],
+                        "chartScrollbar": {
+                            //  "graphFillAlpha": 0,   
+                            //"selectedGraphFillAlpha": 0,
+                            //"graphLineAlpha": 0,           //全显示
+                            // "selectedGraphLineAlpha": 1,   //被选中的显示
+                            "autoGridCount": true,          //自动放大缩小中网格
+                            "graph": "g1",                         //放大缩小图示
+                            "scrollbarHeight": 20                          //放大器宽度
+                        },
+                        "chartCursor": {
+                            "categoryBalloonDateFormat": "YYYY-MM-DD-JJ时",  //X值数据格式
+                            "cursorAlpha": 0,                               //游标（提示框）透明度，不透则黑竖线 
+                            "zoomable": true                              //可缩放
+                            //"cursorPosition": "mouse"                      //游标位置-鼠标（默认）
+                        },
+                        "dataDateFormat": "YYYYMMDD JJ",
+                        "categoryField": "date",                   //X值域
+                        "categoryAxis": {                     //X轴
+                            //"fontSize": 0,
+                            //"labelOffset": 0,
+                            //"tickLength": 1,  
+                            //"labelsEnabled": false,  
+                            // "ignoreAxisWidth": true,            //类似autoGridCount
+                            "equalSpacing": true,                    //让值平均分布
+                            // "boldPeriodBeginning": true,              //年份加粗
+                            // "autoWrap": true,                      //类似autoGridCount
+                            //"boldLabels":true,                   //lable加粗
+                            "minPeriod": "hh",               //最小单位
+                            //"minorGridEnabled": true,   //最小格显示出来
+                            "dateFormats": [                 //数据格式的组成部分
+                            {"period": 'hh', "format": "JJ" },
+                         { "period": "DD", "format": "DD" },
+                            //{ "period": "WW", "format": "MM DD" },
+                         {"period": "MM", "format": "MMM" },
+                         { "period": "YYYY", "format": "YYYY"}],
+                            "parseDates": true,         //按时间排
+                            // "autoGridCount": true,        //自动调节间隔，但孔隙大，缩放不一致
+                            "axisColor": "#555555",      //X轴颜色
+                            "gridAlpha": 0.5,              //网格透明度
+                            "gridCount": 50,
+                            "title": "时间"     //X轴标题
+                            // "axisThickness": 2,     //轴粗
+                            //"position": "top"         //轴位置，上方
+                            //"fillAlpha": 0.05,        //透明度
+                            //"fillColor": "#fff",      //填充曲颜色，即大份格       
+                        }
+                        //    ,
+                        //    "exportConfig": {         //下载图片
+                        //        "menuBottom": "15px",
+                        //        "menuRight": "15px",   //按钮位置
+                        //        "menuItems": [{
+                        //            "icon": '/lib/3/images/export.png',
+                        //            "format": 'png'
+                        //        }]
+                        //    }
+
+                    });    //chaert的结尾
+
+                }         //else的结尾
+            }
+        });           //ajax的结尾
+
+    }
+
+</script>

@@ -1,0 +1,447 @@
+﻿@model CDMIS.ViewModels.BasicAlertViewModel
+
+@{
+    ViewBag.Title = "BasicAlert";
+}
+<link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<link rel="Stylesheet" href="../../Content/chosen.css" />
+<script src="@Url.Content("~/Scripts/jquery-1.11.1.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/bootstrap.min.js")" type="text/javascript"></script>
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<script type="text/javascript" src="../../Scripts/chosen.jquery.min.js"></script>
+
+<style type="text/css">
+    #simplemodal-container {height:380px; width:380px;}
+    #delete-container {height:270px; width:400px;}
+</style>
+
+<div style="text-align: right;">
+    <input type="button" value="新增数据" class="btn btn-primary insertBtn" style="margin-right: 10px"/>
+</div>
+<div id="tableContainer1" class="tableContainer" style="margin-top: 5px" >
+    <table width="100%" id="DataTable" class="display">
+        <thead>
+            <tr>
+                <th align="left">
+                    编码
+                </th>
+                <th align="left">
+                    名称
+                </th>
+                <th align="left">
+                    最小值
+                </th>
+                <th align="left">
+                    最大值
+                </th>
+                <th align="left">
+                    单位
+                </th>
+                <th align="left">
+                    操作
+                </th>
+            </tr>
+        </thead>
+        <tbody id="TableBody">
+             @foreach (var item in Model.BasicAlertList)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AlertItemCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.AlertItemName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Min)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Max)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Units)
+                    </td>
+                    <td>
+                        <input type="button" value="编辑" class="btn btn-primary editBtn" /> |
+                        <input type="button" value="删除" class="btn btn-primary deleteBtn" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@*编辑页面弹框*@
+<div id="addDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>警戒字典表编辑</span>
+    </div>
+    <div class="modalContent">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="AlertItemCode" class="col-sm-3 control-label">
+                    编码
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="AlertItemCode" readonly="readonly" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="AlertItemName" class="col-sm-3 control-label">
+                    名称
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="AlertItemName" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Min" class="col-sm-3 control-label" id="MinLabel">
+                    最小值
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="Min" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Max" class="col-sm-3 control-label" id="MaxLabel">
+                    最大值
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="Max" onkeyup="IsLegal(this.id);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="UnitDropDownList" class="col-sm-3 control-label">
+                    单位
+                </label>
+                <div class="col-sm-7">
+                     @Html.DropDownListFor(model => model.UnitSelected, Model.UnitList(), new { id = "UnitDropDownList", @class = "form-control", style = "font-size:14px", onchange = "IsSelected(this.id)" })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-7">
+                    <input type="button" class="btn btn-primary save" onclick="AddDataToDB();" value="保存" />
+                    <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+                </div>
+            </div>
+            <p align="center" style="color:red" class="notice">
+            </p>
+        </form>
+    </div>
+</div>
+
+@*删除页面弹框*@
+<div id="deleteDataDiv" style="display: none;">
+    <div class="modalHeader">
+        <span>治疗字典表删除</span>
+    </div>
+    <div class="modalContent">
+        <p style="font-size: 16px; color:#EE9A00; font-weight:bold">
+            是否确定删除：
+        </p>
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="AlertItemCode_del" class="col-sm-3 control-label">
+                    编码
+                </label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="AlertItemCode_del" readonly="readonly">
+                </div>
+            </div>
+            <p style="font-size: 16px; color:#EE9A00; font-weight:bold">
+                的这条数据（删除操作将永久删除该条数据）
+            </p>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-7">
+                    <input type="button" class="btn btn-primary" onclick="DeleteDataFromDB();" value="确定" />
+                    <input type="button" class="btn btn-default simplemodal-close" value="取消" />
+                </div>
+            </div>
+        </form>
+        <p align="center" style="color:red" class="notice">
+        </p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var min = -99999999;
+    var max = 99999999;
+    var codeflag = 0;
+    var nameflag = 0;
+    var minflag = 0;
+    var maxflag = 0;
+    var unitflag = 0; //编辑弹框输入合法性标志位 0 不合法 1 合法
+    var trSeq = -1; //选定的行标
+    var editType = 0; //编辑类型，0：无  1：编辑  2：新增
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "420px",
+            "bLengthChange": false,
+            "iDisplayLength": 8,
+            "bFilter": true
+        });
+
+        //编辑按钮触发
+        $(".editBtn").click(function () {
+            codeflag = 1;
+            nameflag = 1;
+            minflag = 1;
+            maxflag = 1;
+            unitflag = 1;
+            editType = 1;
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var AlertItemCode = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            var AlertItemName = $("#TableBody tr:eq(" + trSeq + ") td:eq(1)").text().trim();
+            var Min = $("#TableBody tr:eq(" + trSeq + ") td:eq(2)").text().trim();
+            var Max = $("#TableBody tr:eq(" + trSeq + ") td:eq(3)").text().trim();
+            var Units = $("#TableBody tr:eq(" + trSeq + ") td:eq(4)").text().trim();
+            EditData(AlertItemCode, AlertItemName, Min, Max, Units);
+        });
+
+        //新增按钮触发
+        $(".insertBtn").click(function () {
+            codeflag = 0;
+            nameflag = 0;
+            minflag = 0;
+            maxflag = 0;
+            unitflag = 0;
+            editType = 2;
+            InsertData();
+        });
+
+        //删除按钮触发
+        $(".deleteBtn").click(function () {
+            trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            var AlertItemCode = $("#TableBody tr:eq(" + trSeq + ") td:eq(0)").text().trim();
+            DeleteData(AlertItemCode);
+        });
+    });
+
+    //编辑数据
+    function EditData(AlertItemCode, AlertItemName, Min, Max, Units) {
+        document.getElementById("AlertItemCode").value = AlertItemCode;
+        document.getElementById("AlertItemName").value = AlertItemName;
+        document.getElementById("Min").value = Min;
+        document.getElementById("Max").value = Max;
+        min = parseFloat(Min);
+        max = parseFloat(Max);
+        $("#UnitDropDownList option").each(function () { if ($(this).text() == Units) { $(this).attr('selected', true); } });
+        $('#AlertItemCode').attr('readonly', "readonly");
+        $('.save').removeAttr('disabled');
+        $('#addDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //新增数据
+    function InsertData() {
+        document.getElementById("AlertItemCode").value = "";
+        document.getElementById("AlertItemName").value = "";
+        document.getElementById("Min").value = "";
+        document.getElementById("Max").value = "";
+        min = -99999999;
+        max = 99999999;
+        $("#UnitDropDownList").val('0');
+        $('.save').attr('disabled', "disabled");
+        $('#AlertItemCode').removeAttr('readonly');
+        $('#addDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除数据
+    function DeleteData(AlertItemCode) {
+        document.getElementById("AlertItemCode_del").value = AlertItemCode;
+        $('#deleteDataDiv').modal({
+            closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            containerId: 'delete-container',
+            overlayClose: true     //点击蒙层关闭窗口
+        });
+    }
+
+    //删除提交
+    function DeleteDataFromDB() {
+        var AlertItemCode = document.getElementById("AlertItemCode_del").value;
+        $.ajax({
+            url: "/Dict/BasicAlertDelete",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { AlertItemCode: AlertItemCode
+            },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    trSeq = -1;
+                    notice();
+                }
+                else {
+                    alert("数据删除失败！");
+                }
+            }
+        });
+    }
+
+    //编辑or新增提交
+    function AddDataToDB() {
+        var AlertItemCode = document.getElementById("AlertItemCode").value;
+        var AlertItemName = document.getElementById("AlertItemName").value;
+        var Min = document.getElementById("Min").value;
+        var Max = document.getElementById("Max").value;
+        var Units = $("#UnitDropDownList").val();
+        $.ajax({
+            url: "/Dict/BasicAlertEdit",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { AlertItemCode: AlertItemCode,
+                AlertItemName: AlertItemName,
+                Min: Min,
+                Max: Max,
+                Units: Units
+            },  //输入参数
+            success: function (res) {
+                if (res == true) {
+                    if (editType == 1) {
+                        editType = 0;
+                        trSeq = -1;
+                    }
+                    if (editType == 2) {
+                        editType = 0;
+                    }
+                    notice();
+                }
+                else {
+                    alert("数据插入失败，请重新输入！");
+                }
+            }
+        });
+    }
+
+    //操作成功提醒+关闭窗口+字典表刷新
+    var wait = 1.5;
+    function notice() {
+        if (wait == 0) {
+            window.location.reload();
+            $.modal.close();
+            wait = 1.5
+        }
+        else {
+            $('.notice').text("操作成功！字典表将立刻自动刷新");
+            wait = wait - 0.5;
+            setTimeout(notice, 500);
+        }
+    }
+
+    //验证输入合法性
+    function IsLegal(o) {
+        if (document.getElementById(o).value == "") {
+            $('.save').attr('disabled', "disabled");
+            switch (o) {
+                case "AlertItemCode":
+                    codeflag = 0;
+                    break;
+                case "AlertItemName":
+                    nameflag = 0;
+                    break;
+                case "Min":
+                    minflag = 0;
+                    min = -99999999;
+                    break;
+                case "Max":
+                    maxflag = 0;
+                    max = 99999999;
+                    break;
+            }
+        }
+        else {
+            switch (o) {
+                case "AlertItemCode":
+                    codeflag = 1;
+                    break;
+                case "AlertItemName":
+                    nameflag = 1;
+                    break;
+                case "Min":
+                    min = parseFloat(document.getElementById(o).value);
+                    var re = /^\d+(\.\d+)?$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("MinLabel").style.color = "#333";
+                        if (min >= max) {
+                            $('.notice').text("最小值务必小于最大值！");
+                            minflag = 0;
+                            maxflag = 0;
+                        }
+                        else {
+                            $('.notice').text("");
+                            minflag = 1;
+                            maxflag = 1;
+                        }
+                    }
+                    else {
+                        document.getElementById("MinLabel").style.color = "red";
+                        $('.notice').text("输入格式有误！");
+                        minflag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+                case "Max":
+                    max = parseFloat(document.getElementById(o).value);
+                    var re = /^\d+(\.\d+)?$/;
+                    if (re.test(document.getElementById(o).value)) {
+                        document.getElementById("MaxLabel").style.color = "#333";
+                        if (min >= max) {
+                            $('.notice').text("最小值务必小于最大值！");
+                            minflag = 0;
+                            maxflag = 0;
+                        }
+                        else {
+                            $('.notice').text("");
+                            minflag = 1;
+                            maxflag = 1;
+                        }
+                    }
+                    else {
+                        document.getElementById("MaxLabel").style.color = "red";
+                        $('.notice').text("输入格式有误！");
+                        maxflag = 0;
+                        $('.save').attr('disabled', "disabled");
+                    }
+                    break;
+            }
+            if (codeflag * nameflag * minflag * maxflag * unitflag == 1) {
+                $('.save').removeAttr('disabled');
+            }
+            else {
+                $('.save').attr('disabled', "disabled");
+            }
+        }
+    }
+
+    function IsSelected(o) {
+        if ($("#" + o).val() == "0") {
+            $('.save').attr('disabled', "disabled");
+            unitflag = 0;
+        }
+        else {
+            unitflag = 1;
+            if (codeflag * nameflag * minflag * maxflag * unitflag == 1) {
+                $('.save').removeAttr('disabled');
+            }
+        }
+    }
+
+    //去除空格
+    String.prototype.trim = function () {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
+</script>

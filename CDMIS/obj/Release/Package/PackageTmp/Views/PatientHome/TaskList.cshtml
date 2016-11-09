@@ -1,0 +1,266 @@
+﻿@model CDMIS.ViewModels.TaskListViewModel
+@{
+    ViewBag.Title = "任务列表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+@*<script type="text/javascript" src="../../Scripts/My97DatePicker/WdatePicker.js"></script>*@
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #tabs
+    {
+        overflow: hidden;
+        width: 90%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #tabs li
+    {
+        float: left;
+        margin: 0 -15px 0 0;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+    }
+    
+    #tabs a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 30px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #777\9;
+        opacity: .3;
+        filter: alpha(opacity=30);
+    }
+    
+    #tabs a:hover, #tabs a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #tabs a:focus
+    {
+        outline: 0;
+    }
+    
+    #tabs #current
+    {
+        border-bottom-color: #3d3d3d;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+</style>
+<div>
+<ul id="tabs" style="margin-top: 20px; float:left;">
+    <li><a href="#" id="tab1">未完成任务</a></li>
+    <li><a href="#" id="tab2">待进行任务</a></li>
+</ul>
+<input type="button" value="刷 新" class="btn btn-info" id="refreshTaskListBtn" style="margin-top: 20px; float:right;"/>
+</div>
+<div id="UndoneListDiv" class="tableContainer">
+    <table id="DataTable1" class="display">
+        <thead>
+            <tr>
+                <th style="display: none;">
+                    提醒编号
+                </th>
+                <th>
+                    内容
+                </th>
+                <th>
+                    任务时间
+                </th>
+                <th style="display: none;">
+                    任务日期
+                </th>
+                <th style="display: none;">
+                    任务时间
+                </th>
+                <th>
+                    状态
+                </th>
+                <th>
+                    编辑
+                </th>
+            </tr>
+        </thead>
+        <tbody id="UndoneListBody">
+            @if (Model.UndoneList.Count > 0)
+            {
+                foreach (var item in Model.UndoneList)
+                { 
+                <tr>
+                    <td style="display: none;">@item.ReminderNo
+                    </td>
+                    <td>@item.Content
+                    </td>
+                    <td>@item.TaskDateTime
+                    </td>
+                    <td style="display: none;">@item.TaskDate
+                    </td>
+                    <td style="display: none;">@item.TaskTime
+                    </td>
+                    @if(item.IsDone == 1) {
+                    <td>
+                        已完成
+                    </td>
+                    } else {
+                    <td>
+                        未完成
+                    </td>
+                    }
+                    <td>
+                        <input type="button" value="完成" class="btn btn-primary finishBtn" />
+                    </td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<div id="ToDoListDiv" class="tableContainer">
+    <table id="DataTable2" class="display">
+        <thead>
+            <tr>
+                <th style="display: none;">
+                    提醒编号
+                </th>
+                <th>
+                    内容
+                </th>
+                <th>
+                    提醒时间
+                </th>
+                @*            <th>
+                操作
+            </th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ToDoList.Count > 0)
+            {
+                foreach (var item in Model.ToDoList)
+                { 
+                <tr>
+                    <td style="display: none;">@item.ReminderNo
+                    </td>
+                    <td>@item.Content
+                    </td>
+                    <td>@item.TaskDateTime
+                    </td>
+                    @*<td>
+                    <input type="button" value="完成" class="btn btn-primary finishBtn" />
+                </td>*@
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@Html.HiddenFor(model => model.Type)
+@Html.HiddenFor(model => model.PatientId)
+<script type="text/javascript">
+    var showType = document.getElementById("Type").value;
+    $(function () {
+        var table = $('#DataTable1').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "400px",
+            "bFilter": false,
+            "aoColumnDefs": [{ "sWidth": "200px", "aTargets": [1]}],
+            "aaSorting": [[2, "asc"]]
+        });
+
+        var table1 = $('#DataTable2').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "400px",
+            "bFilter": false,
+            "aoColumnDefs": [{ "sWidth": "200px", "aTargets": [1]}],
+            "aaSorting": [[2, "asc"]]
+        });
+
+        $("#tabs li:eq(" + showType + ") a").attr("id", "current"); // Activate tab
+        setTimeout(function () { $("#ToDoListDiv").hide(); }, 100);
+    });
+
+    $("#tab1").click(function () {
+        resetTabs();
+        $(this).attr("id", "current");
+        $("#UndoneListDiv").show();
+        $("#ToDoListDiv").hide();
+        document.getElementById("Type").value = 0;
+    })
+
+    $("#tab2").click(function () {
+        resetTabs();
+        $(this).attr("id", "current");
+        $("#ToDoListDiv").show();
+        $("#UndoneListDiv").hide();
+        document.getElementById("Type").value = 1;
+    })
+
+    function resetTabs() {
+        $("#tabs a").attr("id", ""); //Reset id's      
+    }
+
+    $("#refreshTaskListBtn").click(function () {
+        window.location.reload();
+    });
+
+    $(".finishBtn").click(function () {
+        var finishBtn = $(this);
+        var tr = $(this).parent().parent();
+        var trSeq = tr.parent().find("tr").index(tr);
+        var reminderNo = trim($("#UndoneListBody tr:eq(" + trSeq + ") td:eq(0)").text());
+        var taskDate = trim($("#UndoneListBody tr:eq(" + trSeq + ") td:eq(3)").text());
+        var taskTime = trim($("#UndoneListBody tr:eq(" + trSeq + ") td:eq(4)").text());
+        $.ajax({
+            url: "/PatientHome/UpdateIsDone",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            data: { pid: $("#PatientId").val(), reminderNo: reminderNo, taskDate: taskDate, taskTime: taskTime },
+            success: function (res) {
+                if (res == 2) {
+                    alert("数据库中无此数据，请刷新页面后重试！")
+                }
+                else if (res == 0) {
+                    alert("数据操作失败，请重试！")
+                }
+                else {
+                    //finishBtn.removeClass("btn-primary");
+                    //finishBtn.addClass("btn-info");
+                    finishBtn.attr('disabled', "disabled");
+                    $("#UndoneListBody tr:eq(" + trSeq + ") td:eq(5)").text("已完成");
+                    var undone = document.getElementById("UndoneCount").innerHTML;
+                    document.getElementById("UndoneCount").innerHTML = undone - 1;
+                }
+            }
+        });
+    });
+
+    function trim(str) {  //删除左右两端的空格
+        return str.replace(/(^\s*)|(\s*$)/g, "");
+    }
+</script>

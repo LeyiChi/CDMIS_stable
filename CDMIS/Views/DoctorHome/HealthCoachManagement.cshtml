@@ -1,0 +1,296 @@
+﻿@model CDMIS.ViewModels.ModuleManagementViewModel
+@{
+    ViewBag.Title = "分配健康专员";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+        #Redirect
+    {
+        overflow: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    #Redirect li
+    {
+        float: right;
+        margin: 0 5 0 5;
+        font-family: \9ED1\4F53;
+        font-size: 15px;
+        display: inline-block;
+    }
+    #Redirect a
+    {
+        float: left;
+        position: relative;
+        padding: 0 40px;
+        height: 0;
+        line-height: 30px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #fff;
+        border-right: 0px solid transparent;
+        border-bottom: 30px solid #3D3D3D;
+        border-bottom-color: #777\9;
+        opacity: .8;
+        filter: alpha(opacity=30);
+    }
+    #Redirect a:hover, #Redirect a:focus
+    {
+        border-bottom-color: #2ac7e1;
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    
+    #simplemodal-container
+    {
+        height: 150px;
+        width: 400px;
+    }
+</style>
+<div style="height: 40px;">
+    <ul id="nav">
+        <li>
+            @Html.ActionLink("个人信息", "BasicProfile", "DoctorHome", new { PatientId = @Model.PatientId, Role = "Patient" }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("就诊信息", "ClinicalInfo", "DoctorHome", new { UserId = @Model.PatientId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息", "ClinicalProfile", "DoctorHome", new { UserId = @Model.PatientId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("健康模块", "ModuleProfile", "DoctorHome", new { PatientId = @Model.PatientId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("分配健康专员", "HealthCoachManagement", "DoctorHome", new { PatientId = @Model.PatientId }, new { target = "_self" })</li>
+        <li>
+            @Html.ActionLink("临床信息查看", "ClinicInfo", "PatientInfo", new { PatientId = @Model.PatientId }, new { target = "_self" })</li>
+    </ul>
+</div>
+@{Html.RenderAction("PatientBasicInfo", "PatientInfo", new { PointedPatient = @Model.PatientId });}
+@using (Html.BeginForm("HealthCoachManagement", "DoctorHome", FormMethod.Post, new { id = "MMForm", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(model => model.PatientId)
+    <div style="width: 70%; margin: 0 auto;">
+        <table id="DataTable" class="display" style="width: 100%; line-height: 4.0em;">
+            <thead>
+                <tr>
+                    <th style="display: none;">
+                        模块ID
+                    </th>
+                    <th style="width: 20%">
+                        项目
+                    </th>
+                    <th style="display: none;">
+                        医生ID
+                    </th>
+                    <th style="width: 70%">
+                        负责医生
+                    </th>
+                    <th style="width: 10%">
+                        操作
+                    </th>
+                    <th style="display: none;">
+                        序号
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="MMTBody">
+                @if (Model.HealthCoachInfoList.Count > 0)
+                {
+                    foreach (var item in Model.HealthCoachInfoList)
+                    {
+                    <tr>
+                        <td style="display: none;">@item.HCDivName
+                        </td>
+                        @if (item.HCDivName.IndexOf("HC") != -1)
+                        {
+                            <td>
+                                健康专员
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @item.DataTableName
+                            </td>
+                        }
+                        <td style="display: none;">@item.HealthCoachId
+                        </td>
+                        <td>
+                            <input class="form-control" id="@item.HealthCoachId" name="@item.HealthCoachId" readonly="readonly" style="width:90%" type="text" value="@item.HealthCoachName" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary HCEditBtn">
+                                重新设置</button>
+                        </td>
+                        <td style="display: none;">@item.ItemSeq
+                        </td>
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div> 
+}
+
+    <ul id="Redirect">
+        <li>@Html.ActionLink("完成", "PatientList", "DoctorHome", new { PatientId = @Model.PatientId }, null)</li>
+    </ul>
+
+<div id="HCDiv" style="margin: 1.0em 0 1.0em 0; width: 100%; border: 2px dotted #3567d1; padding: 0 2.0em 2.0em 2.0em;">
+    <h2 class="text-center">
+        选择健康专员</h2>
+    <div>
+        <table id="HCDataTable" class="display" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>
+                        医生ID
+                    </th>
+                    <th>
+                        医生姓名
+                    </th>
+                    <th>
+                        所在医院
+                    </th>
+                    <th>
+                        所在科室
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.HealthCoachList.Count > 0)
+                {
+                    foreach (var info in Model.HealthCoachList)
+                    {
+                    <tr>
+                        <td>@info.DoctorId
+                        </td>
+                        <td>@info.DoctorName
+                        </td>
+                        <td>@info.Hospital
+                        </td>
+                        <td>@info.Dept
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary HCConfirmBtn" disabled="disabled">
+                                选择</button>
+                        </td>
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="alertModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示</span></div>
+    <div class="modalContent">
+        <h4 class="text-center" id="alertContent">
+            </h4>
+        <div class="col-md-offset-4">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmBtn" />
+            <input type="button" value="取消" class="btn btn-default" id="cancelBtn" />
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(1) a").attr("id", "current");
+        $("#nav a").attr("id", ""); //Reset id's 
+        $("#nav li:eq(4) a").attr("id", "currentnav");
+
+        $('#HCDataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": false,  //是否分页。
+            "sScrollX": "100%",
+            "sScrollY": "300px",
+            "bFilter": true
+        });
+        //$('#HC' + i + 'Div').hide();
+        $("#menu li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+        if ($("#menu li:eq(0) a").attr("href") == "/DoctorHome/HealthCoachPatientList") {
+            $("#nav li:eq(4) a").html("推荐医生");
+            $("h2").text("选择医生");
+        }
+        $("#Redirect li:eq(0) a").attr("href", $("#BackToMain a:eq(4)").attr("href"));
+    });
+
+    //点击编辑按钮
+    $(".HCEditBtn").click(function () {
+        var trSeq = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+        var preDocId = $.trim($("#MMTBody tr:eq(" + trSeq + ") td:eq(2)").text());
+        var seq = $.trim($("#MMTBody tr:eq(" + trSeq + ") td:eq(5)").text());
+        var Module = $.trim($("#MMTBody tr:eq(" + trSeq + ") td:eq(0)").text());
+        var btn2, trSeq2, doctorId, doctorName;
+
+        $('#HCDataTable tbody tr').each(function () {
+            var tr = $(this);
+            if ($.trim(tr.children().eq(0).text()) == preDocId) {
+                tr.siblings().removeClass("selected");
+                tr.addClass("selected");
+            }
+            tr.children().eq(4).children().removeAttr('disabled');
+        });
+
+        //点击修改按钮
+        $(".HCConfirmBtn").click(function () {
+            btn2 = $(this);
+            trSeq2 = $(this).parent().parent().parent().find("tr").index($(this).parent().parent());
+            doctorId = $.trim($("#HCDataTable tbody tr:eq(" + trSeq2 + ") td:eq(0)").text());
+            doctorName = $.trim($("#HCDataTable tbody tr:eq(" + trSeq2 + ") td:eq(1)").text());
+
+            $("#alertContent").text("确认选择"+ doctorName + "（" + doctorId + "）作为该患者的健康专员？")
+            $('#alertModal').modal({
+                closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                overlayClose: true
+            });
+
+            //点击确认按钮
+            $("#confirmBtn").click(function () {
+                $.ajax({
+                    url: "/Management/UpdateHCInfo",
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: { PatientId: $("#PatientId").val(), DoctorId: doctorId, Seq: seq, PreDocId: preDocId, Module: Module },
+                    success: function (res) {
+                        if (res == 1) {
+                            $("#MMTBody tr:eq(" + trSeq + ") td:eq(2)").text(doctorId);
+                            $("#MMTBody tr:eq(" + trSeq + ") td:eq(3)").children().val(doctorName);
+                            $("#HCDataTable tbody tr:eq(" + trSeq2 + ")").addClass("selected");
+                            $("#HCDataTable tbody tr:eq(" + trSeq2 + ")").siblings().removeClass("selected");
+                            $("#HCDataTable tbody button").each(function () {
+                                $(this).attr("disabled", "disabled");
+                            });
+                        }
+                        else if (res == 0) {
+                            alert("数据更新失败，请重试！");
+                        }
+                        $.modal.close();
+//                        $('#confirmBtn').unbind("click");
+//                        $('#cancelBtn').unbind("click");
+                    }
+                });
+            });
+
+            $('#cancelBtn').click(function () {
+                $.modal.close();
+//                $('#confirmBtn').unbind("click");
+//                $('#cancelBtn').unbind("click");
+            })
+        });
+    }); 
+</script>

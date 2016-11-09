@@ -1,0 +1,84 @@
+#basic-modal-content {display:none;}
+
+/* Overlay */
+#simplemodal-overlay {background-color:#eee;}
+
+/* Container */
+#simplemodal-container {text-align:left; background:#fff; border:2px solid #336699;}
+#simplemodal-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#simplemodal-container .modalHeader span {padding-left:8px;}
+#simplemodal-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+
+#simplemodal-container a.modal-close,
+#simplemodal-container a.modal-close:link,
+#simplemodal-container a.modal-close:active,
+#simplemodal-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#simplemodal-container a.modal-close:hover {color:#ccc;}
+
+/*删除框*/
+#delete-container {text-align:left; background:#fff; border:2px solid #336699;}
+#delete-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#delete-container .modalHeader span {padding-left:8px;}
+#delete-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+#delete-container a.modal-close,
+#delete-container a.modal-close:link,
+#delete-container a.modal-close:active,
+#delete-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#delete-container a.modal-close:hover {color:#ccc;}
+
+/*查找患者*/
+#findPatient-container {text-align:left; background:#fff; border:2px solid #336699;}
+#findPatient-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#findPatient-container .modalHeader span {padding-left:8px;}
+#findPatient-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+#findPatient-container a.modal-close,
+#findPatient-container a.modal-close:link,
+#findPatient-container a.modal-close:active,
+#findPatient-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#findPatient-container a.modal-close:hover {color:#ccc;}
+
+/*任务提醒框*/
+#reminder-container {text-align:left; background:#fff; border:2px solid #336699;}
+#reminder-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#reminder-container .modalHeader span {padding-left:8px;}
+#reminder-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+#reminder-container a.modal-close,
+#reminder-container a.modal-close:link,
+#reminder-container a.modal-close:active,
+#reminder-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#reminder-container a.modal-close:hover {color:#ccc;}
+
+/*alert弹出框*/
+#alert-container {text-align:left; background:#fff; border:2px solid #336699;}
+#alert-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#alert-container .modalHeader span {padding-left:8px;}
+#alert-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+
+#alert-container a.modal-close,
+#alert-container a.modal-close:link,
+#alert-container a.modal-close:active,
+#alert-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#alert-container a.modal-close:hover {color:#ccc;}
+
+
+/*化验参数*/
+#LabDtl-container {text-align:left; background:#fff; border:2px solid #336699;}
+#LabDtl-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#LabDtl-container .modalHeader span {padding-left:8px;}
+#LabDtl-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+#LabDtl-container a.modal-close,
+#LabDtl-container a.modal-close:link,
+#LabDtl-container a.modal-close:active,
+#LabDtl-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#LabDtl-container a.modal-close:hover {color:#ccc;}
+
+/*检查详情*/
+#Exam-container {text-align:left; background:#fff; border:2px solid #336699;}
+#Exam-container .modalHeader {height:30px; line-height:30px; width:100%; background:url(../../Content/Image/header.gif) repeat-x; color:#fff; font-weight:bold;}
+#Exam-container .modalHeader span {padding-left:8px;}
+#Exam-container .modalContent {color:#333; margin:0; padding:12px 12px 12px 12px;}
+#Exam-container a.modal-close,
+#Exam-container a.modal-close:link,
+#Exam-container a.modal-close:active,
+#Exam-container a.modal-close:visited {text-decoration:none; font-weight:bold; position:absolute; right:10px; top:2px; color:#fff;}
+#Exam-container a.modal-close:hover {color:#ccc;}

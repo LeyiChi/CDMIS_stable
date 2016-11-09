@@ -1,0 +1,346 @@
+﻿@model CDMIS.ViewModels.PatientListViewModel
+@{
+    ViewBag.Title = "患者列表";
+    Layout = "~/Views/Shared/_DoctorLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/chinese-string.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 400px;
+        width: 600px;
+    }
+</style>
+@using (Html.BeginForm("PatientList", "DoctorHome", FormMethod.Post, new { id = "Form1", @class = "form-horizontal", role = "form", enctype = "multipart/form-data" }))
+{
+    <div class="form-group">
+        <label for="" class="col-sm-offset-1 col-sm-1 control-label">
+            ID
+        </label>
+        <div class="col-sm-2">
+            @Html.TextBoxFor(m => m.PatientId, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.PatientId)
+        </div>
+        <label for="" class="col-sm-1 control-label">
+            姓名
+        </label>
+        <div class="col-sm-2">
+            @Html.TextBoxFor(m => m.PatientName, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.PatientName)
+        </div>
+        <label for="" class="col-sm-1 control-label">
+            性别</label>
+        <div class="col-sm-2">
+            @Html.DropDownListFor(model => model.GenderSelected, Model.GenderList(), new { id = "GenderDropDownList", @class = "form-control" })
+        </div>
+        
+    </div>
+    <div class="form-group">
+        <label for="" class="col-sm-offset-1 col-sm-1 control-label">
+            模块</label>
+        <div class="col-sm-2">
+            @Html.DropDownListFor(model => model.ModuleSelected, Model.ModuleList(), new { id = "ModuleDropDownList", @class = "form-control" })
+        </div>
+        <label for="" class="col-sm-1 control-label">
+            关注</label>
+        <div class="col-sm-2">
+            @Html.DropDownListFor(model => model.CareLevelSelected, Model.CareLevelList(), new { id = "CareLevelDropDownList", @class = "form-control" })
+        </div>
+        <label for="" class="col-sm-1 control-label">
+            警报</label>
+        <div class="col-sm-2">
+            @Html.DropDownListFor(model => model.AlertStatusSelected, Model.AlertStatusList(), new { id = "AlertDropDownList", @class = "form-control" })
+        </div>
+        <div class="col-sm-1 ">
+            <button type="submit" class="btn btn-primary">
+                查 看</button>
+        </div>
+        <div class="col-sm-1 ">
+            <button id="resetbtn" class="btn btn-info">
+                重 置</button>
+        </div>
+    </div>
+    <div style="width: 100%;" align="center">
+        <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; margin-bottom: 10px;">
+            <table width="100%" id="DataTable" class="display ">
+                <thead>
+                    <tr>
+                        <th width="180px">
+                            操作
+                        </th>
+                        <th width="120px">
+                            患者ID
+                        </th>
+                        <th width="80px">
+                            姓名
+                        </th>
+                        <th width="40px">
+                            性别
+                        </th>
+                        <th width="40px">
+                            年龄
+                        </th>
+                        <th width="150px">
+                            主诊断
+                        </th>
+                        <th width="150px">
+                            模块
+                        </th>
+                        <th width="80px">
+                            未处理警报数
+                        </th>
+                        <th width="100px">
+                            关注等级
+                        </th>
+                        <th width="10px">
+                            关注
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="PatientListTbody">
+                    @if (Model.PatientList.Count > 0)
+                    {
+                        foreach (var item in Model.PatientList)
+                        {
+                        <tr class="normalRow" align="center">
+                            <td width="180px">
+                                <a href="">
+                                    <input id="ProfileLink" class="OperationBtn" style="border: 0; background-image: url(../../Content/Image/profile.png);
+                                        background-repeat: no-repeat; background-color: transparent; cursor: pointer;
+                                        width: 24px; height: 24px; margin-right: 5px" title="患者档案" /></a> <a href="">
+                                            <input id="TreatmentLink" class="OperationBtn" style="border: 0; background-image: url(../../Content/Image/medication.png);
+                                                background-repeat: no-repeat; background-color: transparent; cursor: pointer;
+                                                width: 24px; height: 24px; margin-right: 5px" title="治疗" /></a>
+                                <a href="">
+                                    <input id="AlertLink" class="OperationBtn" style="border: 0; background-image: url(../../Content/Image/alert.png);
+                                        background-repeat: no-repeat; background-color: transparent; cursor: pointer;
+                                        width: 24px; height: 24px; margin-right: 5px" title="警报" /></a> <a>
+                                            <input id="MessageLink" class="OperationBtn" style="border: 0; background-image: url(../../Content/Image/mail.png);
+                                                background-repeat: no-repeat; background-color: transparent; cursor: pointer;
+                                                width: 24px; height: 24px; margin-right: 5px" title="发信" /></a>
+                            </td>
+                            <td width="120px" style="cursor: pointer; color: #4573D5">@item.UserId
+                            </td>
+                            <td width="80px">@item.UserName
+                            </td>
+                            <td width="40px">@item.Gender
+                            </td>
+                            <td width="40px">@item.Age
+                            </td>
+                            <td width="150px">@item.Diagnosis
+                            </td>
+                            <td width="150px">@item.Module
+                            </td>
+                            <td width="80px">@item.AlertNumber
+                            </td>
+                            <td width="100px" align="center">
+                                @switch (@item.CareLevel)
+                                {
+                                    case 1:
+                                        {
+                                    <input id="CareLevel1" disabled="disabled" style="border: 0; background-image: url(../../Content/Image/carelevel1.png);
+                                        background-repeat: no-repeat; background-color: transparent; width: 25px; height: 23px;
+                                        cursor: pointer; margin-right: 5px" title="尚未" />
+                                            break;
+                                        }
+                                    case 2:
+                                        {
+                                    <input id="CareLevel2" disabled="disabled" style="border: 0; background-image: url(../../Content/Image/carelevel2.png);
+                                        background-repeat: no-repeat; background-color: transparent; width: 25px; height: 23px;
+                                        cursor: pointer; margin-right: 5px" title="一般" />
+                                            break;
+                                        }
+                                    case 3:
+                                        {    
+                                    <input id="CareLevel3" disabled="disabled" style="border: 0; background-image: url(../../Content/Image/carelevel3.png);
+                                        background-repeat: no-repeat; background-color: transparent; width: 25px; height: 23px;
+                                        cursor: pointer; margin-right: 5px" title="特殊" />
+                                            break;
+                                        }
+                                }
+                                @*@if (@item.CareLevel == 2)
+                                {
+                                    <input id="CareLevel2" disabled="disabled" class="" style="border: 0; background-image: url(../../Content/Image/carelevel2.png);
+                                        background-repeat: no-repeat; background-color: transparent; width: 25px; height: 23px;
+                                        margin-right: 5px" title="特殊" />
+                                }
+                                else
+                                {
+                                    <input id="CareLevel1" disabled="disabled" class="" style="border: 0; background-image: url(../../Content/Image/carelevel1.png);
+                                        background-repeat: no-repeat; background-color: transparent; width: 25px; height: 23px;
+                                        margin-right: 5px" title="一般" />
+                                }*@
+                            </td>
+                            <td width="10px">@item.CareLevel
+                            </td>
+                        </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="sendMessageDiv" style="display: none;">
+        <div class="modalHeader">
+            <span>发送消息</span></div>
+        <div class="modalContent">
+            <iframe id="MessagePop" src="" width="100%" height="350px" style="background: #FFF;"
+                scrolling="no" frameborder="no"></iframe>
+            <input id="closePop" type="button" class="simplemodal-close" value="关闭" style="display: none;" />
+        </div>
+    </div>
+         
+    @Html.HiddenFor(model => model.PatientId)
+    @Html.HiddenFor(model => model.PatientName)
+    @Html.HiddenFor(model => model.GenderSelected)
+    @Html.HiddenFor(model => model.CareLevelSelected)
+    @Html.HiddenFor(model => model.ModuleSelected)
+    @Html.HiddenFor(model => model.AlertStatusSelected)
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(0) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "400px",
+            //            "sScrollX": "100%",
+            "bFilter": false,
+            "bLengthChange": false,
+            "iDisplayLength": 9,
+            "order": [[9, 'desc'], [7, 'desc']],   //两列排序
+            //隐藏列
+            "columnDefs": [
+            {
+                "targets": [9],
+                "visible": false,
+                "searchable": false
+            }]
+        });
+
+        //单击表格中按钮、图标的事件 td on click
+        $(document).on('click', '#DataTable td', function (e) {
+            //var cell_clicked = table.cell(this).data();
+            var colIndex = table.cell(this).index().column;
+            var trIndex = table.cell(this).index().row;
+            var td = $(this).parent();
+            //console.log('The index is ', colIndex);
+            //console.log(cell_clicked);
+            //console.log(td);
+            var row_clicked = $(td).closest('tr');
+            //console.log(row_clicked);
+            var patientId = table.row(row_clicked).data()[1];
+            switch (colIndex) {
+                case 1:     //患者信息-健康参数
+                    {
+                        location.href = "/PatientInfo/HealthParameters" + "?PatientId=" + patientId;
+                        break;
+                    }
+                case 8:     //关注等级
+                    {
+                        if (window.confirm('确定要修改关注等级吗？')) {
+                            //alert("确定");
+                        } else {
+                            //alert("取消");
+                            break;
+                        }
+                        var carelevel = table.row(row_clicked).data()[9];
+                        //console.log(carelevel);
+                        var doctorId = "@Model.DoctorId";
+                        var moduleList = document.getElementById("ModuleDropDownList");
+                        var module = moduleList.options[moduleList.selectedIndex].value;
+                        //console.log('the m is', module);
+                        //console.log("this doctor is ",doctorId );
+                        $.ajax({
+                            type: "GET",
+                            url: "/DoctorHome/ChangeCareLevel",
+                            dataType: "json",
+                            async: false,
+                            data: { patientId: patientId,
+                                doctorId: "@Model.DoctorId",
+                                carelevel: carelevel,
+                                module: module
+                            },  //输入参数
+                            success: function (res) {
+                                if (res == true) {
+                                    var form = document.getElementById("Form1");
+                                    form.submit();
+                                }
+                                else {
+                                    alert("关注等级数据更改失败！");
+                                }
+                            }
+                        });
+                        break;
+                    }
+                default:
+            }
+        });
+    });
+
+
+    //OperationBtn for Treatment, Alert, Message
+    $(".OperationBtn").click(function () {
+        //Get RowIndex
+        var trIndex = $(this).parent().parent().parent().parent().find("tr").index($(this).parent().parent().parent());
+        var content = trim($("#PatientListTbody tr:eq(" + trIndex + ") td:eq(1)").text());
+        switch ($(this).attr('id')) {
+            case "ProfileLink":
+                {
+                    $(this).parent().attr('href', "/DoctorHome/BasicProfile" + "?PatientId=" + content);
+                    break;
+                }
+            case "TreatmentLink":
+                {
+                    $(this).parent().attr('href', "/PatientInfo/TreatmentPlan" + "?PatientId=" + content);
+                    break;
+                }
+            case "AlertLink":
+                {
+                    $(this).parent().attr('href', "/PatientInfo/PatientAlert" + "?PatientId=" + content);
+                    break;
+                }
+            case "MessageLink":
+                {
+                    $("#MessagePop").attr('src', "/MailBox/FASTWrite?Receiver=" + content + "&SendBy=" + "@Model.DoctorId");
+                    $('#sendMessageDiv').modal({
+                        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+                        overlayClose: true     //点击蒙层关闭窗口
+                    });
+                    break;
+                }
+            default:
+        }
+
+    });
+
+    function trim(str) {  //删除左右两端的空格
+        return str.replace(/(^\s*)|(\s*$)/g, "");
+    }
+    //重置筛选条件
+    $("#resetbtn").click(function () {
+        //console.log("reset");
+        $('#PatientId').val('');
+        $('#PatientName').val('');
+
+        var obj = document.getElementById("CareLevelDropDownList");
+        obj.selectedIndex = 0;
+        obj = document.getElementById("GenderDropDownList");
+        obj.selectedIndex = 0;
+        obj = document.getElementById("AlertDropDownList");
+        obj.selectedIndex = 0;
+        obj = document.getElementById("ModuleDropDownList");
+        obj.selectedIndex = 0;
+        //console.log("this obj is ", obj);
+        location.href = "/DoctorHome/PatientList";
+
+    });
+</script>

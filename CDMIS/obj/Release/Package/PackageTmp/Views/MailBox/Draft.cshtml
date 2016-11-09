@@ -1,0 +1,189 @@
+﻿@model CDMIS.ViewModels.MessageListViewModel
+@{
+    ViewBag.Title = "信箱-草稿箱";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+<style type="text/css">
+    #simplemodal-container
+    {
+        height: 160px;
+        width: 250px;
+    }
+</style>
+<div id="MailBoxShare">
+    @{Html.RenderAction("MailBoxShare", "MailBox");}
+</div>
+<div id="Content" style="border: 5px solid #DDDDFF;">
+    <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+        <table id="DataTable" class="display">
+            <thead>
+                <tr>
+                    <th>
+                        收件人
+                    </th>
+                    <th>
+                        主题
+                    </th>
+                    <th>
+                        时间
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.MessageList.Count > 0)
+                {
+                    foreach (CDMIS.Models.MessageInfo item in Model.MessageList)
+                    {   
+                    <tr onclick="TranPa(this)">
+                        <td>
+                            @if (item.OutDateFlag == 1)
+                            {                          
+                                <input type="hidden" value="|@item.MessageNo|"/>@item.ReceiverName<span style="color:#FF0000;">（身份已过期）</span>                    
+                            }
+                            else
+                            {                       
+                                <input type="hidden" value="|@item.MessageNo|"/>@item.ReceiverName                          
+                            }
+                        </td>
+                        <td>
+                            @item.Title
+                        </td>
+                        <td>
+                            @item.SendDateTime
+                        </td>
+                        <td>
+                            <button type="submit" value="@item.MessageNo" class="myButton1" id="DeleteBtn" onclick="deletedrat(this.value)">
+                                删除
+                            </button>
+                        </td>
+                    </tr>           
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<span>
+    <input type="hidden" value="0" id="DeleteFlag" /></span>
+<div id="deleteModal" style="display: none;">
+    <div class="modalHeader">
+        <span>提示
+            <button type="button" style="position: relative; left: 170px; background-color: transparent;
+                border: none;" id="CloseWindow">
+                关闭</button></span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            确定要删除此数据？</h4>
+        <div class="col-md-offset-3" style="position: relative; top: 20px;">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmDeleteBtn" />
+            <input type="button" value="取消" class="btn btn-default" id="cancelDeleteBtn" />
+        </div>
+    </div>
+</div>
+<div id="MyModel" style="display: none;">
+    <div class="modalHeader">
+        <span>提示
+            <button type="button" style="position: relative; left: 170px; background-color: transparent;
+                border: none;" id="CloseBtn">
+                关闭</button></span></div>
+    <div class="modalContent">
+        <h4 class="text-center">
+            删除失败!</h4>
+        <div class="col-md-offset-3" style="position: relative; top: 20px; left: 28px;">
+            <input type="button" value="确定" class="btn btn-primary" id="confirmBtn" />
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //删除草稿
+    function deletedrat(MessageNo) {
+        $("#DeleteFlag").attr("value", "1");
+        //弹框提示
+        $('#deleteModal').modal({
+            overlayClose: true
+        });
+
+        $('#CloseWindow').click(function () {
+            $.modal.close();
+            $("#DeleteFlag").attr("value", "0");
+        });
+
+        $('#confirmDeleteBtn').click(function () {
+            $.modal.close();
+            //连接数据库删除数据
+            $.ajax({
+                url: "/MailBox/DeleteJson",
+                type: "GET",
+                dataType: "json",
+                async: false,
+                data: {
+                    PiMessageNo: MessageNo
+                },
+                success: function (res) {
+                    if (!res) {
+                        deletefail();
+                        $("#DeleteFlag").attr("value", "0");
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+
+        $('#cancelDeleteBtn').click(function () {
+            $.modal.close();
+            $("#DeleteFlag").attr("value", "0");
+        });
+    }
+    //删除失败弹窗
+    function deletefail() {
+        $('#MyModel').modal({
+            overlayClose: true
+        });
+        $('#CloseBtn').click(function () {
+            $.modal.close();
+        });
+        $('#confirmBtn').click(function () {
+            $.modal.close();
+        });
+    }
+    //改变按钮颜色
+    $(document).ready(function () {
+        $("#bn4").toggleClass("myButtonChange");
+    });
+
+    //查看草稿详细信息
+    function TranPa(obj) {
+        if (document.getElementById('DeleteFlag').value == 0) {
+            var Txt = obj.cells[0].innerHTML;
+            var TxtList = new Array();
+            TxtList = Txt.split("|");
+            var Temp = TxtList[1].split("|")[0];
+            window.location.href = "/MailBox/DraftDetail/" + Temp;
+        }
+    }
+
+    //表格样式
+    $(document).ready(function () {
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bPaginate": true,  //是否分页。
+            "sScrollY": "518px",
+            "bLengthChange": false,
+            "iDisplayLength": 14,
+            "bFilter": false,
+            "bSort": false
+        });
+    });
+</script>

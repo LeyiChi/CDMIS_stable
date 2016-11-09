@@ -1,0 +1,89 @@
+﻿@model CDMIS.ViewModels.TreatmentListViewModel
+@{
+    ViewBag.Title = "患者治疗方案";
+    Layout = "~/Views/Shared/_PatientLayout.cshtml";
+}
+<link href="../../Content/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+<link href="../../Content/simpleModal.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../Scripts/jquery.dataTables.js"></script>
+<script type="text/javascript" src="../../Scripts/jquery.simplemodal.1.4.4.min.js"></script>
+
+<div onload="ShowOptions()">
+    <div id="tableContainer1" class="tableContainer" style="margin-top: 5px; width: 100%;">
+        <h2 class="text-center">
+            已有治疗情况列表</h2>
+        <table id="DataTable" class="display">
+            <thead>
+                <tr>
+                    <th>
+                        治疗目标
+                    </th>
+                    <th>
+                        治疗措施
+                    </th>
+                    <th>
+                        特殊人群
+                    </th>
+                    <th>
+                        治疗方案
+                    </th>
+                    <th>
+                        治疗时间
+                    </th>
+                    <th>
+                        疗程
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.TreatmentList)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentGoal)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentAction)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Group)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatmentPlan)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TreatTime)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Duration)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(4) a").attr("id", "current");
+
+        var table = $('#DataTable').DataTable({
+            "oLanguage": {//语言国际化
+                "sUrl": "/Content/jquery.dataTable.cn.txt"
+            },
+            "bAutoWidth": false,
+            "bPaginate": true,  //是否分页。
+            "iDisplayLength": 10,
+            "order": [4, 'desc'],   //排序
+//            "sScrollX": "100%",
+//            "sScrollY": "300px",
+            "bFilter": false
+            //            "aoColumnDefs": [{ "sWidth": "30px", "aTargets": [0] },
+            //            { "sWidth": "200px", "aTargets": [1]}]
+
+        });
+    });
+
+</script>

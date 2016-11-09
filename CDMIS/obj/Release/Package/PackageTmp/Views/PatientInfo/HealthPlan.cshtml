@@ -1,0 +1,1105 @@
+﻿@model CDMIS.ViewModels.HealthPlanViewModel
+@{
+    ViewBag.Title = "患者健康计划";
+   Layout = "~/Views/Shared/_PatientInfoLayout.cshtml";
+}
+
+<script type="text/javascript" src="../../Scripts/amcharts.js"></script>
+<script type="text/javascript" src="../../Scripts/serial.js"></script>
+<script type="text/javascript" src="../../Scripts/amstock.js"></script>
+
+
+
+ <style>
+.barbox{height:18px;line-height:18px;overflow:hidden;width:350px;margin:0px auto;padding:20px 0 0 0px;}
+.barbox dd{float:left;}
+.barbox dd.last{color:#0048CC;font-size:14px;margin-left:10px;}
+.barbox dd.barline{width:100px;background:#E3E3E3;height:12px;overflow:hidden;margin:3px 10px 0 10px;display:inline;border-bottom:solid 1px #F4F4F4;border-right:solid 1px #F4F4F4;}
+
+.barbox dd.barline div.proChart.barblue{background-position:0 -20px;border:1px solid #0A83E6;}
+.barbox dd.barline div.proChart.barred{background-position:0 0;border:1px solid #C2142C;}
+.barbox dd.barline div.proChart.baryellow{background-position:0 -10px;border:1px solid #EFA804;}
+   
+.barbox dd.barline div.proChart{height:10px;overflow:hidden;background:url(../../Content/Image/barbg.gif) repeat-x;} 
+     
+#thumbs li{display:inline;float:left;margin-right:0px;height:24px;font-size:20px;}
+
+.lefttop{background:url(../../Content/Image/lefttop.gif) repeat-x;height:40px;color:#fff;font-size:14px;line-height:40px;}
+.lefttop span{margin-left:8px; margin-top:10px;margin-right:8px; background:url(../../Content/Image/leftico.png) no-repeat; width:20px; height:21px;float:left;}
+.leftmenu{width:187px;padding-bottom: 9999px;margin-bottom: -9999px;overflow:hidden; background:url(../../Content/Image/leftline.gif) repeat-y right;}
+.leftmenu dd{repeat-x;line-height:35px;font-weight:bold;font-size:18px;border-right:solid 0px #b7d5df;}
+.leftmenu dd span{float:left;margin:0px 8px 0 4px;}
+.menuson {line-height:25px; font-weight:normal; }
+.menuson li{font-size:16px;list-style-type:none;}
+.menuson li.instruction{font-size:14px; margin-left:25px;}
+.menuson li cite{display:block; float:left; margin-left:5px; background:url(../../Content/Image/list.gif) no-repeat; width:16px; height:16px; margin-top:7px;}
+
+
+ </style>
+
+
+ @Html.HiddenFor(model => model.UserId)
+
+<div>
+
+    
+
+
+    <div id="load_first">
+     <div id="thumbs" style="margin-top:0px;margin-bottom:10px;width:100%;height:30px;" align="center">
+        <ul id="ul_target" style="margin:0 auto;overflow: hidden;width:700px">
+
+        </ul>
+        <div style="width:830px;height:60px;">
+
+            <div style="width:150px;float:left;">
+                <img src="/Content/Image/btn_prev.png" width="30" height="30" title="下一计划" alt="下一计划"  id="play_prev" onclick="hookBtn(this.id);"/>
+            </div>
+            
+            <div style="width:400px;height:40px;float:left;margin-left:50px;font-size:20px;" id="planListDiv">
+            <select name="planList" id="planList" style="width:380px;">
+
+            </select>  
+            </div>
+            <div style="width:150px;float:left;margin-left:50px;">
+                <img src="/Content/Image/btn_next.png" width="30" height="30" title="下一计划" alt="下一计划"  id="play_next" onclick="hookBtn(this.id);"/>
+            </div>
+        </div>
+     </div>
+     
+    </div>
+  
+    <div id="alertTextDiv" style="display: none; margin-top:60px" align="center">
+            <p style="font-size: 20px; color: Blue;" id="alertText">当前无正在执行的计划</p>
+    </div>
+
+    <div id="graph_loading" style="display: none; margin-top:60px" align="center">
+            <img alt="Load" src="/Content/Image/history_loading.gif" style="width:50px;height:50px;" />
+            <p>加载中，请稍后</p>
+        </div>  
+  
+  
+    <div id="load_after">
+  
+       <div id="proRate" style="width:100%;height:30px">
+          <div style="width:430px;height:25px;margin:0px auto;">
+              <div class="progress" style="height:15px;width:100px;float:left;">
+                    <div id="proRate_rate" class="progress-bar" role="progressbar" style="width:0%;"></div>
+              </div>
+              <div id="proRate_text" style="width:300px;float:left;font-size:18px;color:#0A83E6;margin-left:20px;margin-top:-5px;">进度0%，距离计划结束还有N天</div>
+         </div>
+      </div>
+
+       <div style="width:100%;margin-top:5px;">
+         <div id="taskList" style="float:left;width:160px;">
+          
+            <dl class="leftmenu">
+            <h3>任务列表</h3>
+            </dl>
+          </div>
+         
+         <div id="noGragh" style="display: none;" align="center">
+            <p style="font-size: 20px; color: Blue;">计划内无数据</p>
+        </div>
+
+         <div id="detail_plan" style="float:left;width:800px;margin-left:5%;">
+
+       <div id="title_graph" style="width:700px;height:40px;display:block;margin-top:20px;" >
+    
+       <div style="width:150px;float:left;">
+             <select name="switch" id="sign_switch" style="font-size:18px;">
+
+             </select>
+     </div>
+
+     <div id="ori_tarDiv">
+         <div style="width:200px;float:left;" id="originalDiv">        
+              <p><img alt="Load" src="../../Content/Image/original.png" style="width:30px;height:5px;" />&nbsp;起始值：<span id="BPoriginal"></span></p>         
+        </div>
+
+         <div style="width:200px;float:left;" id="targetDiv">
+             <p><img alt="Load" src="../../Content/Image/target.png" style="width:30px;height:5px;" />&nbsp;目标值：<span id="BPtarget"></span></p>
+        </div>
+     </div>
+
+    </div>
+
+       <div id="chartdiv" style="width:95%;height:500px;">
+       </div>
+
+       <div style="margin:7px auto;" align="center">  
+          <p id="CompliacneValue" style="font-size:20px;color:#0048CC;"></p>
+       </div>
+   </div>
+
+    </div>
+
+  </div>
+
+</div> 
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+    //初始值
+    var chart;
+    var NowPlanNo = "";
+    var StartDate = 0;
+    var EndDate = 0;
+
+    $(document).ready(function () {
+        $("#menu a").attr("id", ""); //Reset id's 
+        $("#menu li:eq(0) a").attr("id", "current");
+
+
+        var PatientId = document.getElementById("UserId").value;
+        GetImplementationForWebFirst(PatientId, "M1");  //默认高血压模块
+
+       $('#sign_switch').change(function(){ 
+	      selectDataset($(this).children('option:selected').val());  //按钮切换体征
+	   });
+
+       $('#planList').change(function(){ 
+	      GetImplementationForPadSecond(PatientId, $(this).children('option:selected').val());
+	      //selectPlan($(this).children('option:selected').val());  //下拉框切换计划
+	   });
+    });
+
+    //GetImplementationForWebFirst
+    function GetImplementationForWebFirst(PatientId, Module) {
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: '/PatientInfo/GetImplementationForWebFirst',
+            async: false,
+            data: { PatientId: PatientId,
+                Module: Module
+            },
+            beforeSend: function () {
+                $("#load_first").css("display", "none");
+                $("#load_after").css("visibility", "hidden");
+                $("#alertTextDiv").css("display", "none");
+                $("#noGragh").css("display", "none");
+                $("#graph_loading").css("display", "block");
+            },
+            success: function (data) {
+
+                //计划列表  条数必>=1，下拉框形式加前后计划切换钮
+                var str_li = '';
+                for (var i = 0; i < data.PlanList.length; i++) {
+                    var id = "planList_" + (i + 1).toString();
+                    var planno = data.PlanList[i].PlanNo;
+                    str_li += '<option value="' + planno + '" id="' + id + '">' + data.PlanList[i].PlanName + '</option>';
+                }
+
+                str_li += '';
+                $('#planList').append(str_li); 
+
+
+                if (data.PlanList[0].PlanNo == "") //当前没有正在执行的计划
+                {
+
+                    $("#alertText").text("当前没有正在执行的计划");
+                    $("#graph_loading").css("display", "none");
+                    $("#load_after").css("visibility", "hidden");
+                    $("#load_first").css("display", "block");
+                    $("#alertTextDiv").css("display", "block");
+
+                    NowPlanNo="";
+	                StartDate=0;
+	                EndDate=0;
+                }
+
+                else  //当前计划有正在执行
+                {
+
+                    //当前任务列表
+                    if (data.TaskList.length > 0) {
+
+                        var str_li_task = '';
+                        for (var i = 0; i < data.TaskList.length; i++) {
+                            if (data.TaskList[i].TaskType == "VitalSign") {
+                                str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>体征测量</div><ul class="menuson">';
+                            }
+                            else if (data.TaskList[i].TaskType == "LifeStyle") {
+                                str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>生活方式</div><ul class="menuson">';
+                            }
+                            else if (data.TaskList[i].TaskType == "Drug") {
+                                str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>用药任务</div><ul class="menuson">';
+                            }
+                            else
+                            {
+                              str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>其他任务</div><ul class="menuson">';
+                            }
+                            for (var j = 0; j < data.TaskList[i].TaskDeatilList.length; j++) {
+                                str_li_task += ' <li><cite></cite>' + data.TaskList[i].TaskDeatilList[j].TaskName + '</li>';
+                                if (data.TaskList[i].TaskDeatilList[j].Instruction != "") {
+                                    str_li_task += ' <li class="instruction">' + data.TaskList[i].TaskDeatilList[j].Instruction + '</li>';
+                                }
+                            }
+                            str_li_task += '</ul></dd>';
+
+                        }
+                        //$(".leftmenu li").remove();
+                        $('.leftmenu').find("dd").remove();
+                        $('.leftmenu').append(str_li_task);
+                    }
+
+
+
+
+                    //进度、依从率
+                    animate(data.ProgressRate, data.RemainingDays);
+                    var CompliacneValue = data.CompliacneValue;
+                    $("#CompliacneValue").text(CompliacneValue);
+
+                    //计划编号、起止日期
+                    NowPlanNo = data.PlanList[0].PlanNo;
+                    StartDate = data.StartDate;
+                    EndDate = data.EndDate;
+
+                    //体征切换下拉框
+				    var str_option='';
+				    for(var i=0;i<data.SignList.length;i++)
+				    {
+					    var signid="signList_"+(i+1);
+					    str_option+='<option value="'+data.SignList[i].SignCode+'" id="'+signid+'">'+data.SignList[i].SignName+'</option>';
+				    }
+	   
+				    str_option+='';
+                    $('#sign_switch').find("option").remove();
+				    $('#sign_switch').append(str_option); 
+
+
+                    //画图
+                    if((data.ChartData.GraphList.length>0) && (data.ChartData.GraphList!=null))//有图表数据
+                    {
+
+                        //✔ ✘ ' 图片地址处理 
+                        for (var m = 0; m < data.ChartData.GraphList.length; m++) {
+
+                            var regS = new RegExp("noncomplete", "g");
+                            data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS, "✘");
+                            var regS1 = new RegExp("complete", "g");
+                            data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS1, "✔");
+                            var regS2 = new RegExp("###", "g");
+                            data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS2, "'");
+                            var regS3 = new RegExp("amcharts-images/drug.png", "g");
+                            data.ChartData.GraphList[m].DrugBullet = data.ChartData.GraphList[m].DrugBullet.toString().replace(regS3, "../../Content/Image/drug.png");
+                        }
+
+                        //输入画图数据和分级规则  画图
+				        if(data.ChartData.OtherTasks=="1")  //除体征测量外，有其他任务
+				        {
+			                createStockChart(data.ChartData); 
+				        }
+				        else  //没有其他任务
+				        {
+					        createStockChartNoOther(data.ChartData);
+				        }
+
+
+                       //收缩压的起始值，目标值必须有！
+				        if(((data.ChartData.GraphGuide.original==null)||(data.ChartData.GraphGuide.original=="")) && ((data.ChartData.GraphGuide.target==null)||(data.ChartData.GraphGuide.target=="")))
+				        {
+					        $("#ori_tarDiv").css("display","none");
+				        }
+				        else
+				        {
+					        //$("#originalDiv").css("visibility","visible");
+				            //$("#targetDiv").css("visibility","visible");
+			                $("#BPoriginal").text(data.ChartData.GraphGuide.original);
+	                        $("#BPtarget").text(data.ChartData.GraphGuide.target);
+					        $("#ori_tarDiv").css("display","block");
+				        }
+
+                        $("#graph_loading").css("display", "none");
+                        $("#alertTextDiv").css("display", "none");
+                        $("#load_first").css("display", "block");
+                        $("#load_after").css("visibility", "visible");
+                        $("#detail_plan").css("visibility", "visible");
+
+
+
+                    }
+                    else //有任务、无图表数据
+                    {
+                        //$("#alertText").text("暂时无数据");$("#alertTextDiv").css("display", "block");
+                        $("#graph_loading").css("display", "none");
+                        $("#load_first").css("display", "block");
+                        $("#noGragh").css("display", "block");
+                        $("#detail_plan").css("visibility", "hidden");
+                        $("#load_after").css("visibility", "visible");
+
+                    }
+
+                }
+            },
+            error: function (msg) { alert("Error!"); }
+        });
+    }
+
+    //createStockChart  有其他任务（除了体征测量)
+   function createStockChart(ChartData) {
+	 
+        $("#chartdiv").height(500);
+
+	   //var minimum=50;
+       //图
+	   chart=AmCharts.makeChart("chartdiv", {
+				type: "stock",
+				pathToImages: "../../Content/Image/",
+				dataDateFormat:"YYYYMMDD",
+                categoryAxesSettings: {
+						//minPeriod: "mm"
+						parseDates: true,
+						minPeriod:"DD",
+						dateFormats:[{
+                    period: 'DD',
+                    format: 'MM/DD'
+                }, {
+                    period: 'WW',
+                    format: 'MM DD'
+                }, {
+                    period: 'MM',
+                    format: 'MM/DD'
+                }, {
+                    period: 'YYYY',
+                    format: 'YYYY'
+                }]
+					},
+					
+				dataSets: [{
+					fieldMappings: [{
+					fromField: "SignValue",
+					toField: "SignValue"
+				},{
+					fromField: "DrugValue",
+					toField: "DrugValue"
+				}],
+					//color: "#fac314",
+					dataProvider: ChartData.GraphList, //数据集   
+					//title: "体征和任务依从情况",
+					categoryField: "Date"
+				}],
+              valueAxesSettings:{
+					inside:true,
+					reversed:false
+					//labelsEnabled:true				
+				},
+				
+               PanelsSettings:{   
+				   //marginTop:90,
+				   //marginRight:90,
+				   //panelSpacing:400,
+				  // plotAreaBorderAlpha:1,
+				  // plotAreaBorderColor:"#000000"
+				   //usePrefixes: true,
+				   autoMargins:false
+			   },
+				//autoMargins:false,
+				panels: [{
+						title: "血压 （单位：mmHg）",
+						showCategoryAxis: false,
+						percentHeight: 65,
+						autoMargins:false,
+						//marginTop:300,
+						//marginLeft:90,
+						//marginRight:90,
+						valueAxes: [{
+							id:"v1",
+							//strictMinMax:true,
+							//logarithmic : true,
+							//baseValue:115,     //起始值，Y线
+							//dashLength: 5,   //虚线
+							//title:"血压",
+							//axisThickness:4,
+							showFirstLabel:true,
+							showLastLabel:true,
+							//inside:false,
+							gridAlpha : 0,
+							//labelOffset:0,
+							labelsEnabled : false,
+							minimum: ChartData.GraphGuide.minimum,  
+							maximum: ChartData.GraphGuide.maximum,   
+                            //显示上下限不对  解决办法parseFloat(guides[0].minimum
+							guides: ChartData.GraphGuide.GuideList  //区域划分
+							
+						}
+						//,{id:"v2",minimum:10}
+						],
+                       
+						categoryAxis: {
+							//dashLength: 5	
+						},
+						stockGraphs: [{
+							//type: "line",
+							id: "graph1",
+                            valueField: "SignValue",
+							//lineColor: "#7f8da9",
+                            lineColor: "#EA7500",
+							lineColorField:"SignColor",
+							lineThickness : 3,
+							lineAlpha:1,
+                            //connect:false,
+							bullet: "round",
+							bulletField:"SignShape",
+							bulletSize:12,
+							//bulletSizeField:"bulletSize",
+                            //customBulletField : "customBullet", //客制化
+                            bulletBorderColor : "#FFFFFF",
+                            bulletBorderThickness : 1,
+                            bulletBorderAlpha : 1,		
+							showBalloon: true,		
+                            balloonText: "[[SignDescription]]",
+							//要不要显示时间？[[category]]<br>
+				            //labelText:"[[nowDay]][[SBPvalue]]",
+							ValueAxis:{
+								id:"v1",
+								strictMinMax:true
+							//maximum: 190,   //guide的第三和最后
+                            //minimum: 65,
+							}
+
+						}],
+							stockLegend: {     //有这个才能显示title
+								valueTextRegular: " ",
+								markerType: "none"
+								//autoMargins:false
+							}
+					},
+					{
+						title: "任务依从情况",
+						showCategoryAxis: true,
+						//backgroundColor:"#CC0000",
+						percentHeight: 35,
+						valueAxes: [{
+							id:"v2",
+							gridAlpha : 0,
+                            axisAlpha : 0,
+							labelsEnabled : false
+							//minimum: 10,
+						}],
+                        //dateFormats: "YYYYMMDD",
+						categoryAxis: {		
+							//dashLength: 5
+						},
+						stockGraphs: [{
+							//type: "line",
+							id: "graph2",
+                            valueField: "DrugValue",
+							lineColor: "#FFFFFF",
+							lineColorField:"DrugColor",
+							lineThickness : 0,
+							lineAlpha:0,
+							bullet: "round",
+							bulletSize:20,
+							//bulletSizeField:"bulletSize",
+                            customBulletField : "DrugBullet", //客制化
+                            bulletBorderColor : "#FFFFFF",
+                            bulletBorderThickness : 2,
+                            bulletBorderAlpha : 1,		
+							showBalloon: true,		
+                            balloonText: "[[DrugDescription]]"
+				            //labelText:"[[drugDescription]]"
+
+						}],
+							stockLegend: {     //有这个才能显示title
+								valueTextRegular: " ",
+								markerType: "none"			
+							}
+					}
+				],
+                balloon:{
+                    //offsetX:8,
+					fadeOutDuration:3,   //3秒之后自动消失
+					animationDuration:0.1,
+					maxWidth:550,  //必须有，不然自排版是乱的
+				    textAlign:"left",
+					horizontalPadding:12,
+					verticalPadding:4,
+					fillAlpha:0.8
+					 //offsetX:20
+                     //fixedPosition:true,
+				},
+				chartCursorSettings:{
+					usePeriod: "7DD",
+					//pan:false,
+				    //zoomable:true,
+					//leaveCursor:"false",
+					//cursorPosition:"middle",
+					categoryBalloonEnabled:false,
+					categoryBalloonAlpha:1,
+					categoryBalloonColor:"#ffff",
+					categoryBalloonDateFormats:[{period:"YYYY", format:"YYYY"}, {period:"MM", format:"YYYY/MM"}, {period:"WW", format:"YYYY/MM/DD"}, {period:"DD", format:"YYYY/MM/DD"}],
+					valueLineEnabled:false,  //水平线
+					valueLineBalloonEnabled:false,
+					valueBalloonsEnabled: true  //上下值同时显现
+					//graphBulletSize: 1,
+					},
+			chartScrollbarSettings: {  //时间缩放面板				    
+						enabled:true,
+						position: "top",
+					    autoGridCount: true, //默认
+						graph: "graph1",
+						graphType:"line",
+						graphLineAlpha:1,
+						graphFillAlpha:0,
+						height:30,
+						dragIconHeight:28,
+						dragIconWidth:20
+						//usePeriod: "10mm",
+						
+			  },
+				responsive: {   //手机屏幕自适应
+                    enabled: true
+                   }
+			});
+		
+		//alert(chart.panels[0].valueAxes[0].reversed);
+		//chart.addListener("clickStockEvent",objet);				
+        // chart.panels[0].valueAxes[0].inside=false;
+	    //chart.validateNow();
+}
+
+//体征切换
+  function selectDataset(ItemCode) {
+
+	  //方案 重新画图 清空chart再赋值
+  	  //$("#chartdiv").empty();  //清空子元素
+
+       var PatientId = document.getElementById("UserId").value;
+
+	  //获取当前计划编号
+	  $.ajax({  
+        type: "GET",
+        dataType: "json",
+		//timeout: 30000,  
+		url: '/PatientInfo/GetSignInfoByCodeWeb',
+		//async:false,
+        data: {PatientId:PatientId, 
+		        PlanNo:NowPlanNo,
+				ItemCode:ItemCode, 
+		        StartDate:StartDate,
+				EndDate:EndDate
+			  },
+		beforeSend: function(){
+
+            $("#detail_plan").css("visibility", "hidden");
+			//$("#graph_loading").css("display","block");
+
+			},
+        success: function(data) {
+			   chart="";
+
+			    //画图
+			    if((data.GraphList.length>0) && (data.GraphList!=null))          //图表有数据
+			   {
+				   //✔ ✘ ' 处理 
+				   for(var m=0;m<data.GraphList.length;m++)
+				   {	
+				       var regS = new RegExp("noncomplete","g");
+			           data.GraphList[m].DrugDescription=data.GraphList[m].DrugDescription.toString().replace(regS, "✘");
+		               var regS1 = new RegExp("complete","g");
+			           data.GraphList[m].DrugDescription=data.GraphList[m].DrugDescription.toString().replace(regS1, "✔");
+				       var regS2 = new RegExp("###","g");
+			           data.GraphList[m].DrugDescription=data.GraphList[m].DrugDescription.toString().replace(regS2, "'");
+                       var regS3 = new RegExp("amcharts-images/drug.png", "g");
+                       data.GraphList[m].DrugBullet = data.GraphList[m].DrugBullet.toString().replace(regS3, "../../Content/Image/drug.png");
+				   }
+				   
+				//输入画图数据和分级规则
+				  if(data.OtherTasks=="1")  //除体征测量外，有其他任务
+				  {
+			          createStockChart(data);
+				  }
+				  else  //没有其他任务
+				  {
+					  createStockChartNoOther(data);
+				  }
+
+
+                  if((ItemCode=="Bloodpressure|Bloodpressure_1")||(ItemCode=="Bloodpressure|Bloodpressure_2"))
+				  {
+					  chart.panels[0].title="血压 （单位：mmHg）";
+				  }
+				  else if(ItemCode=="Pulserate|Pulserate_1")
+				  {
+					  chart.panels[0].title="脉率 （单位：次/分）";
+				  }
+				  chart.validateNow();
+				  
+				  //类似脉率没有初始值和目标值，则隐藏
+			   if(((data.GraphGuide.original==null)||(data.GraphGuide.original=="")) && ((data.GraphGuide.target==null)||(data.GraphGuide.target=="")))
+				{
+					$("#ori_tarDiv").css("display","none");
+				}
+				else
+				{
+					//$("#originalDiv").css("visibility","visible");
+				    //$("#targetDiv").css("visibility","visible");
+			        $("#BPoriginal").text(data.GraphGuide.original);
+	                $("#BPtarget").text(data.GraphGuide.target);
+					$("#ori_tarDiv").css("display","block");
+				}
+			}
+
+	        //chart.validateNow();
+           // chart.validateData();
+           //chart.animateAgain();  //只适用于serial
+	      //chart.write("chartdiv");
+
+		    $("#detail_plan").css("visibility", "visible");
+			
+		     
+			
+			   
+			 }, 
+       error: function(msg) {
+		   alert("selectDataset Error!");
+		   },
+	   complete: function() {      
+    
+        } 
+     });
+  }
+
+
+
+    //animate 进度条动态
+    function animate(a, b) {
+
+        $("#proRate_rate").css("width", a + "%");
+        var proText = "进度";
+        proText += a + "%";
+        proText += "，距离计划结束还有" + b + "天";
+        $("#proRate_text").text(proText);
+    }
+
+
+
+      //按钮切换计划（新）
+function hookBtn(button_id)
+{
+	//获取计划下拉框当前选择
+	
+	//var length=document.getElementById("planList").options.length
+	var length=$("#planList option").length;
+	//var planSelected=$('#planList option:selected').val();
+	var planSelected=$('#planList option:selected').attr("id");
+	var array = planSelected.split("_");
+	var index=parseInt(array[1]);
+	
+	if(button_id == 'play_prev')  //上一计划 之前
+	{
+		index++;
+		if(index == length+1) 
+		{
+		    index = length;  //维持不变alert(index);
+		    //$("#popupBasic").popup("open");	
+			//setTimeout(function(){$("#popupBasic").popup("close");},1000);
+            $("#play_prev").css("visibility", "hidden");
+		}
+		else
+		{
+            $("#play_prev").css("visibility", "visible");
+            $("#play_next").css("visibility", "visible");
+			rechange(index); //更新下拉框计划,刷新图
+		}
+	}
+	else  //下一计划 时间晚些的
+	{
+		index--;
+		if(index == 0) 
+		{
+			index = 1; //维持不变，提示已是最新
+            $("#play_next").css("visibility", "hidden");
+		}
+		else
+		{
+            $("#play_prev").css("visibility", "visible");
+            $("#play_next").css("visibility", "visible");
+			rechange(index); 
+		}
+	}
+
+}
+  
+   //计划列表显示项刷新，图也相应刷新
+function rechange(loop){
+    var temp = "planList_" + loop;
+
+    //$("#"+temp).attr("selected","selected");
+ 
+	var opList = document.getElementById("planList").childNodes;
+    for (var i = 0, len = opList.length; i < len; i++) 
+	{
+        if (opList[i].id == temp) 
+		{
+            opList[i].selected = true;
+            //break;
+        }
+		else
+		{
+			opList[i].selected = false;
+		}
+    }
+
+
+    var planid=$("#"+temp).val();
+    //刷图
+	if(planid=="")
+	{
+		 //当前无正在执行的计划
+		 $("#alertText").text("当前没有正在执行的计划");
+		 $("#graph_loading").css("display","none");
+		 $("#load_after").css("visibility","hidden");
+		 $("#load_first").css("display","block");
+		 $("#alertText").css("display","block");
+	}
+	else
+	{
+		
+	  $("#load_after").css("visibility","hidden");
+	  $("#graph_loading").css("display","block");
+
+      var PatientId = document.getElementById("UserId").value;
+	  GetImplementationForPadSecond(PatientId, planid);
+	}
+	
+}
+
+    //GetImplementationForPadSecond
+    function GetImplementationForPadSecond(PatientId, PlanNo) {
+        //需要重新画图，改变chart、guide
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: '/PatientInfo/GetImplementationForWebSecond',
+            //async:false,
+            data: { PatientId: PatientId,
+                PlanNo: PlanNo
+            },
+            beforeSend: function () {
+                $("#load_first").css("display", "block");
+                $("#load_after").css("visibility", "hidden");
+                $("#detail_plan").css("visibility", "hidden");
+                $("#alertTextDiv").css("display", "none");
+                $("#noGragh").css("display", "none");
+                $("#graph_loading").css("display", "block");
+
+                $("#originalDiv").css("visibility","hidden");
+				$("#targetDiv").css("visibility","hidden");
+            },
+            success: function (data) {
+
+                //进度      
+                animate(data.ProgressRate, data.RemainingDays);
+                $("#CompliacneValue").text(data.CompliacneValue);
+
+                //计划编号、起止日期
+                NowPlanNo=PlanNo;
+	            StartDate=data.StartDate;
+	            EndDate=data.EndDate;
+
+                //任务列表-肯定有
+                $('.leftmenu').find("dd").remove();
+                if ((data.TaskList !== null) && (data.TaskList.length > 0)) {
+                    var str_li_task = '';
+                    for (var i = 0; i < data.TaskList.length; i++) {
+                        if (data.TaskList[i].TaskType == "VitalSign") {
+                            str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>体征测量</div><ul class="menuson">';
+                        }
+                        else if (data.TaskList[i].TaskType == "LifeStyle") {
+                            str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>生活方式</div><ul class="menuson">';
+                        }
+                        else {
+                            str_li_task += '<dd><div class="title"><span><img src="../../Content/Image/leftico01.png" /></span>用药任务</div><ul class="menuson">';
+                        }
+
+                        for (var j = 0; j < data.TaskList[i].TaskDeatilList.length; j++) {
+                            str_li_task += ' <li><cite></cite>' + data.TaskList[i].TaskDeatilList[j].TaskName + '</li>';
+                            if (data.TaskList[i].TaskDeatilList[j].Instruction != "") {
+                                str_li_task += ' <li class="instruction">' + data.TaskList[i].TaskDeatilList[j].Instruction + '</li>';
+                            }
+                        }
+                        str_li_task += '</ul></dd>';
+
+                    }
+                    $('.leftmenu').append(str_li_task);
+                }
+
+
+                //体征切换下拉框
+				    var str_option='';
+				    for(var i=0;i<data.SignList.length;i++)
+				    {
+					    var signid="signList_"+(i+1);
+					    str_option+='<option value="'+data.SignList[i].SignCode+'" id="'+signid+'">'+data.SignList[i].SignName+'</option>';
+				    }
+	   
+				    str_option+='';
+                    $('#sign_switch').find("option").remove();
+				    $('#sign_switch').append(str_option); 
+
+                if((data.ChartData.GraphList.length>0) && (data.ChartData.GraphList!=null))          //图表有数据
+			    {
+                    //✔ ✘ ' 图片地址处理 
+                    for (var m = 0; m < data.ChartData.GraphList.length; m++) {
+
+                        var regS = new RegExp("noncomplete", "g");
+                        data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS, "✘");
+                        var regS1 = new RegExp("complete", "g");
+                        data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS1, "✔");
+                        var regS2 = new RegExp("###", "g");
+                        data.ChartData.GraphList[m].DrugDescription = data.ChartData.GraphList[m].DrugDescription.toString().replace(regS2, "'");
+                        var regS3 = new RegExp("amcharts-images/drug.png", "g");
+                        data.ChartData.GraphList[m].DrugBullet = data.ChartData.GraphList[m].DrugBullet.toString().replace(regS3, "../../Content/Image/drug.png");
+                    }
+                    
+                     //输入画图数据和分级规则
+				  if(data.ChartData.OtherTasks=="1")  //除体征测量外，有其他任务
+				  {
+			          createStockChart(data.ChartData);
+				  }
+				  else  //没有其他任务
+				  {
+					  createStockChartNoOther(data.ChartData);
+				  }
+
+
+                  //类似脉率没有初始值和目标值，则隐藏  类似收缩压有的则显示
+			   if(((data.ChartData.GraphGuide.original==null)||(data.ChartData.GraphGuide.original=="")) && ((data.ChartData.GraphGuide.target==null)||(data.ChartData.GraphGuide.target=="")))
+				{
+					$("#ori_tarDiv").css("display","none");
+				}
+				else
+				{
+					//$("#originalDiv").css("visibility","visible");
+				    //$("#targetDiv").css("visibility","visible");
+			        $("#BPoriginal").text(data.ChartData.GraphGuide.original);
+	                $("#BPtarget").text(data.ChartData.GraphGuide.target);
+					$("#ori_tarDiv").css("display","block");
+				}
+				
+			   $("#graph_loading").css("display", "none");
+               $("#alertTextDiv").css("display", "none");
+               $("#load_first").css("display", "block");
+               $("#load_after").css("visibility", "visible");
+               $("#detail_plan").css("visibility", "visible");
+			    //还原下拉框 收缩压被选
+			   //$("#Bloodpressure_1").attr("selected","selected");
+			   $("#signList_1").attr("selected","selected");
+
+                }
+                else //有任务、无图表数据
+                {
+                    //$("#alertText").text("计划内无数据");$("#alertTextDiv").css("display", "block");
+                    $("#graph_loading").css("display", "none");
+                    $("#load_first").css("display", "block");
+                    $("#noGragh").css("display", "block");
+                    $("#detail_plan").css("visibility", "hidden");
+                    $("#load_after").css("visibility", "visible");
+
+                }
+
+
+            },
+            error: function (msg) { alert("Error!"); },
+            complete: function () {
+
+            }
+        });
+    }
+  
+
+
+
+  //没有其他任务
+  function createStockChartNoOther(ChartData) {
+	    	  
+      $("#chartdiv").height(300);
+
+	   //var minimum=50;
+       //图上说明
+       //$("#BPoriginal").text(ChartData.GraphGuide.original);
+	   //$("#BPtarget").text(ChartData.GraphGuide.target);
+       //图
+	   chart=AmCharts.makeChart("chartdiv", {
+				type: "stock",
+				pathToImages: "../../Content/Image/",
+				dataDateFormat:"YYYYMMDD",
+                categoryAxesSettings: {
+						//minPeriod: "mm"
+						parseDates: true,
+						minPeriod:"DD",
+						dateFormats:[{
+                    period: 'DD',
+                    format: 'MM/DD'
+                }, {
+                    period: 'WW',
+                    format: 'MM DD'
+                }, {
+                    period: 'MM',
+                    format: 'MM/DD'
+                }, {
+                    period: 'YYYY',
+                    format: 'YYYY'
+                }]
+					},
+					
+				dataSets: [{
+					fieldMappings: [{
+					fromField: "SignValue",
+					toField: "SignValue"
+				},{
+					fromField: "DrugValue",
+					toField: "DrugValue"
+				}],
+					//color: "#fac314",
+					dataProvider: ChartData.GraphList, //数据集   
+					//title: "体征和任务依从情况",
+					categoryField: "Date"
+				}],
+              valueAxesSettings:{
+					inside:true,
+					reversed:false
+					//labelsEnabled:true				
+				},
+				
+               PanelsSettings:{   
+				   //marginTop:90,
+				   //marginRight:90,
+				   //panelSpacing:400,
+				  // plotAreaBorderAlpha:1,
+				  // plotAreaBorderColor:"#000000"
+				   //usePrefixes: true,
+				   autoMargins:false
+			   },
+				//autoMargins:false,
+				panels: [{
+						title: "血压 （单位：mmHg）",
+						showCategoryAxis: true,
+						percentHeight: 70,
+						autoMargins:false,
+						//marginTop:300,
+						//marginLeft:90,
+						//marginRight:90,
+						valueAxes: [{
+							id:"v1",
+							//strictMinMax:true,
+							//logarithmic : true,
+							//baseValue:115,     //起始值，Y线
+							//dashLength: 5,   //虚线
+							//title:"血压",
+							//axisThickness:4,
+							showFirstLabel:true,
+							showLastLabel:true,
+							//inside:false,
+							gridAlpha : 0,
+							//labelOffset:0,
+							labelsEnabled : false,
+							minimum: ChartData.GraphGuide.minimum,  
+							maximum: ChartData.GraphGuide.maximum,   
+                            //显示上下限不对  解决办法parseFloat(guides[0].minimum
+							guides: ChartData.GraphGuide.GuideList  //区域划分
+							
+						}
+						//,{id:"v2",minimum:10}
+						],
+                       
+						categoryAxis: {
+							//dashLength: 5	
+						},
+						stockGraphs: [{
+							//type: "line",
+							id: "graph1",
+                            valueField: "SignValue",
+							lineColor: "#EA7500",
+							lineColorField:"SignColor",
+							lineThickness : 3,
+							lineAlpha:1,
+                            //connect:false,
+							bullet: "round",
+							bulletField:"SignShape",
+							bulletSize:12,
+							//bulletSizeField:"bulletSize",
+                            //customBulletField : "customBullet", //客制化
+                            bulletBorderColor : "#FFFFFF",
+                            bulletBorderThickness : 1,
+                            bulletBorderAlpha : 1,		
+							showBalloon: true,		
+                            balloonText: "[[SignDescription]]",
+							//要不要显示时间？[[category]]<br>
+				            //labelText:"[[nowDay]][[SBPvalue]]",
+							ValueAxis:{
+								id:"v1",
+								strictMinMax:true,
+							//maximum: 190,   //guide的第三和最后
+                            //minimum: 65,
+							}
+
+						}],
+							stockLegend: {     //有这个才能显示title
+								valueTextRegular: " ",
+								markerType: "none"
+								//autoMargins:false
+							}
+					}	
+				],
+                balloon:{
+					fadeOutDuration:3,
+					animationDuration:0.1,
+					maxWidth:400,
+				    textAlign:"left",
+					horizontalPadding:12,
+					verticalPadding:4,
+					fillAlpha:0.8
+				},
+				chartCursorSettings:{
+					usePeriod: "7DD",
+					//pan:false,
+				    //zoomable:true,
+					//leaveCursor:"false",
+					//cursorPosition:"middle",
+					categoryBalloonEnabled:false,
+					categoryBalloonAlpha:1,
+					categoryBalloonColor:"#ffff",
+					categoryBalloonDateFormats:[{period:"YYYY", format:"YYYY"}, {period:"MM", format:"YYYY/MM"}, {period:"WW", format:"YYYY/MM/DD"}, {period:"DD", format:"YYYY/MM/DD"}],
+					valueLineEnabled:false,  //水平线
+					valueLineBalloonEnabled:false,
+					valueBalloonsEnabled: true,  //上下值同时显现
+					//graphBulletSize: 1,
+					},
+			chartScrollbarSettings: {  //时间缩放面板				    
+						enabled:true,
+						position: "top",
+					    autoGridCount: true, //默认
+						graph: "graph1",
+						graphType:"line",
+						graphLineAlpha:1,
+						graphFillAlpha:0,
+						height:30,
+						dragIconHeight:28,
+						dragIconWidth:20,
+						//usePeriod: "10mm",
+						
+			  },
+				responsive: {   //手机屏幕自适应
+                    enabled: true
+                   },
+
+			});
+		
+		//alert(chart.panels[0].valueAxes[0].reversed);
+		//chart.addListener("clickStockEvent",objet);				
+        // chart.panels[0].valueAxes[0].inside=false;
+	    //chart.validateNow();
+}
+    </script>

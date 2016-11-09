@@ -1,0 +1,229 @@
+/*Ê±¼äÖáÑùÊ½*/
+
+*{list-style-type:none;}
+a,img{border:0;}
+.demo{width:960px;margin:30px auto 0 auto;}
+/*history*/
+.history{background:url(/Content/Image/clinicInfo-line.gif) repeat-y 187px 0;overflow:hidden;position:relative;}
+.history-date{overflow:hidden;position:relative;}
+.history-date ul li h2{font-size:22px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;}
+
+/*Äê ÏÂÀ­±êÍ¼*/
+.history-date h2.first{background:#fff url(/Content/Image/clinicInfo-icon-big.gif) no-repeat 158px 0;height:59px;font-size:25px;font-family:Î¢ÈíÑÅºÚ;font-weight:bold;padding-left:45px;margin-bottom:74px; }
+.history-date h2.first{position:absolute;left:0;top:0;width:935px;z-index:10;}
+.history-date h2 a{color:#000;display:inline-block;*display:inline;zoom:1;background:url(/Content/Image/clinicInfo-icon2.gif) no-repeat right 50%;padding-right:17px;margin:21px 97px 0 0;}
+.history-date h2 a:hover{text-decoration:none;}
+.history-date h2 img{vertical-align:-5px;}
+.history-date h2.date02{background:none;}
+
+.history-date ul li{background:url(/Content/Image/clinicInfo-icon.gif) no-repeat 180px 0;padding-bottom:50px;zoom:1;}
+.history-date ul li.last{padding-bottom:0;}
+.history-date ul li:after{content:" ";display:block;height:0;clear:both;visibility:hidden;}
+.history-date ul li h3{float:left;width:168px;text-align:right;padding-right:18px;color:#000;font-weight:bold;font-size:18px;font-family:Î¢ÈíÑÅºÚ;}
+.history-date ul li h3 span{display:block;color:#000;font-size:12px;}
+.history-date ul li dl{float:left;padding-left:41px;margin-top:-5px;font-family:Î¢ÈíÑÅºÚ;}
+.history-date ul li dl dt{font:20px/22px Î¢ÈíÑÅºÚ;color:#737373;margin-top:5px;}
+.history-date ul li dl dt span{display:block;color:#787878;font-size:12px;}
+.history-date ul li.green h3{color:#000;}
+.history-date ul li.green h3 span{color:#a8dda3;}
+.history-date ul li.green dl{margin-top:-8px;}
+.history-date ul li.green dl dt{font-size:30px;line-height:28px;}
+.history-date ul li.green dl dt a{display:inline-block;*display:inline;zoom:1;overflow:hidden;vertical-align:middle;margin-left:12px;}
+.history-date ul li.green dl dd{padding-top:20px;display:none;}
+.history-date ul li.green dl dd img{float:left;}
+.history-date ul li.green dl dd p{overflow:hidden;zoom:1;line-height:21px;color:#787878;}
+
+.history-date h2.first .more-history{font-size:16px;background:transparent;margin-left:30px;}
+.history-date h2.first .more-history:hover{text-decoration:underline;}
+
+*body .history-date ul li dl dt{_font-size:12px!important;_font-weight:bold;}
+*body .history-date ul li dl dt span{_font-weight:normal!important;}
+*body .history-date ul li.green dl dt a{_background:transparent!important;*background:transparent!important;*font-size:12px!important;_font-weight:normal!important;}
+
+.Itemhref {color:#000;font-size:16px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;}
+
+.Itemhref_Diagnosis {color:#000;font-size:16px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;}
+.Itemhref_Examination {color:#000;font-size:16px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;}
+.Itemhref_LabTest {color:#000;font-size:16px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;}
+.Itemhref_Drug {color:#000;font-size:16px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;}
+
+
+.Item {color:#000;font-size:20px;font-family:Î¢ÈíÑÅºÚ;font-weight:normal;text-decoration:none;font-weight:bold;}
+.cbp_tmlabel {
+	margin: 0 0 15px 25%;
+	color: #000000;
+	padding: 2em;
+	font-size: 1.2em;
+	font-weight: 300;
+	line-height: 1.4;
+	position: relative;
+	border-radius: 5px;
+    border-style:solid; 
+    border-width:3px; 
+    border-color:#00DB00;
+    width:550px;
+}
+
+
+.cbp_tmlabel:after {
+	right: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-right-color:	#00DB00;
+	border-width: 10px;
+	top: 10px;
+}
+
+.cbp_tmlabel h2 { 
+	margin-top: 0px;
+	border-bottom: 1px solid ;
+    border-bottom-color:#00DB00;
+}
+
+
+  /*Êý×ÖÆøÅÝ£º×¡ÔºÂÌ»Æ
+    .number
+    {
+        float:right;
+        height:20px; 
+        width:21px;
+        line-height:16px; 
+        display:block; 
+        color:#0000; 
+        text-align:center; 
+        background-color:#ffff;
+        border-radius:25px;
+        border-style:solid;
+        border-width:1px;
+        border-color:#0000;
+    }*/
+     .number
+    {
+        float:right;
+        line-height:16px; 
+        color:#0000; 
+    }
+    
+    
+    /*ÓÒÉÏ±êÇ©
+     .tag
+    {
+        float:right;
+        height:20px; 
+        width:21px;
+        line-height:16px; 
+        display:block; 
+        color:#0000; 
+        text-align:center; 
+        background-color:#ffff;
+        border-radius:25px;
+        border-style:solid;
+        border-width:1px;
+        border-color:#0000;
+    }*/
+     .tag
+    {
+        float:right;
+        line-height:16px; 
+        color:#2894FF;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+     .tag-clolor_in
+    {
+        float:right;
+        line-height:16px; 
+        color:#73BF00;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+    
+    .tag-clolor_inHos
+    {
+        float:right;
+        line-height:16px; 
+        color:#FFD306;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+    .tag-clolor_trans
+    {
+        float:right;
+        line-height:16px; 
+        color:#D9B300;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+   .tag-clolor_out 
+    {
+        float:right;
+        line-height:16px; 
+        color:#2894FF;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+    .tag-clolor_emer 
+    {
+        float:right;
+        line-height:16px; 
+        color:#FF8040;
+        font-weight:bold;
+        margin-top:-25px;
+       margin-right:-20px;
+    }
+    
+    
+    /*±ß¿ò£º  ³ö¡¢ÈëÔº-ÂÌÉ«£»   ×¡ÔºÖÐ¡¢Ä¿Ç°×¡ÔºÖÐ-³ÈÉ«  ÃÅÕï-À¶É«  ¼±Õï-ºì*/
+
+    #clolor_in
+    {
+        border-color:#73BF00; 
+    }
+    
+    #clolor_in:after 
+    {
+        border-right-color:#73BF00;
+    }
+    #clolor_inHos 
+    {
+        border-color:#FFD306;    
+    }
+    #clolor_inHos:after 
+    {
+        border-right-color:#FFD306; 
+    }
+
+    #clolor_trans 
+    {
+        border-color:#D9B300;      
+    }
+    #clolor_trans:after 
+    {
+        border-right-color:	#D9B300;
+    }
+    
+    #clolor_out 
+    {
+        border-color:#2894FF;     
+    }
+    #clolor_out:after 
+    {
+        border-right-color:#2894FF;
+    }
+    #clolor_emer
+    {
+        border-color:#FF8040;     
+    }
+    #clolor_emer:after 
+    {
+        border-right-color:#FF8040;
+    }	
